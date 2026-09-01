@@ -4,6 +4,7 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 const { runMigrations } = require("./db");
+const { seedIfEmpty } = require("./seed");
 
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
@@ -15,6 +16,7 @@ const reportRoutes = require("./routes/reports");
 const { requireAdmin } = require("./middleware/adminAuth");
 
 runMigrations();
+seedIfEmpty(); // Shell 접근이 안 되는 환경(Render 무료 티어 등)에서도 초기 데이터가 자동으로 채워지게 함
 
 const app = express();
 app.use(cors());

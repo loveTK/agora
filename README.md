@@ -63,6 +63,10 @@ npm run seed     # 초기 지역 6곳(서울/도쿄/뉴욕/런던/베를린/상�
 npm start        # http://localhost:4000
 ```
 
+> **Render 무료 티어처럼 Shell 접근이 안 되는 환경 배포 시**: `npm run seed`를 따로 실행할 필요가 없습니다.
+> 서버가 시작될 때 지역 데이터가 비어있으면 자동으로 시드합니다(`seedIfEmpty`, `src/index.js`에서 호출).
+> 이미 데이터가 있으면 건너뛰므로 재배포·재시작해도 중복 삽입되지 않습니다.
+
 ## 지역 이동 시 초기화 정책
 지역을 옮기면(`PATCH /users/me/region`) 아래와 같이 처리됩니다.
 
