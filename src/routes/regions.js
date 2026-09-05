@@ -134,6 +134,19 @@ router.get("/:id/wars", (req, res) => {
   res.json(wars);
 });
 
+// GET /regions/:id/congress-approvals
+// 이 지역이 선포측인 국회 승인투표 목록(최신순) — 진행 중인 투표 UI에 사용
+router.get("/:id/congress-approvals", (req, res) => {
+  const region = db.prepare("SELECT id FROM regions WHERE id = ?").get(req.params.id);
+  if (!region) return res.status(404).json({ error: "지역을 찾을 수 없습니다." });
+
+  const approvals = db
+    .prepare(`SELECT * FROM congress_approvals WHERE attacker_region_id = ? ORDER BY created_at DESC`)
+    .all(req.params.id);
+
+  res.json(approvals);
+});
+
 // GET /regions/:id/cultural-influence
 // 이 지역에서 "사상 영향권"으로 인정된 외부 유저 목록 (영향력 높은 순)
 router.get("/:id/cultural-influence", (req, res) => {

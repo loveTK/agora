@@ -266,6 +266,7 @@
   const SLOT_LABEL = { accessory: '악세사리', badge: '뱃지', cloak: '망토', weapon: '무기' };
   const BELLIGERENCE_TIER_LABEL = { warrior: '논전사', elite_warrior: '정예 논전사' };
   const WAR_STATUS_LABEL = { voting: '수락 투표중', accepted: '전투 진행중', avoided: '회피(부결)', void: '성립 불가' };
+  const CONGRESS_STATUS_LABEL = { voting: '국회 승인투표중', approved: '승인 → 선포됨', rejected: '국회 부결' };
 
   let regionsData = [];      // 지도 + 회원가입 지역 선택에서 공용으로 씀
   let authToken = localStorage.getItem('agora_token');
@@ -771,10 +772,48 @@
     });
   }
 
+  /* ---------------- 국회 승인투표 (S16) — 선포측 지역 정당원 전용 ---------------- */
+
+  async function renderCongressApprovalItem(a) {
+    let tally = { accept_votes: a.accept_votes || 0, reject_votes: a.reject_votes || 0 };
+    try { tally = await apiRequest(`/congress-approvals/${a.id}`); } catch (err) {}
+
+    const actionHtml = a.status === 'voting'
+      ? `<button class="mini-btn" data-congress-vote="accept" data-congress="${a.id}">찬성</button>
+         <button class="mini-btn" data-congress-vote="reject" data-congress="${a.id}">반대</button>`
+      : '';
+
+    return `
+      <div class="dispute-item" style="flex-direction:column; align-items:flex-start; gap:6px;">
+        <span class="dispute-region">${regionName(a.attacker_region_id)} → ${regionName(a.defender_region_id)} 선포 승인투표
+          <span class="stat-label">(${CONGRESS_STATUS_LABEL[a.status] || a.status})</span></span>
+        <div class="issue-meta">찬성 ${tally.accept_votes} / 반대 ${tally.reject_votes}</div>
+        <div>${actionHtml}</div>
+      </div>`;
+  }
+
+  function attachCongressActionHandlers(el) {
+    el.querySelectorAll('[data-congress-vote]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          await apiRequest(`/congress-approvals/${btn.dataset.congress}/vote`, {
+            method: 'POST',
+            body: JSON.stringify({ verdict: btn.dataset.congressVote }),
+          });
+          renderWars();
+        } catch (err) { alert(err.message); }
+      });
+    });
+  }
+
   async function renderWars() {
     const el = document.getElementById('warsContent');
     try {
       const wars = await apiRequest(`/regions/${currentUser.region_id}/wars`);
+
+      let congressApprovals = [];
+      try { congressApprovals = await apiRequest(`/regions/${currentUser.region_id}/congress-approvals`); } catch (err) {}
+      const pendingApprovals = congressApprovals.filter(a => a.status === 'voting');
 
       let dominanceStatus = null;
       try {
@@ -790,23 +829,30 @@
           <button class="mini-btn" id="declareWarBtn">선전포고</button>
         </div>` : '';
 
+      const congressHtml = pendingApprovals.length
+        ? (await Promise.all(pendingApprovals.map(a => renderCongressApprovalItem(a)))).join('')
+        : '';
+
       const warItemsHtml = wars.length
         ? (await Promise.all(wars.map(w => renderWarItem(w)))).join('')
         : '<div class="issue-meta">진행 중인 전쟁이 없습니다.</div>';
 
-      el.innerHTML = `${declareBlock}${warItemsHtml}`;
+      el.innerHTML = `${declareBlock}${congressHtml}${warItemsHtml}`;
 
       if (dominanceStatus) {
         document.getElementById('declareWarBtn').addEventListener('click', async () => {
           const defender_region_id = document.getElementById('warTargetRegion').value;
           try {
-            await apiRequest('/wars', { method: 'POST', body: JSON.stringify({ defender_region_id }) });
-            alert('선전포고했습니다.');
+            const result = await apiRequest('/wars', { method: 'POST', body: JSON.stringify({ defender_region_id }) });
+            alert(result.pending_congress_approval
+              ? `국회력(당원 ${result.congress_power}명)이 높아 자기 지역 정당원 승인투표가 먼저 필요합니다.`
+              : '선전포고했습니다.');
             renderWars();
           } catch (err) { alert(err.message); }
         });
       }
 
+      attachCongressActionHandlers(el);
       attachWarActionHandlers(el);
     } catch (err) {
       el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
