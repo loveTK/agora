@@ -28,11 +28,10 @@
   }
   .serif{ font-family:'Cormorant Garamond', serif; }
 
-  /* ---------- layout shell ---------- */
+  /* ---------- layout shell (single vertical column — same stack on phone and desktop) ---------- */
   .shell{
-    max-width:1240px;
+    max-width:720px;
     margin:0 auto;
-    padding:0 28px;
   }
 
   /* ---------- header ---------- */
@@ -44,6 +43,7 @@
     display:flex;
     align-items:baseline;
     justify-content:space-between;
+    padding:0 28px;
   }
   .wordmark{
     font-family:'Cormorant Garamond', serif;
@@ -63,22 +63,19 @@
   }
   nav a.active{ color:var(--black); border-bottom-color:var(--black); }
 
-  /* ---------- main grid ---------- */
-  main{ padding:34px 0 60px; }
-  .grid{
-    display:grid;
-    grid-template-columns: 300px 1fr;
-    gap:26px;
-  }
-
-  /* ---------- character panel ---------- */
-  .char-card{
-    border:1px solid var(--line);
-    padding:26px 22px;
+  /* ---------- main: one section per block, stacked top to bottom ---------- */
+  main{ padding:0 0 60px; }
+  .section{
+    border-bottom:1px solid var(--line);
+    padding:32px 28px;
     display:flex;
     flex-direction:column;
-    gap:18px;
+    gap:16px;
   }
+  .section:last-child{ border-bottom:none; }
+
+  /* ---------- character panel ---------- */
+  .char-top{ display:flex; align-items:center; gap:18px; }
   .char-avatar{
     width:72px; height:72px;
     border:1px solid var(--black);
@@ -102,20 +99,7 @@
 
   .rank-bar{ height:3px; background:var(--gray-4); border-radius:2px; overflow:hidden; margin-top:2px;}
   .rank-fill{ height:100%; background:var(--black); }
-
-  .explore-cta{
-    margin-top:6px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:13px 16px;
-    border:1px solid var(--black);
-    text-decoration:none;
-    color:var(--black);
-    font-size:13.5px;
-    letter-spacing:0.02em;
-  }
-  .explore-cta:hover{ background:var(--black); color:var(--white); }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:6px; }
 
   /* ---------- auth (login/signup) ---------- */
   .auth-tabs{ display:flex; gap:18px; margin-bottom:6px; }
@@ -137,13 +121,6 @@
   .logout-link{ font-size:11.5px; color:var(--gray-2); text-decoration:underline; cursor:pointer; margin-top:2px; align-self:flex-start; background:none; border:none; padding:0; font-family:'Archivo',sans-serif; }
   .loading-text{ font-size:13px; color:var(--gray-2); }
 
-  /* ---------- right column ---------- */
-  .right-col{ display:flex; flex-direction:column; gap:22px; }
-
-  .section-head{
-    display:flex; align-items:baseline; justify-content:space-between;
-    margin-bottom:12px;
-  }
   .section-title{ font-family:'Cormorant Garamond', serif; font-size:19px; font-weight:600; }
   .section-sub{ font-size:12px; color:var(--gray-2); }
 
@@ -165,13 +142,12 @@
   .dot.contested{ background:var(--white); border:1.4px solid var(--black); }
   .dot.dispute{ background:var(--gray-3); }
 
-  /* ---------- lists row ---------- */
+  /* ---------- lists-row: used only for the Hall of Fame's two ranking columns ---------- */
   .lists-row{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:22px;
   }
-  .list-card{ border:1px solid var(--line); padding:20px 20px 6px; }
   .issue-item{
     display:flex; align-items:flex-start; gap:12px;
     padding:13px 0;
@@ -202,10 +178,10 @@
   .mini-btn:hover{ background:var(--black); color:var(--white); }
   .mini-btn:disabled{ opacity:0.5; cursor:default; }
 
-  @media (max-width:860px){
-    .grid{ grid-template-columns:1fr; }
-    .lists-row{ grid-template-columns:1fr; }
+  @media (max-width:480px){
+    .lists-row{ grid-template-columns:1fr; gap:14px; }
     nav{ gap:18px; }
+    header .shell, .section{ padding-left:20px; padding-right:20px; }
   }
 </style>
 </head>
@@ -223,69 +199,51 @@
 </header>
 
 <main>
-  <div class="shell grid">
+  <div class="shell">
 
-    <!-- 캐릭터 현황 판 (로그인 상태에 따라 JS가 내용을 채움) -->
-    <aside class="char-card" id="charCard">
+    <!-- 캐릭터 현황 (로그인 상태에 따라 JS가 내용을 채움) -->
+    <section class="section" id="charCard">
       <div class="loading-text">불러오는 중...</div>
-    </aside>
+    </section>
 
-    <!-- 우측: 지도 + 리스트 -->
-    <div class="right-col">
+    <section class="section">
+      <div>
+        <span class="section-title">전황 개요</span>
+        <div class="section-sub">실시간 폴리스 지배 현황</div>
+      </div>
+      <div id="map"></div>
+      <div class="map-legend">
+        <span><i class="dot dominant"></i>지배 확정</span>
+        <span><i class="dot contested"></i>판정 진행중</span>
+        <span><i class="dot dispute"></i>분쟁 지역</span>
+      </div>
+    </section>
 
-      <section>
-        <div class="section-head">
-          <span class="section-title">전황 개요</span>
-          <span class="section-sub">실시간 폴리스 지배 현황</span>
-        </div>
-        <div id="map"></div>
-        <div class="map-legend">
-          <span><i class="dot dominant"></i>지배 확정</span>
-          <span><i class="dot contested"></i>판정 진행중</span>
-          <span><i class="dot dispute"></i>분쟁 지역</span>
-        </div>
-      </section>
+    <section class="section">
+      <span class="section-title" style="font-size:16px;">주요 논쟁 · Hot Issue</span>
+      <div id="hotIssueList"><div class="loading-text">불러오는 중...</div></div>
+    </section>
 
-      <section class="lists-row">
-        <div class="list-card">
-          <div class="section-head">
-            <span class="section-title" style="font-size:16px;">주요 논쟁 · Hot Issue</span>
-          </div>
-          <div id="hotIssueList"><div class="loading-text">불러오는 중...</div></div>
-        </div>
+    <section class="section">
+      <span class="section-title" style="font-size:16px;">주요 분쟁 지역</span>
+      <div id="disputeList"><div class="loading-text">불러오는 중...</div></div>
+    </section>
 
-        <div class="list-card">
-          <div class="section-head">
-            <span class="section-title" style="font-size:16px;">주요 분쟁 지역</span>
-          </div>
-          <div id="disputeList"><div class="loading-text">불러오는 중...</div></div>
-        </div>
-      </section>
+    <section class="section" id="factionsCard">
+      <span class="section-title" style="font-size:16px;">세력 · 종교 / 정당</span>
+      <div id="factionsContent"><div class="loading-text">로그인하면 종교·정당 목록을 볼 수 있습니다.</div></div>
+    </section>
 
-      <section class="lists-row">
-        <div class="list-card" id="factionsCard">
-          <div class="section-head">
-            <span class="section-title" style="font-size:16px;">세력 · 종교 / 정당</span>
-          </div>
-          <div id="factionsContent"><div class="loading-text">로그인하면 종교·정당 목록을 볼 수 있습니다.</div></div>
-        </div>
+    <section class="section" id="warsCard">
+      <span class="section-title" style="font-size:16px;">전쟁</span>
+      <div id="warsContent"><div class="loading-text">로그인하면 소속 지역의 전쟁 현황을 볼 수 있습니다.</div></div>
+    </section>
 
-        <div class="list-card" id="warsCard">
-          <div class="section-head">
-            <span class="section-title" style="font-size:16px;">전쟁</span>
-          </div>
-          <div id="warsContent"><div class="loading-text">로그인하면 소속 지역의 전쟁 현황을 볼 수 있습니다.</div></div>
-        </div>
-      </section>
+    <section class="section" id="hallOfFameCard">
+      <span class="section-title" style="font-size:16px;">명예의 전당</span>
+      <div id="hallOfFameContent"><div class="loading-text">불러오는 중...</div></div>
+    </section>
 
-      <section class="list-card" id="hallOfFameCard">
-        <div class="section-head">
-          <span class="section-title" style="font-size:16px;">명예의 전당</span>
-        </div>
-        <div id="hallOfFameContent"><div class="loading-text">불러오는 중...</div></div>
-      </section>
-
-    </div>
   </div>
 </main>
 
@@ -440,18 +398,20 @@
       ? inventory.map(it => {
           const label = SLOT_LABEL[it.slot_type] || it.slot_type;
           const extra = it.slot_type === 'cloak' && it.color === 'black' ? ' (검정)' : '';
-          return `<span class="badge" style="margin-right:4px;">${label}${extra}</span>`;
+          return `<span class="badge">${label}${extra}</span>`;
         }).join('')
       : '<span class="stat-label">없음</span>';
 
     charCard.innerHTML = `
-      ${avatarSvg}
-      <div>
-        <div class="char-name-row">
-          <span class="char-name">${currentUser.nickname}</span>
-          <span style="display:flex; gap:6px;">${dominanceBadge}<span class="badge">${rankLabel}</span></span>
+      <div class="char-top">
+        ${avatarSvg}
+        <div>
+          <div class="char-name-row">
+            <span class="char-name">${currentUser.nickname}</span>
+            <span style="display:flex; gap:6px;">${dominanceBadge}<span class="badge">${rankLabel}</span></span>
+          </div>
+          <div class="issue-meta" style="margin-top:4px;">소속 폴리스 · ${regionName(currentUser.region_id)}</div>
         </div>
-        <div class="issue-meta" style="margin-top:4px;">소속 폴리스 · ${regionName(currentUser.region_id)}</div>
       </div>
       <div class="stat-list">
         <div class="stat-row">
@@ -473,9 +433,9 @@
           </div>
           <div class="rank-bar"><div class="rank-fill" style="width:${belligerencePct}%;"></div></div>
         </div>
-        <div class="stat-row">
+        <div class="stat-row" style="flex-direction:column; align-items:stretch; gap:8px;">
           <span class="stat-label">보유 아이템</span>
-          <span>${itemChips}</span>
+          <div class="chip-row">${itemChips}</div>
         </div>
       </div>
       <button class="logout-link" id="logoutBtn">로그아웃</button>
