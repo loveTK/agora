@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGORA — 전황 개요</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#111110;
+    --ink:#1c1c1a;
+    --gray-1:#4a4a46;
+    --gray-2:#8a8a84;
+    --gray-3:#c9c9c2;
+    --gray-4:#e6e6e0;
+    --white:#ffffff;
+    --line: rgba(17,17,16,0.14);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--white);
+    color:var(--ink);
+    font-family:'Archivo', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .serif{ font-family:'Cormorant Garamond', serif; }
+
+  /* ---------- layout shell ---------- */
+  .shell{
+    max-width:1240px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    border-bottom:1px solid var(--line);
+    padding:22px 0 20px;
+  }
+  header .shell{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+  }
+  .wordmark{
+    font-family:'Cormorant Garamond', serif;
+    font-size:26px;
+    font-weight:600;
+    letter-spacing:0.14em;
+  }
+  .wordmark span{ font-style:italic; font-weight:400; color:var(--gray-2); font-size:14px; letter-spacing:0.02em; margin-left:10px;}
+  nav{ display:flex; gap:34px; }
+  nav a{
+    color:var(--gray-1);
+    text-decoration:none;
+    font-size:14px;
+    letter-spacing:0.02em;
+    padding-bottom:4px;
+    border-bottom:2px solid transparent;
+  }
+  nav a.active{ color:var(--black); border-bottom-color:var(--black); }
+
+  /* ---------- main grid ---------- */
+  main{ padding:34px 0 60px; }
+  .grid{
+    display:grid;
+    grid-template-columns: 300px 1fr;
+    gap:26px;
+  }
+
+  /* ---------- character panel ---------- */
+  .char-card{
+    border:1px solid var(--line);
+    padding:26px 22px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .char-avatar{
+    width:72px; height:72px;
+    border:1px solid var(--black);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .char-name-row{ display:flex; align-items:baseline; justify-content:space-between; }
+  .char-name{ font-family:'Cormorant Garamond', serif; font-size:22px; font-weight:600; }
+  .badge{
+    font-size:10.5px;
+    letter-spacing:0.06em;
+    padding:3px 9px;
+    border:1px solid var(--black);
+    border-radius:999px;
+  }
+  .stat-list{ display:flex; flex-direction:column; gap:11px; margin-top:4px; }
+  .stat-row{ display:flex; justify-content:space-between; font-size:13px; padding-bottom:11px; border-bottom:1px solid var(--gray-4); }
+  .stat-row:last-child{ border-bottom:none; padding-bottom:0; }
+  .stat-label{ color:var(--gray-2); }
+  .stat-value{ color:var(--ink); font-weight:500; }
+
+  .rank-bar{ height:3px; background:var(--gray-4); border-radius:2px; overflow:hidden; margin-top:2px;}
+  .rank-fill{ height:100%; background:var(--black); }
+
+  .explore-cta{
+    margin-top:6px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:13px 16px;
+    border:1px solid var(--black);
+    text-decoration:none;
+    color:var(--black);
+    font-size:13.5px;
+    letter-spacing:0.02em;
+  }
+  .explore-cta:hover{ background:var(--black); color:var(--white); }
+
+  /* ---------- auth (login/signup) ---------- */
+  .auth-tabs{ display:flex; gap:18px; margin-bottom:6px; }
+  .auth-tab{ font-size:12.5px; color:var(--gray-2); cursor:pointer; padding-bottom:6px; border-bottom:2px solid transparent; background:none; border-top:none; border-left:none; border-right:none; font-family:'Archivo',sans-serif; }
+  .auth-tab.active{ color:var(--black); border-bottom-color:var(--black); }
+  .auth-field{ display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+  .auth-field label{ font-size:11.5px; color:var(--gray-2); }
+  .auth-field input, .auth-field select{
+    border:1px solid var(--line); padding:9px 10px; font-size:13px;
+    font-family:'Archivo',sans-serif; color:var(--ink); background:var(--white);
+  }
+  .auth-submit{
+    margin-top:4px; width:100%; padding:11px 0; background:var(--black); color:var(--white);
+    border:none; font-size:13px; letter-spacing:0.02em; cursor:pointer; font-family:'Archivo',sans-serif;
+  }
+  .auth-submit:hover{ opacity:0.85; }
+  .auth-submit:disabled{ opacity:0.5; cursor:default; }
+  .auth-error{ font-size:12px; color:#B23A3A; margin-top:-6px; margin-bottom:10px; }
+  .logout-link{ font-size:11.5px; color:var(--gray-2); text-decoration:underline; cursor:pointer; margin-top:2px; align-self:flex-start; background:none; border:none; padding:0; font-family:'Archivo',sans-serif; }
+  .loading-text{ font-size:13px; color:var(--gray-2); }
+
+  /* ---------- right column ---------- */
+  .right-col{ display:flex; flex-direction:column; gap:22px; }
+
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .section-title{ font-family:'Cormorant Garamond', serif; font-size:19px; font-weight:600; }
+  .section-sub{ font-size:12px; color:var(--gray-2); }
+
+  #map{
+    height:420px;
+    width:100%;
+    border:1px solid var(--line);
+    filter:grayscale(1) contrast(1.08) brightness(1.02);
+  }
+
+  .map-legend{
+    display:flex; gap:22px;
+    margin-top:12px;
+    font-size:12px;
+    color:var(--gray-1);
+  }
+  .map-legend .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; }
+  .dot.dominant{ background:var(--black); }
+  .dot.contested{ background:var(--white); border:1.4px solid var(--black); }
+  .dot.dispute{ background:var(--gray-3); }
+
+  /* ---------- lists row ---------- */
+  .lists-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px;
+  }
+  .list-card{ border:1px solid var(--line); padding:20px 20px 6px; }
+  .issue-item{
+    display:flex; align-items:flex-start; gap:12px;
+    padding:13px 0;
+    border-bottom:1px solid var(--gray-4);
+  }
+  .issue-item:last-child{ border-bottom:none; }
+  .issue-num{ font-family:'Cormorant Garamond', serif; font-size:15px; color:var(--gray-3); width:16px; flex-shrink:0; }
+  .issue-text{ font-size:13.5px; line-height:1.5; }
+  .issue-meta{ font-size:11.5px; color:var(--gray-2); margin-top:3px; }
+
+  .dispute-item{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px 0;
+    border-bottom:1px solid var(--gray-4);
+  }
+  .dispute-item:last-child{ border-bottom:none; }
+  .dispute-region{ font-size:13.5px; }
+  .dispute-flag{
+    display:flex; align-items:center; gap:6px;
+    font-size:11px; color:var(--gray-1);
+  }
+  .dispute-flag svg{ width:12px; height:12px; }
+
+  @media (max-width:860px){
+    .grid{ grid-template-columns:1fr; }
+    .lists-row{ grid-template-columns:1fr; }
+    nav{ gap:18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="shell">
+    <div class="wordmark">ΑΓΟΡΑ<span>agora</span></div>
+    <nav>
+      <a href="#" class="active">대시보드</a>
+      <a href="#">조직 현황</a>
+      <a href="#">리포트</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="shell grid">
+
+    <!-- 캐릭터 현황 판 (로그인 상태에 따라 JS가 내용을 채움) -->
+    <aside class="char-card" id="charCard">
+      <div class="loading-text">불러오는 중...</div>
+    </aside>
+
+    <!-- 우측: 지도 + 리스트 -->
+    <div class="right-col">
+
+      <section>
+        <div class="section-head">
+          <span class="section-title">전황 개요</span>
+          <span class="section-sub">실시간 폴리스 지배 현황</span>
+        </div>
+        <div id="map"></div>
+        <div class="map-legend">
+          <span><i class="dot dominant"></i>지배 확정</span>
+          <span><i class="dot contested"></i>판정 진행중</span>
+          <span><i class="dot dispute"></i>분쟁 지역</span>
+        </div>
+      </section>
+
+      <section class="lists-row">
+        <div class="list-card">
+          <div class="section-head">
+            <span class="section-title" style="font-size:16px;">주요 논쟁 · Hot Issue</span>
+          </div>
+          <div class="issue-item">
+            <span class="issue-num">01</span>
+            <div>
+              <div class="issue-text">다수의 행복을 위해 소수의 희생은 정당한가</div>
+              <div class="issue-meta">서울 · 참여 214명</div>
+            </div>
+          </div>
+          <div class="issue-item">
+            <span class="issue-num">02</span>
+            <div>
+              <div class="issue-text">거짓말은 상황에 따라 도덕적일 수 있는가</div>
+              <div class="issue-meta">도쿄 · 참여 178명</div>
+            </div>
+          </div>
+          <div class="issue-item">
+            <span class="issue-num">03</span>
+            <div>
+              <div class="issue-text">자유의지는 착각에 불과한가</div>
+              <div class="issue-meta">뉴욕 · 참여 152명</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="list-card">
+          <div class="section-head">
+            <span class="section-title" style="font-size:16px;">주요 분쟁 지역</span>
+          </div>
+          <div class="dispute-item">
+            <span class="dispute-region">런던</span>
+            <span class="dispute-flag">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="#111110" stroke-width="1.6"/></svg>
+              판정 65% 진행
+            </span>
+          </div>
+          <div class="dispute-item">
+            <span class="dispute-region">베를린</span>
+            <span class="dispute-flag">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="#111110" stroke-width="1.6"/></svg>
+              판정 42% 진행
+            </span>
+          </div>
+          <div class="dispute-item">
+            <span class="dispute-region">상하이</span>
+            <span class="dispute-flag">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="#111110" stroke-width="1.6"/></svg>
+              선전포고 접수
+            </span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+  const API_BASE = 'https://agora-ye2n.onrender.com';
+  const RANK_LABEL = { citizen: '시민', supporter: '지지자', prophet: '선지자' };
+
+  let regionsData = [];      // 지도 + 회원가입 지역 선택에서 공용으로 씀
+  let authToken = localStorage.getItem('agora_token');
+  let currentUser = null;
+
+  // 서버(Render 무료 티어)가 15분 넘게 쉬고 있었다면 첫 응답이 최대 50초까지 걸릴 수 있음
+  const regionsPromise = fetch(`${API_BASE}/regions`)
+    .then(res => res.json())
+    .catch(err => {
+      console.error('지역 데이터를 불러오지 못했습니다:', err);
+      return [];
+    });
+
+  regionsPromise.then(regions => {
+    regionsData = regions;
+    renderCharCard(); // 지역 목록이 있어야 회원가입 폼의 지역 선택을 만들 수 있음
+    initMap(regions);
+  });
+
+  /* ---------------- 지도 (Leaflet/Socket.io 로드 실패해도 아래 회원가입은 정상 동작) ---------------- */
+
+  function markerIcon(status){
+    const fill = status === 'dominant' ? '#111110' : (status === 'contested' ? '#ffffff' : '#c9c9c2');
+    return L.divIcon({
+      html: `<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="${fill}" stroke="#111110" stroke-width="1.6"/></svg>`,
+      className:'', iconSize:[16,16], iconAnchor:[8,8]
+    });
+  }
+
+  function initMap(regions) {
+    if (typeof L === 'undefined') {
+      console.warn('Leaflet을 불러오지 못해 지도를 표시할 수 없습니다.');
+      return;
+    }
+    const map = L.map('map', { zoomControl:false, attributionControl:false }).setView([25, 20], 2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:8 }).addTo(map);
+
+    const markersById = {};
+    regions.forEach(r => {
+      const marker = L.marker([r.lat, r.lng], { icon: markerIcon(r.status) })
+        .bindTooltip(r.name, { permanent:false, direction:'top' })
+        .addTo(map);
+      markersById[r.id] = marker;
+    });
+
+    if (typeof io !== 'undefined') {
+      const socket = io(API_BASE);
+      socket.on('region:update', ({ region_id, status }) => {
+        const marker = markersById[region_id];
+        if (marker) marker.setIcon(markerIcon(status));
+      });
+    } else {
+      console.warn('Socket.io를 불러오지 못해 실시간 갱신이 비활성화됩니다.');
+    }
+  }
+
+  /* ---------------- 회원가입 / 로그인 / 캐릭터 패널 ---------------- */
+
+  const charCard = document.getElementById('charCard');
+  const avatarSvg = `
+    <div class="char-avatar">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="7.5" r="4" stroke="#111110" stroke-width="1.4"/>
+        <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="#111110" stroke-width="1.4" fill="none"/>
+      </svg>
+    </div>`;
+
+  function regionName(regionId){
+    const r = regionsData.find(r => r.id === regionId);
+    return r ? r.name : '알 수 없음';
+  }
+
+  async function apiRequest(path, options = {}) {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...(options.headers || {}),
+      },
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || '요청에 실패했습니다.');
+    return body;
+  }
+
+  function setSession(token, user) {
+    authToken = token;
+    currentUser = user;
+    localStorage.setItem('agora_token', token);
+  }
+
+  function clearSession() {
+    authToken = null;
+    currentUser = null;
+    localStorage.removeItem('agora_token');
+  }
+
+  async function tryRestoreSession() {
+    if (!authToken) return renderCharCard();
+    try {
+      currentUser = await apiRequest('/users/me');
+    } catch (err) {
+      clearSession(); // 토큰 만료/무효
+    }
+    renderCharCard();
+  }
+
+  function renderCharCard() {
+    if (currentUser) return renderLoggedIn();
+    if (regionsData.length === 0 && !authToken) {
+      charCard.innerHTML = `<div class="loading-text">불러오는 중...</div>`;
+      return;
+    }
+    renderAuthForm('login');
+  }
+
+  function renderLoggedIn() {
+    const rankLabel = RANK_LABEL[currentUser.rank] || currentUser.rank;
+    charCard.innerHTML = `
+      ${avatarSvg}
+      <div>
+        <div class="char-name-row">
+          <span class="char-name">${currentUser.nickname}</span>
+          <span class="badge">${rankLabel}</span>
+        </div>
+        <div class="issue-meta" style="margin-top:4px;">소속 폴리스 · ${regionName(currentUser.region_id)}</div>
+      </div>
+      <div class="stat-list">
+        <div class="stat-row">
+          <span class="stat-label">명성 수치</span>
+          <span class="stat-value">${currentUser.reputation ?? 0}</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">계급</span>
+          <span class="stat-value">${rankLabel}</span>
+        </div>
+      </div>
+      <button class="logout-link" id="logoutBtn">로그아웃</button>
+    `;
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      clearSession();
+      renderCharCard();
+    });
+  }
+
+  function renderAuthForm(mode) {
+    const isLogin = mode === 'login';
+    const regionOptions = regionsData.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+
+    charCard.innerHTML = `
+      ${avatarSvg}
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab ${isLogin ? 'active' : ''}" data-mode="login">로그인</button>
+        <button type="button" class="auth-tab ${!isLogin ? 'active' : ''}" data-mode="signup">회원가입</button>
+      </div>
+      <form id="authForm">
+        ${!isLogin ? `
+        <div class="auth-field">
+          <label>닉네임</label>
+          <input type="text" name="nickname" required maxlength="20" />
+        </div>
+        <div class="auth-field">
+          <label>소속 폴리스</label>
+          <select name="region_id" required>${regionOptions}</select>
+        </div>` : ''}
+        <div class="auth-field">
+          <label>이메일</label>
+          <input type="email" name="email" required />
+        </div>
+        <div class="auth-field">
+          <label>비밀번호${!isLogin ? ' (8자 이상)' : ''}</label>
+          <input type="password" name="password" required minlength="${isLogin ? 1 : 8}" />
+        </div>
+        <div class="auth-error" id="authError" style="display:none;"></div>
+        <button type="submit" class="auth-submit" id="authSubmit">${isLogin ? '로그인' : '가입하고 시작하기'}</button>
+      </form>
+    `;
+
+    charCard.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => renderAuthForm(tab.dataset.mode));
+    });
+
+    document.getElementById('authForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const submitBtn = document.getElementById('authSubmit');
+      const errorBox = document.getElementById('authError');
+      errorBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = '처리 중...';
+
+      try {
+        const payload = isLogin
+          ? { email: form.email.value, password: form.password.value }
+          : {
+              email: form.email.value,
+              password: form.password.value,
+              nickname: form.nickname.value,
+              region_id: form.region_id.value,
+            };
+        const result = await apiRequest(isLogin ? '/auth/login' : '/auth/signup', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        setSession(result.token, result.user);
+        renderCharCard();
+      } catch (err) {
+        errorBox.textContent = err.message;
+        errorBox.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = isLogin ? '로그인' : '가입하고 시작하기';
+      }
+    });
+  }
+
+  tryRestoreSession();
+</script>
+
+</body>
+</html>
