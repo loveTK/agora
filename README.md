@@ -146,6 +146,15 @@
 - 조회 API: `GET /users/:id/influence`(내 영향력·문화 루트 진행도), `GET /regions/:id/cultural-influence`(이 지역의 사상 영향권 보유자 목록)
 - DB 스키마 추가: `influence`, `cultural_influence_zones`, `culture_victories`
 
+**S16 (국회 견제 시스템)**
+- 국회력 = 선포측 지역 소속 정당원 수 합산(`regionCongressPower`, `src/services/congress.js`)
+- 지배자(폭군 아님)의 국회력이 **30명** 이상이면 선전포고 시 즉시 전쟁이 생성되지 않고, 자기 지역 정당원 대상 승인 투표(24시간, 과반)가 먼저 생성됨 — `POST /wars`가 이 경우 `202`로 `congress_approvals` 레코드를 반환
+  - 폭군이거나 국회력이 30명 미만이면 승인 절차 없이 기존 플로우 그대로 즉시 선포
+  - 승인 가결 시 그 시점에 실제 전쟁 생성(기존 `declareWar` 재사용), 부결 시 선포만 무산되고 페널티 없음
+- API: `GET /congress-approvals/:id`, `POST /congress-approvals/:id/vote`, `POST /internal/congress-approvals/settle`(하루 1회 배치, 데드라인 경과분 확정)
+- DB 스키마 추가: `congress_approvals`, `congress_votes`
+- **미확정 사항 그대로 남김**(기획 문서 16.4절): 국회 승인투표가 반복 부결될 때의 재시도 쿨다운은 아직 없음(현재는 기존 선포 쿨다운 7일/14일만 적용됨)
+
 ## 기술 스택
 - Node.js + Express
 - SQLite (better-sqlite3) — 베타 단계용. 운영 전환 시 `src/db.js`만 PostgreSQL 드라이버로 교체하면 됩니다(쿼리는 표준 SQL).

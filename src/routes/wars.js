@@ -2,7 +2,8 @@ const express = require("express");
 const { randomUUID } = require("crypto");
 const { db } = require("../db");
 const { requireAuth } = require("../middleware/authMiddleware");
-const { declareWar, getWarTally, resolveWarIfReady, VOTE_QUORUM, APPROVAL_RATIO } = require("../services/war");
+const { getWarTally, resolveWarIfReady, VOTE_QUORUM, APPROVAL_RATIO } = require("../services/war");
+const { requestWarDeclaration } = require("../services/congress");
 const { createBattle, getBattleTally, isWarParticipant, resolveBattle } = require("../services/warBattle");
 
 const router = express.Router();
@@ -11,6 +12,8 @@ const router = express.Router();
 // body: { defender_region_id }
 // 정책: 선포자는 현재 지배자여야 하며, 상대 지역에도 지배자가 있어야 함.
 // 선포 쿨다운(주 1회), 동일 상대 재선포 쿨다운(14일), 병력 격차(3배) 제한 적용.
+// S16 국회 시스템: 지배자(폭군 아님)의 지역 국회력(당원 수)이 30명 이상이면 즉시 선포되지 않고
+// 자기 지역 당원 대상 승인 투표(24시간)가 먼저 생성된다 — 이 경우 202로 승인투표를 반환한다.
 router.post("/", requireAuth, (req, res) => {
   const { defender_region_id } = req.body || {};
   if (!defender_region_id) {
@@ -20,9 +23,12 @@ router.post("/", requireAuth, (req, res) => {
   const region = db.prepare("SELECT id FROM regions WHERE id = ?").get(defender_region_id);
   if (!region) return res.status(404).json({ error: "존재하지 않는 지역입니다." });
 
-  const result = declareWar(req.userId, defender_region_id);
+  const result = requestWarDeclaration(req.userId, defender_region_id);
   if (result.error) {
     return res.status(result.status).json({ error: result.error });
+  }
+  if (result.approval) {
+    return res.status(202).json({ pending_congress_approval: true, ...result.approval });
   }
   res.status(201).json(result.war);
 });

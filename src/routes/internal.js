@@ -4,6 +4,7 @@ const { settleDominance } = require("../services/dominance");
 const { refreshTyrantStatus } = require("../services/tyranny");
 const { distributeItem } = require("../services/itemDistribution");
 const { settleExpiredWars } = require("../services/war");
+const { settleExpiredApprovals } = require("../services/congress");
 const { settleDueBattles } = require("../services/warBattle");
 const { db } = require("../db");
 
@@ -112,6 +113,13 @@ router.post("/wars/settle", (req, res) => {
 // 하루 1회(cron) 호출 전제. 마감된 전투를 확정하고 영토 점령·인센티브를 적용한다.
 router.post("/wars/battles/settle", (req, res) => {
   const results = settleDueBattles();
+  res.json({ settled_count: results.length, results });
+});
+
+// POST /internal/congress-approvals/settle
+// 하루 1회(cron) 호출 전제. 데드라인이 지난 국회 승인투표를 확정한다(승인 시 실제 전쟁 생성).
+router.post("/congress-approvals/settle", (req, res) => {
+  const results = settleExpiredApprovals();
   res.json({ settled_count: results.length, results });
 });
 

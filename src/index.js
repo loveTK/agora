@@ -18,6 +18,7 @@ const religionRoutes = require("./routes/religions");
 const partyRoutes = require("./routes/parties");
 const itemRoutes = require("./routes/items");
 const warRoutes = require("./routes/wars");
+const congressRoutes = require("./routes/congress");
 const hotAgendaRoutes = require("./routes/hotAgenda");
 const { requireAdmin } = require("./middleware/adminAuth");
 
@@ -51,6 +52,7 @@ app.use("/religions", religionRoutes);
 app.use("/parties", partyRoutes);
 app.use("/items", itemRoutes);
 app.use("/wars", warRoutes);
+app.use("/congress-approvals", congressRoutes);
 app.use("/hot-agenda", hotAgendaRoutes);
 app.use("/internal", requireAdmin, internalRoutes);
 
