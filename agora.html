@@ -74,16 +74,23 @@
   }
   .section:last-child{ border-bottom:none; }
 
-  /* ---------- character panel ---------- */
-  .char-top{ display:flex; align-items:center; gap:18px; }
+  /* ---------- character panel: 아바타+CTA 열 / 정보 3줄 열, 가로 배치 ---------- */
+  .char-top{ display:flex; gap:20px; align-items:flex-start; }
   .char-avatar{
     width:72px; height:72px;
     border:1px solid var(--black);
     border-radius:50%;
     display:flex; align-items:center; justify-content:center;
   }
-  .char-name-row{ display:flex; align-items:baseline; justify-content:space-between; }
-  .char-name{ font-family:'Cormorant Garamond', serif; font-size:22px; font-weight:600; }
+  .profile-avatar-col{ display:flex; flex-direction:column; gap:8px; flex-shrink:0; }
+  .profile-avatar{
+    width:96px; height:96px;
+    border:1px solid var(--black);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .profile-info{ display:flex; flex-direction:column; gap:9px; flex:1; min-width:0; padding-top:4px; }
+  .char-name-row{ display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:13.5px; }
+  .char-name{ font-weight:600; color:var(--ink); }
   .badge{
     font-size:10.5px;
     letter-spacing:0.06em;
@@ -91,14 +98,10 @@
     border:1px solid var(--black);
     border-radius:999px;
   }
-  .stat-list{ display:flex; flex-direction:column; gap:11px; margin-top:4px; }
-  .stat-row{ display:flex; justify-content:space-between; font-size:13px; padding-bottom:11px; border-bottom:1px solid var(--gray-4); }
-  .stat-row:last-child{ border-bottom:none; padding-bottom:0; }
+  .profile-stats-line{ display:flex; gap:22px; flex-wrap:wrap; font-size:13px; }
   .stat-label{ color:var(--gray-2); }
   .stat-value{ color:var(--ink); font-weight:500; }
-
-  .rank-bar{ height:3px; background:var(--gray-4); border-radius:2px; overflow:hidden; margin-top:2px;}
-  .rank-fill{ height:100%; background:var(--black); }
+  .profile-ticker{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:12.5px; color:var(--gray-1); }
   .chip-row{ display:flex; flex-wrap:wrap; gap:6px; }
 
   /* ---------- auth (login/signup) ---------- */
@@ -148,15 +151,23 @@
     grid-template-columns:1fr 1fr;
     gap:22px;
   }
-  .issue-item{
-    display:flex; align-items:flex-start; gap:12px;
-    padding:13px 0;
-    border-bottom:1px solid var(--gray-4);
-  }
-  .issue-item:last-child{ border-bottom:none; }
-  .issue-num{ font-family:'Cormorant Garamond', serif; font-size:15px; color:var(--gray-3); width:16px; flex-shrink:0; }
-  .issue-text{ font-size:13.5px; line-height:1.5; }
   .issue-meta{ font-size:11.5px; color:var(--gray-2); margin-top:3px; }
+
+  /* ---------- hot issue 카드: 발의자 아바타 / 논제 본문 / 입장 CTA ---------- */
+  .hot-issue-card{ display:flex; align-items:center; gap:20px; border:1px solid var(--line); padding:18px 20px; }
+  .hot-issue-card + .hot-issue-card{ margin-top:14px; }
+  .hot-issue-left{ display:flex; flex-direction:column; align-items:center; gap:8px; flex-shrink:0; }
+  .hot-issue-avatar{ width:76px; height:76px; border:1px solid var(--black); display:flex; align-items:center; justify-content:center; }
+  .hot-issue-author{ font-size:11px; color:var(--gray-2); text-align:center; max-width:76px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hot-issue-body{ flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; }
+  .hot-issue-quote{ font-size:14.5px; color:var(--ink); line-height:1.5; }
+  .hot-issue-stance{
+    width:60px; height:60px; border-radius:50%; border:1px solid var(--black);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-size:11px; color:var(--black); line-height:1.3; flex-shrink:0; background:none; cursor:pointer;
+    font-family:'Archivo',sans-serif; text-decoration:none;
+  }
+  .hot-issue-stance:hover{ background:var(--black); color:var(--white); }
 
   .dispute-item{
     display:flex; align-items:center; justify-content:space-between;
@@ -379,7 +390,6 @@
   async function renderLoggedIn() {
     const rankLabel = RANK_LABEL[currentUser.rank] || currentUser.rank;
     const tierLabel = BELLIGERENCE_TIER_LABEL[currentUser.belligerence_tier] || null;
-    const belligerencePct = Math.min(100, Math.round(((currentUser.belligerence || 0) / 300) * 100));
 
     // 지배자/폭군 여부는 별도 컬럼이 없어서 소속 지역의 dominance 정보로 판별한다.
     let dominanceStatus = null;
@@ -405,42 +415,40 @@
 
     charCard.innerHTML = `
       <div class="char-top">
-        ${avatarSvg}
-        <div>
+        <div class="profile-avatar-col">
+          <div class="profile-avatar">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="7.5" r="4" stroke="#111110" stroke-width="1.4"/>
+              <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="#111110" stroke-width="1.4" fill="none"/>
+            </svg>
+          </div>
+          <button class="mini-btn" id="inventoryBtn">인벤토리</button>
+        </div>
+        <div class="profile-info">
           <div class="char-name-row">
-            <span class="char-name">${currentUser.nickname}</span>
-            <span style="display:flex; gap:6px;">${dominanceBadge}<span class="badge">${rankLabel}</span></span>
+            <span>
+              <span class="char-name">${currentUser.nickname}</span>
+              / ${regionName(currentUser.region_id)} 폴리스 /
+              ${dominanceBadge}<span class="badge">${rankLabel}</span>
+            </span>
+            <button class="logout-link" id="logoutBtn">로그아웃</button>
           </div>
-          <div class="issue-meta" style="margin-top:4px;">소속 폴리스 · ${regionName(currentUser.region_id)}</div>
+          <div class="profile-stats-line">
+            <span><span class="stat-label">명성치</span> <span class="stat-value">${currentUser.reputation ?? 0}</span></span>
+            <span><span class="stat-label">팔로워</span> <span class="stat-value">${currentUser.follower_count ?? 0}명</span></span>
+            <span><span class="stat-label">호전성</span> <span class="stat-value">${currentUser.belligerence ?? 0}${tierLabel ? ' · ' + tierLabel : ''}</span></span>
+          </div>
+          <div class="profile-ticker">
+            <span>›</span>
+            <div class="chip-row">${itemChips}</div>
+          </div>
         </div>
       </div>
-      <div class="stat-list">
-        <div class="stat-row">
-          <span class="stat-label">명성 수치</span>
-          <span class="stat-value">${currentUser.reputation ?? 0}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">계급</span>
-          <span class="stat-value">${rankLabel}</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">팔로워</span>
-          <span class="stat-value">${currentUser.follower_count ?? 0}</span>
-        </div>
-        <div class="stat-row" style="flex-direction:column; align-items:stretch; gap:5px;">
-          <div style="display:flex; justify-content:space-between;">
-            <span class="stat-label">호전성</span>
-            <span class="stat-value">${currentUser.belligerence ?? 0}${tierLabel ? ' · ' + tierLabel : ''}</span>
-          </div>
-          <div class="rank-bar"><div class="rank-fill" style="width:${belligerencePct}%;"></div></div>
-        </div>
-        <div class="stat-row" style="flex-direction:column; align-items:stretch; gap:8px;">
-          <span class="stat-label">보유 아이템</span>
-          <div class="chip-row">${itemChips}</div>
-        </div>
-      </div>
-      <button class="logout-link" id="logoutBtn">로그아웃</button>
     `;
+    // 아직 별도 인벤토리 화면이 없어서, 눌러보면 뭐가 있는지는 위 칩 목록에서 바로 보인다는 걸 알려주는 정도로만 둠.
+    document.getElementById('inventoryBtn').addEventListener('click', () => {
+      alert(inventory.length ? '보유 아이템: ' + inventory.map(it => SLOT_LABEL[it.slot_type] || it.slot_type).join(', ') : '보유한 아이템이 없습니다.');
+    });
     document.getElementById('logoutBtn').addEventListener('click', () => {
       clearSession();
       location.reload(); // 세력/전쟁 카드까지 한 번에 로그아웃 상태로 되돌리는 가장 간단한 방법
@@ -528,13 +536,22 @@
     try {
       const threads = await apiRequest('/hot-agenda');
       el.innerHTML = threads.length
-        ? threads.slice(0, 5).map((t, i) => `
-          <div class="issue-item">
-            <span class="issue-num">${String(i + 1).padStart(2, '0')}</span>
-            <div>
-              <div class="issue-text">${t.title}</div>
-              <div class="issue-meta">${t.region_name} · 참여 ${t.participant_count}명 · 추천 ${t.total_upvotes}</div>
+        ? threads.slice(0, 5).map(t => `
+          <div class="hot-issue-card">
+            <div class="hot-issue-left">
+              <div class="hot-issue-avatar">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="7.5" r="4" stroke="#111110" stroke-width="1.4"/>
+                  <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="#111110" stroke-width="1.4" fill="none"/>
+                </svg>
+              </div>
+              <div class="hot-issue-author">${t.author_nickname}</div>
             </div>
+            <div class="hot-issue-body">
+              <div class="hot-issue-quote">"${t.title}"</div>
+              <div class="issue-meta">${t.region_name} 폴리스 / 참여 ${t.participant_count}명 / 추천 ${t.total_upvotes}</div>
+            </div>
+            <a class="hot-issue-stance" href="${API_BASE}/threads/${t.id}" target="_blank" rel="noopener">입장 →</a>
           </div>`).join('')
         : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
     } catch (err) {
