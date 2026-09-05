@@ -2,6 +2,8 @@
 
 스프린트표 기준 **S1~S5** 구현체입니다. 여기까지가 원래 로드맵상 "베타 오픈 가능 시점"입니다.
 
+> `main` push 시 GitHub Actions가 Lightsail에 자동 배포합니다 (`.github/workflows/deploy-lightsail.yml`).
+
 ## 포함된 기능
 
 **S1**
