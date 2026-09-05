@@ -5,6 +5,8 @@ const { requireAuth } = require("../middleware/authMiddleware");
 const { getTally, settleThread, QUORUM, COLLAPSE_THRESHOLD } = require("../services/judgment");
 const { refreshRegionStatus } = require("../services/regionStatus");
 const { containsBannedWord } = require("../services/contentFilter");
+const { THREAD_BELLIGERENCE_POINTS, ARGUMENT_BELLIGERENCE_POINTS } = require("../services/belligerence");
+const { grantWeaponIfEligible } = require("../services/weapon");
 
 const DAILY_JUDGMENT_VOTE_LIMIT = 20; // 어뷰징 방지: 하루 20개 논제까지만 판정투표 가능
 
@@ -44,9 +46,15 @@ router.post("/", requireAuth, (req, res) => {
     return res.status(400).json({ error: "부적절한 표현이 포함되어 있어 등록할 수 없습니다." });
   }
 
-  const region = db.prepare("SELECT id FROM regions WHERE id = ?").get(region_id);
+  const region = db.prepare("SELECT * FROM regions WHERE id = ?").get(region_id);
   if (!region) {
     return res.status(400).json({ error: "존재하지 않는 지역입니다." });
+  }
+  // 전쟁 패배로 점령된 지역은 일정 기간 신규 논제 등록이 제한된다(S12, 문서 6.2절 "점령 상태").
+  if (region.thread_ban_until && region.thread_ban_until > new Date().toISOString()) {
+    return res.status(403).json({
+      error: `이 지역은 점령 상태로 신규 논제 등록이 제한되어 있습니다. (해제: ${region.thread_ban_until})`,
+    });
   }
 
   const todayCount = db
@@ -67,6 +75,13 @@ router.post("/", requireAuth, (req, res) => {
     `INSERT INTO threads (id, region_id, author_id, title, body)
      VALUES (?, ?, ?, ?, ?)`
   ).run(id, region_id, req.userId, title, body || null);
+
+  // 호전성 게이지: 논제 발의 1건당 +2 (기획 합의사항)
+  db.prepare("UPDATE users SET belligerence = belligerence + ? WHERE id = ?").run(
+    THREAD_BELLIGERENCE_POINTS,
+    req.userId
+  );
+  grantWeaponIfEligible(req.userId); // 논전사 티어(100) 이상이면 무기 슬롯 자동 지급
 
   const thread = db.prepare("SELECT * FROM threads WHERE id = ?").get(id);
   res.status(201).json(toPublicThread(thread));
@@ -109,6 +124,13 @@ router.post("/:id/arguments", requireAuth, (req, res) => {
     `INSERT INTO arguments (id, thread_id, author_id, stance, body)
      VALUES (?, ?, ?, ?, ?)`
   ).run(id, req.params.id, req.userId, stance, body.trim());
+
+  // 호전성 게이지: 답글(논증) 등록 1건당 +1 (기획 합의사항)
+  db.prepare("UPDATE users SET belligerence = belligerence + ? WHERE id = ?").run(
+    ARGUMENT_BELLIGERENCE_POINTS,
+    req.userId
+  );
+  grantWeaponIfEligible(req.userId); // 논전사 티어(100) 이상이면 무기 슬롯 자동 지급
 
   const arg = db.prepare("SELECT * FROM arguments WHERE id = ?").get(id);
   res.status(201).json(arg);
@@ -171,7 +193,7 @@ router.post("/:id/judgment-vote", requireAuth, (req, res) => {
     "INSERT INTO judgment_votes (id, thread_id, voter_id, verdict) VALUES (?, ?, ?, ?)"
   ).run(randomUUID(), req.params.id, req.userId, verdict);
 
-  const settled = settleThread(req.params.id);
+  const settled = settleThread(req.params.id, req.app.get("io"));
   const tally = getTally(req.params.id);
 
   // 정족수 도달/판정 결과에 따라 지역 상태(dispute/contested)가 바뀔 수 있으므로

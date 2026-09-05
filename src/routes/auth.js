@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { randomUUID } = require("crypto");
 const { db } = require("../db");
 const { JWT_SECRET } = require("../middleware/authMiddleware");
+const { belligerenceTier } = require("../services/belligerence");
 
 const router = express.Router();
 
@@ -63,7 +64,7 @@ router.post("/signup", (req, res) => {
   const token = issueToken(id);
   res.status(201).json({
     token,
-    user: { id, email, nickname, region_id, rank: "citizen", reputation: 0 },
+    user: { id, email, nickname, region_id, rank: "citizen", reputation: 0, belligerence: 0, belligerence_tier: "citizen" },
   });
 });
 
@@ -90,6 +91,8 @@ router.post("/login", (req, res) => {
       region_id: user.region_id,
       rank: user.rank,
       reputation: user.reputation,
+      belligerence: user.belligerence,
+      belligerence_tier: belligerenceTier(user.belligerence),
     },
   });
 });

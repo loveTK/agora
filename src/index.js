@@ -13,6 +13,12 @@ const threadRoutes = require("./routes/threads");
 const voteRoutes = require("./routes/votes");
 const internalRoutes = require("./routes/internal");
 const reportRoutes = require("./routes/reports");
+const hallOfFameRoutes = require("./routes/hallOfFame");
+const religionRoutes = require("./routes/religions");
+const partyRoutes = require("./routes/parties");
+const itemRoutes = require("./routes/items");
+const warRoutes = require("./routes/wars");
+const hotAgendaRoutes = require("./routes/hotAgenda");
 const { requireAdmin } = require("./middleware/adminAuth");
 
 runMigrations();
@@ -40,6 +46,12 @@ app.use("/regions", regionRoutes);
 app.use("/threads", threadRoutes);
 app.use("/arguments", voteRoutes);
 app.use("/reports", reportRoutes);
+app.use("/hall-of-fame", hallOfFameRoutes);
+app.use("/religions", religionRoutes);
+app.use("/parties", partyRoutes);
+app.use("/items", itemRoutes);
+app.use("/wars", warRoutes);
+app.use("/hot-agenda", hotAgendaRoutes);
 app.use("/internal", requireAdmin, internalRoutes);
 
 app.use((req, res) => res.status(404).json({ error: "존재하지 않는 경로입니다." }));

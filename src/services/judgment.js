@@ -1,5 +1,6 @@
 const { randomUUID } = require("crypto");
 const { db } = require("../db");
+const { executeIfRuler } = require("./execution");
 
 const QUORUM = 30;              // 최소 참여 인원
 const COLLAPSE_THRESHOLD = 0.6; // 붕괴 확정 비율
@@ -32,7 +33,8 @@ function getTally(threadId) {
 
 // 정족수(30명) + 붕괴표(60%) 조건 충족 시 논제를 '붕괴' 확정하고 judgments에 기록.
 // 조건 미충족이면 아무 것도 하지 않음(계속 active로 남아 투표가 쌓임).
-function settleThread(threadId) {
+// io를 넘기면(선택) 처형이 발동될 때 'region:execution' 이벤트를 즉시 브로드캐스트한다.
+function settleThread(threadId, io = null) {
   const thread = db.prepare("SELECT * FROM threads WHERE id = ?").get(threadId);
   if (!thread || thread.status !== "active") return null;
 
@@ -49,14 +51,20 @@ function settleThread(threadId) {
   });
   tx();
 
-  return { thread_id: threadId, ...tally };
+  // 붕괴된 논제의 작성자가 그 지역의 현재 지배자라면 처형 집행 (지배자가 아니면 null 반환)
+  const execution = executeIfRuler(thread);
+  if (execution && io) {
+    io.emit("region:execution", execution);
+  }
+
+  return { thread_id: threadId, ...tally, execution };
 }
 
-function settleAllActiveThreads() {
+function settleAllActiveThreads(io = null) {
   const activeThreads = db.prepare("SELECT id FROM threads WHERE status = 'active'").all();
   const settled = [];
   for (const t of activeThreads) {
-    const result = settleThread(t.id);
+    const result = settleThread(t.id, io);
     if (result) settled.push(result);
   }
   return settled;

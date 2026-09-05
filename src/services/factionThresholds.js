@@ -1,0 +1,12 @@
+// 종교/정당 창설 진입장벽 (기획 합의사항: 아무나 남발하지 못하게 임계값을 둔다)
+const RELIGION_CREATE_REPUTATION_THRESHOLD = 500;
+const PARTY_CREATE_FOLLOWER_THRESHOLD = 100;
+const TENET_MIN = 3;
+const TENET_MAX = 5;
+
+module.exports = {
+  RELIGION_CREATE_REPUTATION_THRESHOLD,
+  PARTY_CREATE_FOLLOWER_THRESHOLD,
+  TENET_MIN,
+  TENET_MAX,
+};

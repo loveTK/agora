@@ -3,6 +3,11 @@ const { randomUUID } = require("crypto");
 const { db } = require("../db");
 const { requireAuth } = require("../middleware/authMiddleware");
 const { getVoteWeight } = require("../services/voteWeight");
+const { recalcRank } = require("../services/rank");
+const { refreshTyrantStatus } = require("../services/tyranny");
+const { checkVoteBrigading } = require("../services/abuseDetection");
+const { isReputationGainBlocked } = require("../services/war");
+const { applyInfluenceDelta } = require("../services/influence");
 
 const router = express.Router();
 const DAILY_VOTE_LIMIT = 100; // 어뷰징 방지: 하루 추천/비추천 총 횟수 상한
@@ -42,12 +47,44 @@ router.post("/:id/vote", requireAuth, (req, res) => {
   const applyDelta = (col, delta) =>
     db.prepare(`UPDATE arguments SET ${col} = ${col} + ? WHERE id = ?`).run(delta, req.params.id);
 
+  // 추천(up)은 명성 +delta, 비추천(down)은 명성 -delta로 반영한다(0 미만으로는 내려가지 않음).
+  // 명성은 시민->지지자->선지자 승급의 기준이 되므로, 논증에 대한 반응이 바로 계급에 영향을 준다.
+  // 전쟁 회피로 "굴복 상태"에 놓인 지역의 지배자는 명성 획득(양수 델타)만 막힌다(S11) — 손실은 그대로 반영.
+  const applyReputationDelta = (delta) => {
+    if (delta > 0 && isReputationGainBlocked(arg.author_id)) return;
+    db.prepare("UPDATE users SET reputation = MAX(0, reputation + ?) WHERE id = ?").run(delta, arg.author_id);
+  };
+
+  // 영향력(문화 루트, S13): 이 논증이 달린 논제가 작성자 소속 지역이 아닌 "타 지역"의 논제라면,
+  // 추천/비추천에 따라 그 지역에서의 영향력이 오르내린다. applyInfluenceDelta 내부에서
+  // 자기 소속 지역이면 자동으로 무시하므로 별도 분기 없이 항상 호출해도 안전하다.
+  const argThread = db.prepare("SELECT region_id FROM threads WHERE id = ?").get(arg.thread_id);
+  const applyInfluence = (delta) => applyInfluenceDelta(arg.author_id, argThread.region_id, delta);
+
+  // 폭군 판정용 누적치: 논증이 비추천을 받을 때마다 작성자의 downvotes_received가 오르내린다
+  // (가중치 반영, 0 미만으로는 내려가지 않음). refreshTyrantStatus는 트랜잭션 밖에서 마지막에 호출한다.
+  const applyDownvotesReceivedDelta = (delta) =>
+    db
+      .prepare("UPDATE users SET downvotes_received = MAX(0, downvotes_received + ?) WHERE id = ?")
+      .run(delta, arg.author_id);
+
+  // 지지자 수치(명성) 적립: 추천 버튼을 누르는 행위 자체도 투표자 본인에게 +1 (기획 합의사항).
+  // 가중치 없이 정수 1로 고정 — 콘텐츠 품질과 무관하게 "참여" 자체에 대한 보상이기 때문.
+  const applyVoterReputationDelta = (delta) =>
+    db
+      .prepare("UPDATE users SET reputation = MAX(0, reputation + ?) WHERE id = ?")
+      .run(delta, req.userId);
+
   const tx = db.transaction(() => {
     if (!existing) {
       db.prepare(
-        "INSERT INTO votes (id, argument_id, voter_id, vote_type, weight) VALUES (?, ?, ?, ?, ?)"
-      ).run(randomUUID(), req.params.id, req.userId, vote_type, weight);
+        "INSERT INTO votes (id, argument_id, voter_id, vote_type, weight, ip) VALUES (?, ?, ?, ?, ?, ?)"
+      ).run(randomUUID(), req.params.id, req.userId, vote_type, weight, req.ip);
       applyDelta(vote_type === "up" ? "upvotes" : "downvotes", weight);
+      applyReputationDelta(vote_type === "up" ? weight : -weight);
+      applyInfluence(vote_type === "up" ? weight : -weight);
+      if (vote_type === "down") applyDownvotesReceivedDelta(weight);
+      if (vote_type === "up") applyVoterReputationDelta(1);
       return "cast";
     }
 
@@ -55,19 +92,38 @@ router.post("/:id/vote", requireAuth, (req, res) => {
       // 같은 타입 재클릭 -> 취소
       db.prepare("DELETE FROM votes WHERE id = ?").run(existing.id);
       applyDelta(vote_type === "up" ? "upvotes" : "downvotes", -existing.weight);
+      applyReputationDelta(vote_type === "up" ? -existing.weight : existing.weight);
+      applyInfluence(vote_type === "up" ? -existing.weight : existing.weight);
+      if (vote_type === "down") applyDownvotesReceivedDelta(-existing.weight);
+      if (vote_type === "up") applyVoterReputationDelta(-1);
       return "cancelled";
     }
 
     // 다른 타입으로 변경
     db.prepare(
-      "UPDATE votes SET vote_type = ?, weight = ?, created_at = datetime('now') WHERE id = ?"
-    ).run(vote_type, weight, existing.id);
+      "UPDATE votes SET vote_type = ?, weight = ?, created_at = datetime('now'), ip = ? WHERE id = ?"
+    ).run(vote_type, weight, req.ip, existing.id);
     applyDelta(existing.vote_type === "up" ? "upvotes" : "downvotes", -existing.weight);
     applyDelta(vote_type === "up" ? "upvotes" : "downvotes", weight);
+    // 명성도 기존 방향을 되돌리고 새 방향을 적용
+    applyReputationDelta(existing.vote_type === "up" ? -existing.weight : existing.weight);
+    applyReputationDelta(vote_type === "up" ? weight : -weight);
+    applyInfluence(existing.vote_type === "up" ? -existing.weight : existing.weight);
+    applyInfluence(vote_type === "up" ? weight : -weight);
+    // 비추천 누적치도 기존 방향을 되돌리고 새 방향을 적용
+    if (existing.vote_type === "down") applyDownvotesReceivedDelta(-existing.weight);
+    if (vote_type === "down") applyDownvotesReceivedDelta(weight);
+    // 투표자 본인의 지지자 수치도 up<->down 전환에 맞춰 조정
+    if (existing.vote_type === "up") applyVoterReputationDelta(-1);
+    if (vote_type === "up") applyVoterReputationDelta(1);
     return "changed";
   });
 
   const result = tx();
+  recalcRank(arg.author_id); // 작성자 명성 변화가 계급(지지자/선지자 슬롯)에 영향을 줄 수 있으므로 재계산
+  if (req.userId !== arg.author_id) recalcRank(req.userId); // 투표자 본인의 명성도 바뀌었으므로 재계산
+  refreshTyrantStatus(arg.author_id); // 작성자가 현재 지배자라면 폭군 전환 여부 재판정
+  if (result === "cast") checkVoteBrigading(req.params.id, req.ip); // 신규 투표일 때만 몰표 패턴 탐지
   const updated = db.prepare("SELECT * FROM arguments WHERE id = ?").get(req.params.id);
   res.json({ result, weight, upvotes: updated.upvotes, downvotes: updated.downvotes });
 });
