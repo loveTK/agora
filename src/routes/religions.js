@@ -21,6 +21,20 @@ function joinReligion(religionId, userId, ip) {
   checkJoinBrigading("religion_members", "religion_id", religionId, ip);
 }
 
+// GET /religions
+// 가입 화면에서 고를 수 있도록 전체 종교 목록(신자 수 포함)을 노출한다.
+router.get("/", (req, res) => {
+  const religions = db
+    .prepare(
+      `SELECT r.id, r.name, r.founder_id, u.nickname AS founder_nickname,
+              (SELECT COUNT(*) FROM religion_members rm WHERE rm.religion_id = r.id) AS member_count
+       FROM religions r JOIN users u ON u.id = r.founder_id
+       ORDER BY member_count DESC`
+    )
+    .all();
+  res.json(religions);
+});
+
 // POST /religions
 // body: { name, tenet_thread_ids: [3~5개] }
 // 정책: 창설 조건 = 명성 500 이상. 교리는 본인이 정립한 논제 3~5개 묶음.

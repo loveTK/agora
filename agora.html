@@ -195,6 +195,13 @@
   }
   .dispute-flag svg{ width:12px; height:12px; }
 
+  .mini-btn{
+    font-size:11.5px; padding:6px 11px; border:1px solid var(--black); background:var(--white);
+    color:var(--black); cursor:pointer; font-family:'Archivo',sans-serif; letter-spacing:0.02em;
+  }
+  .mini-btn:hover{ background:var(--black); color:var(--white); }
+  .mini-btn:disabled{ opacity:0.5; cursor:default; }
+
   @media (max-width:860px){
     .grid{ grid-template-columns:1fr; }
     .lists-row{ grid-template-columns:1fr; }
@@ -244,55 +251,38 @@
           <div class="section-head">
             <span class="section-title" style="font-size:16px;">주요 논쟁 · Hot Issue</span>
           </div>
-          <div class="issue-item">
-            <span class="issue-num">01</span>
-            <div>
-              <div class="issue-text">다수의 행복을 위해 소수의 희생은 정당한가</div>
-              <div class="issue-meta">서울 · 참여 214명</div>
-            </div>
-          </div>
-          <div class="issue-item">
-            <span class="issue-num">02</span>
-            <div>
-              <div class="issue-text">거짓말은 상황에 따라 도덕적일 수 있는가</div>
-              <div class="issue-meta">도쿄 · 참여 178명</div>
-            </div>
-          </div>
-          <div class="issue-item">
-            <span class="issue-num">03</span>
-            <div>
-              <div class="issue-text">자유의지는 착각에 불과한가</div>
-              <div class="issue-meta">뉴욕 · 참여 152명</div>
-            </div>
-          </div>
+          <div id="hotIssueList"><div class="loading-text">불러오는 중...</div></div>
         </div>
 
         <div class="list-card">
           <div class="section-head">
             <span class="section-title" style="font-size:16px;">주요 분쟁 지역</span>
           </div>
-          <div class="dispute-item">
-            <span class="dispute-region">런던</span>
-            <span class="dispute-flag">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="#111110" stroke-width="1.6"/></svg>
-              판정 65% 진행
-            </span>
-          </div>
-          <div class="dispute-item">
-            <span class="dispute-region">베를린</span>
-            <span class="dispute-flag">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="#111110" stroke-width="1.6"/></svg>
-              판정 42% 진행
-            </span>
-          </div>
-          <div class="dispute-item">
-            <span class="dispute-region">상하이</span>
-            <span class="dispute-flag">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="#111110" stroke-width="1.6"/></svg>
-              선전포고 접수
-            </span>
-          </div>
+          <div id="disputeList"><div class="loading-text">불러오는 중...</div></div>
         </div>
+      </section>
+
+      <section class="lists-row">
+        <div class="list-card" id="factionsCard">
+          <div class="section-head">
+            <span class="section-title" style="font-size:16px;">세력 · 종교 / 정당</span>
+          </div>
+          <div id="factionsContent"><div class="loading-text">로그인하면 종교·정당 목록을 볼 수 있습니다.</div></div>
+        </div>
+
+        <div class="list-card" id="warsCard">
+          <div class="section-head">
+            <span class="section-title" style="font-size:16px;">전쟁</span>
+          </div>
+          <div id="warsContent"><div class="loading-text">로그인하면 소속 지역의 전쟁 현황을 볼 수 있습니다.</div></div>
+        </div>
+      </section>
+
+      <section class="list-card" id="hallOfFameCard">
+        <div class="section-head">
+          <span class="section-title" style="font-size:16px;">명예의 전당</span>
+        </div>
+        <div id="hallOfFameContent"><div class="loading-text">불러오는 중...</div></div>
       </section>
 
     </div>
@@ -304,6 +294,9 @@
 <script>
   const API_BASE = 'https://api.myagora.xyz';
   const RANK_LABEL = { citizen: '시민', supporter: '지지자', prophet: '선지자' };
+  const SLOT_LABEL = { accessory: '악세사리', badge: '뱃지', cloak: '망토', weapon: '무기' };
+  const BELLIGERENCE_TIER_LABEL = { warrior: '논전사', elite_warrior: '정예 논전사' };
+  const WAR_STATUS_LABEL = { voting: '수락 투표중', accepted: '전투 진행중', avoided: '회피(부결)', void: '성립 불가' };
 
   let regionsData = [];      // 지도 + 회원가입 지역 선택에서 공용으로 씀
   let authToken = localStorage.getItem('agora_token');
@@ -320,7 +313,11 @@
     regionsData = regions;
     renderCharCard(); // 지역 목록이 있어야 회원가입 폼의 지역 선택을 만들 수 있음
     initMap(regions);
+    renderDisputes();
   });
+
+  renderHotIssues();
+  renderHallOfFame();
 
   /* ---------------- 지도 (Leaflet/Socket.io 로드 실패해도 아래 회원가입은 정상 동작) ---------------- */
 
@@ -420,14 +417,39 @@
     renderAuthForm('login');
   }
 
-  function renderLoggedIn() {
+  async function renderLoggedIn() {
     const rankLabel = RANK_LABEL[currentUser.rank] || currentUser.rank;
+    const tierLabel = BELLIGERENCE_TIER_LABEL[currentUser.belligerence_tier] || null;
+    const belligerencePct = Math.min(100, Math.round(((currentUser.belligerence || 0) / 300) * 100));
+
+    // 지배자/폭군 여부는 별도 컬럼이 없어서 소속 지역의 dominance 정보로 판별한다.
+    let dominanceStatus = null;
+    try {
+      const d = await apiRequest(`/regions/${currentUser.region_id}/dominance`);
+      if (d.ruler && d.ruler.user_id === currentUser.id) dominanceStatus = d.ruler.status;
+    } catch (err) { /* 조회 실패해도 카드 자체는 그려야 하므로 무시 */ }
+
+    let inventory = [];
+    try { inventory = await apiRequest(`/users/${currentUser.id}/inventory`); } catch (err) {}
+
+    const dominanceBadge = dominanceStatus === 'tyrant'
+      ? `<span class="badge" style="background:var(--black); color:var(--white);">폭군</span>`
+      : dominanceStatus === 'ruler' ? `<span class="badge">지배자</span>` : '';
+
+    const itemChips = inventory.length
+      ? inventory.map(it => {
+          const label = SLOT_LABEL[it.slot_type] || it.slot_type;
+          const extra = it.slot_type === 'cloak' && it.color === 'black' ? ' (검정)' : '';
+          return `<span class="badge" style="margin-right:4px;">${label}${extra}</span>`;
+        }).join('')
+      : '<span class="stat-label">없음</span>';
+
     charCard.innerHTML = `
       ${avatarSvg}
       <div>
         <div class="char-name-row">
           <span class="char-name">${currentUser.nickname}</span>
-          <span class="badge">${rankLabel}</span>
+          <span style="display:flex; gap:6px;">${dominanceBadge}<span class="badge">${rankLabel}</span></span>
         </div>
         <div class="issue-meta" style="margin-top:4px;">소속 폴리스 · ${regionName(currentUser.region_id)}</div>
       </div>
@@ -440,13 +462,31 @@
           <span class="stat-label">계급</span>
           <span class="stat-value">${rankLabel}</span>
         </div>
+        <div class="stat-row">
+          <span class="stat-label">팔로워</span>
+          <span class="stat-value">${currentUser.follower_count ?? 0}</span>
+        </div>
+        <div class="stat-row" style="flex-direction:column; align-items:stretch; gap:5px;">
+          <div style="display:flex; justify-content:space-between;">
+            <span class="stat-label">호전성</span>
+            <span class="stat-value">${currentUser.belligerence ?? 0}${tierLabel ? ' · ' + tierLabel : ''}</span>
+          </div>
+          <div class="rank-bar"><div class="rank-fill" style="width:${belligerencePct}%;"></div></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">보유 아이템</span>
+          <span>${itemChips}</span>
+        </div>
       </div>
       <button class="logout-link" id="logoutBtn">로그아웃</button>
     `;
     document.getElementById('logoutBtn').addEventListener('click', () => {
       clearSession();
-      renderCharCard();
+      location.reload(); // 세력/전쟁 카드까지 한 번에 로그아웃 상태로 되돌리는 가장 간단한 방법
     });
+
+    renderFactions();
+    renderWars();
   }
 
   function renderAuthForm(mode) {
@@ -509,6 +549,7 @@
           body: JSON.stringify(payload),
         });
         setSession(result.token, result.user);
+        currentUser = await apiRequest('/users/me'); // follower_count 등 로그인 응답에 없는 필드까지 채우기 위해 재조회
         renderCharCard();
       } catch (err) {
         errorBox.textContent = err.message;
@@ -517,6 +558,281 @@
         submitBtn.textContent = isLogin ? '로그인' : '가입하고 시작하기';
       }
     });
+  }
+
+  /* ---------------- 핫 아젠다 / 분쟁 지역 / 명예의 전당 (비로그인 상태에서도 노출) ---------------- */
+
+  async function renderHotIssues() {
+    const el = document.getElementById('hotIssueList');
+    try {
+      const threads = await apiRequest('/hot-agenda');
+      el.innerHTML = threads.length
+        ? threads.slice(0, 5).map((t, i) => `
+          <div class="issue-item">
+            <span class="issue-num">${String(i + 1).padStart(2, '0')}</span>
+            <div>
+              <div class="issue-text">${t.title}</div>
+              <div class="issue-meta">${t.region_name} · 참여 ${t.participant_count}명 · 추천 ${t.total_upvotes}</div>
+            </div>
+          </div>`).join('')
+        : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
+    } catch (err) {
+      el.innerHTML = '<div class="issue-meta">불러오지 못했습니다.</div>';
+    }
+  }
+
+  function renderDisputes() {
+    const el = document.getElementById('disputeList');
+    const notable = regionsData.filter(r => r.status !== 'dominant');
+    el.innerHTML = notable.length
+      ? notable.slice(0, 6).map(r => `
+        <div class="dispute-item">
+          <span class="dispute-region">${r.name}</span>
+          <span class="dispute-flag">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="#111110" stroke-width="1.6"/></svg>
+            ${r.status === 'contested' ? '판정 진행중' : '분쟁 지역'}
+          </span>
+        </div>`).join('')
+      : '<div class="issue-meta">현재 분쟁 중인 지역이 없습니다.</div>';
+  }
+
+  async function renderHallOfFame() {
+    const el = document.getElementById('hallOfFameContent');
+    try {
+      const data = await apiRequest('/hall-of-fame');
+      const rulers = data.top_rulers.length
+        ? data.top_rulers.slice(0, 5).map(r => `
+          <div class="dispute-item"><span class="dispute-region">${r.nickname} · ${r.region_name}</span><span class="issue-meta">${r.streak_days}일 재위</span></div>`).join('')
+        : '<div class="issue-meta">기록 없음</div>';
+      const prophets = data.top_prophets.length
+        ? data.top_prophets.slice(0, 5).map(p => `
+          <div class="dispute-item"><span class="dispute-region">${p.nickname} · ${p.region_name}</span><span class="issue-meta">명성 ${p.reputation}</span></div>`).join('')
+        : '<div class="issue-meta">기록 없음</div>';
+      el.innerHTML = `
+        <div class="lists-row">
+          <div><div class="section-sub">역대 최장 재위 지배자</div>${rulers}</div>
+          <div><div class="section-sub">현재 선지자 랭킹</div>${prophets}</div>
+        </div>`;
+    } catch (err) {
+      el.innerHTML = '<div class="issue-meta">불러오지 못했습니다.</div>';
+    }
+  }
+
+  /* ---------------- 세력 (종교/정당) — 로그인 후에만 노출 ---------------- */
+
+  async function renderFactions() {
+    const el = document.getElementById('factionsContent');
+    try {
+      const [religions, parties] = await Promise.all([
+        apiRequest('/religions'),
+        apiRequest('/parties'),
+      ]);
+
+      const religionItems = religions.length
+        ? religions.map(r => `
+          <div class="dispute-item">
+            <span class="dispute-region">${r.name} <span class="stat-label">(신자 ${r.member_count})</span></span>
+            <button class="mini-btn" data-join="religion" data-id="${r.id}">가입</button>
+          </div>`).join('')
+        : '<div class="issue-meta">아직 창설된 종교가 없습니다.</div>';
+
+      const partyItems = parties.length
+        ? parties.map(p => `
+          <div class="dispute-item">
+            <span class="dispute-region">${p.name} <span class="stat-label">(당원 ${p.member_count})</span></span>
+            <button class="mini-btn" data-join="party" data-id="${p.id}">가입</button>
+          </div>`).join('')
+        : '<div class="issue-meta">아직 창당된 정당이 없습니다.</div>';
+
+      el.innerHTML = `
+        <div class="section-sub" style="margin-bottom:8px;">종교: 명성 500 이상 · 정당: 팔로워 100명 이상부터 창설 가능</div>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <button class="mini-btn" id="createReligionBtn">종교 창설</button>
+          <button class="mini-btn" id="createPartyBtn">정당 창당</button>
+        </div>
+        <div class="section-sub">종교</div>
+        ${religionItems}
+        <div class="section-sub" style="margin-top:10px;">정당</div>
+        ${partyItems}
+      `;
+
+      el.querySelectorAll('[data-join]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const kind = btn.dataset.join === 'religion' ? 'religions' : 'parties';
+          try {
+            await apiRequest(`/${kind}/${btn.dataset.id}/join`, { method: 'POST' });
+            alert('가입되었습니다.');
+            renderFactions();
+          } catch (err) { alert(err.message); }
+        });
+      });
+
+      document.getElementById('createReligionBtn').addEventListener('click', async () => {
+        const name = prompt('종교 이름을 입력하세요 (명성 500 이상 필요)');
+        if (!name) return;
+        const idsRaw = prompt('교리로 지정할 본인 논제 ID 3~5개를 콤마(,)로 구분해 입력하세요');
+        if (!idsRaw) return;
+        const tenet_thread_ids = idsRaw.split(',').map(s => s.trim()).filter(Boolean);
+        try {
+          await apiRequest('/religions', { method: 'POST', body: JSON.stringify({ name, tenet_thread_ids }) });
+          alert('종교가 창설되었습니다.');
+          renderFactions();
+        } catch (err) { alert(err.message); }
+      });
+
+      document.getElementById('createPartyBtn').addEventListener('click', async () => {
+        const name = prompt('정당 이름을 입력하세요 (팔로워 100명 이상 필요)');
+        if (!name) return;
+        const platform = prompt('강령(정책 방향)을 입력하세요');
+        if (!platform) return;
+        try {
+          await apiRequest('/parties', { method: 'POST', body: JSON.stringify({ name, platform }) });
+          alert('정당이 창당되었습니다.');
+          renderFactions();
+        } catch (err) { alert(err.message); }
+      });
+    } catch (err) {
+      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
+  }
+
+  /* ---------------- 전쟁 — 로그인 후에만 노출 ---------------- */
+
+  function warRegionLabel(w) {
+    return `${regionName(w.attacker_region_id)} ⚔ ${regionName(w.defender_region_id)}`;
+  }
+
+  async function renderWarItem(w) {
+    const isDefender = currentUser.region_id === w.defender_region_id;
+    const isAttacker = currentUser.region_id === w.attacker_region_id;
+    let actionHtml = `<span class="issue-meta">${WAR_STATUS_LABEL[w.status] || w.status}</span>`;
+
+    if (w.status === 'voting' && isDefender) {
+      actionHtml = `
+        <button class="mini-btn" data-war-vote="accept" data-war="${w.id}">수락 찬성</button>
+        <button class="mini-btn" data-war-vote="reject" data-war="${w.id}">수락 반대</button>`;
+    } else if (w.status === 'accepted') {
+      let battle = null;
+      try { battle = await apiRequest(`/wars/${w.id}/battle`); } catch (err) {}
+
+      if (!battle) {
+        actionHtml = isAttacker
+          ? `<button class="mini-btn" data-war-battle-open="${w.id}">전투 개설</button>`
+          : '<span class="issue-meta">전투 개설 대기중</span>';
+      } else if (battle.status === 'open') {
+        actionHtml = `
+          <div class="issue-meta">${battle.title} · 참여 ${battle.participant_count ?? ''}명</div>
+          <button class="mini-btn" data-battle-choice="attacker" data-war="${w.id}">${battle.option_attacker}</button>
+          <button class="mini-btn" data-battle-choice="defender" data-war="${w.id}">${battle.option_defender}</button>
+          <button class="mini-btn" data-battle-argue="${w.id}">논증 등록</button>`;
+      } else {
+        actionHtml = `<span class="issue-meta">전투 종료 · 승리: ${battle.winner_side === 'attacker' ? battle.option_attacker : battle.option_defender}</span>`;
+      }
+    }
+
+    return `
+      <div class="dispute-item" style="flex-direction:column; align-items:flex-start; gap:6px;">
+        <span class="dispute-region">${warRegionLabel(w)} <span class="stat-label">(${WAR_STATUS_LABEL[w.status] || w.status})</span></span>
+        <div>${actionHtml}</div>
+      </div>`;
+  }
+
+  function attachWarActionHandlers(el) {
+    el.querySelectorAll('[data-war-vote]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          await apiRequest(`/wars/${btn.dataset.war}/vote`, {
+            method: 'POST',
+            body: JSON.stringify({ verdict: btn.dataset.warVote }),
+          });
+          renderWars();
+        } catch (err) { alert(err.message); }
+      });
+    });
+    el.querySelectorAll('[data-war-battle-open]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const title = prompt('전투 논제를 입력하세요');
+        if (!title) return;
+        const option_attacker = prompt('공격측 주장(선택지)을 입력하세요');
+        if (!option_attacker) return;
+        const option_defender = prompt('방어측 주장(선택지)을 입력하세요');
+        if (!option_defender) return;
+        try {
+          await apiRequest(`/wars/${btn.dataset.warBattleOpen}/battle`, {
+            method: 'POST',
+            body: JSON.stringify({ title, option_attacker, option_defender }),
+          });
+          renderWars();
+        } catch (err) { alert(err.message); }
+      });
+    });
+    el.querySelectorAll('[data-battle-choice]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          await apiRequest(`/wars/${btn.dataset.war}/battle/choice`, {
+            method: 'POST',
+            body: JSON.stringify({ side: btn.dataset.battleChoice }),
+          });
+          alert('진영을 선택했습니다.');
+          renderWars();
+        } catch (err) { alert(err.message); }
+      });
+    });
+    el.querySelectorAll('[data-battle-argue]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const body = prompt('논증 내용을 입력하세요');
+        if (!body) return;
+        try {
+          await apiRequest(`/wars/${btn.dataset.battleArgue}/battle/arguments`, {
+            method: 'POST',
+            body: JSON.stringify({ body }),
+          });
+          alert('논증이 등록되었습니다.');
+        } catch (err) { alert(err.message); }
+      });
+    });
+  }
+
+  async function renderWars() {
+    const el = document.getElementById('warsContent');
+    try {
+      const wars = await apiRequest(`/regions/${currentUser.region_id}/wars`);
+
+      let dominanceStatus = null;
+      try {
+        const d = await apiRequest(`/regions/${currentUser.region_id}/dominance`);
+        if (d.ruler && d.ruler.user_id === currentUser.id) dominanceStatus = d.ruler.status;
+      } catch (err) {}
+
+      const declareBlock = dominanceStatus ? `
+        <div style="display:flex; gap:6px; margin-bottom:10px;">
+          <select id="warTargetRegion">
+            ${regionsData.filter(r => r.id !== currentUser.region_id).map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
+          </select>
+          <button class="mini-btn" id="declareWarBtn">선전포고</button>
+        </div>` : '';
+
+      const warItemsHtml = wars.length
+        ? (await Promise.all(wars.map(w => renderWarItem(w)))).join('')
+        : '<div class="issue-meta">진행 중인 전쟁이 없습니다.</div>';
+
+      el.innerHTML = `${declareBlock}${warItemsHtml}`;
+
+      if (dominanceStatus) {
+        document.getElementById('declareWarBtn').addEventListener('click', async () => {
+          const defender_region_id = document.getElementById('warTargetRegion').value;
+          try {
+            await apiRequest('/wars', { method: 'POST', body: JSON.stringify({ defender_region_id }) });
+            alert('선전포고했습니다.');
+            renderWars();
+          } catch (err) { alert(err.message); }
+        });
+      }
+
+      attachWarActionHandlers(el);
+    } catch (err) {
+      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
   }
 
   tryRestoreSession();

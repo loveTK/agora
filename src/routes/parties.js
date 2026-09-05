@@ -28,6 +28,20 @@ function joinParty(partyId, userId, ip) {
   checkJoinBrigading("party_members", "party_id", partyId, ip);
 }
 
+// GET /parties
+// 가입 화면에서 고를 수 있도록 전체 정당 목록(당원 수 포함)을 노출한다.
+router.get("/", (req, res) => {
+  const parties = db
+    .prepare(
+      `SELECT p.id, p.name, p.platform, p.founder_id, u.nickname AS founder_nickname,
+              (SELECT COUNT(*) FROM party_members pm WHERE pm.party_id = p.id) AS member_count
+       FROM parties p JOIN users u ON u.id = p.founder_id
+       ORDER BY member_count DESC`
+    )
+    .all();
+  res.json(parties);
+});
+
 // POST /parties
 // body: { name, platform }
 // 정책: 창설 조건 = 팔로워 수 100 이상
