@@ -30,7 +30,7 @@
 
   /* ---------- layout shell (single vertical column — same stack on phone and desktop) ---------- */
   .shell{
-    max-width:720px;
+    max-width:960px;
     margin:0 auto;
   }
 
@@ -293,7 +293,8 @@
       return;
     }
     const map = L.map('map', { zoomControl:false, attributionControl:false }).setView([25, 20], 2);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:8 }).addTo(map);
+    // CartoDB 무료 타일이 API 키를 요구하도록 바뀌어서(워터마크 노출) OSM 표준 타일로 교체 — 흑백 필터는 #map CSS에서 그대로 처리
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, subdomains:'abc' }).addTo(map);
 
     const markersById = {};
     regions.forEach(r => {
