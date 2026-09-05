@@ -2,7 +2,8 @@ const { randomUUID, randomBytes } = require("crypto");
 const bcrypt = require("bcryptjs");
 const { db, runMigrations } = require("./db");
 
-// 알파 오픈 대상으로 논의된 대표 지역 6곳을 시드로 넣습니다.
+// 알파 오픈 대상으로 논의된 대표 지역 6곳 + 23장 지역 확장(13곳) = 총 19곳.
+// INSERT OR IGNORE(name UNIQUE)라 기존 배포 서버에서도 재시드 시 새로 추가된 지역만 들어간다.
 const REGIONS = [
   { name: "서울", lat: 37.5665, lng: 126.9780 },
   { name: "도쿄", lat: 35.6762, lng: 139.6503 },
@@ -10,6 +11,19 @@ const REGIONS = [
   { name: "런던", lat: 51.5074, lng: -0.1278 },
   { name: "베를린", lat: 52.5200, lng: 13.4050 },
   { name: "상하이", lat: 31.2304, lng: 121.4737 },
+  { name: "멕시코시티", lat: 19.4326, lng: -99.1332 },
+  { name: "상파울루", lat: -23.5505, lng: -46.6333 },
+  { name: "부에노스아이레스", lat: -34.6037, lng: -58.3816 },
+  { name: "보고타", lat: 4.7110, lng: -74.0721 },
+  { name: "파리", lat: 48.8566, lng: 2.3522 },
+  { name: "마드리드", lat: 40.4168, lng: -3.7038 },
+  { name: "로마", lat: 41.9028, lng: 12.4964 },
+  { name: "라고스", lat: 6.5244, lng: 3.3792 },
+  { name: "카이로", lat: 30.0444, lng: 31.2357 },
+  { name: "요하네스버그", lat: -26.2041, lng: 28.0473 },
+  { name: "두바이", lat: 25.2048, lng: 55.2708 },
+  { name: "이스탄불", lat: 41.0082, lng: 28.9784 },
+  { name: "리야드", lat: 24.7136, lng: 46.6753 },
 ];
 
 // 금칙어 자리표시자 시드 (실제 배포 전 CX/법무 검토된 진짜 목록으로 교체 필요)
