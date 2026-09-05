@@ -13,9 +13,11 @@ echo "== 1. 시스템 패키지 업데이트 =="
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
-echo "== 2. Node.js 20 LTS 설치 =="
-if ! command -v node >/dev/null 2>&1; then
-  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+echo "== 2. Node.js 22 LTS 설치 =="
+# better-sqlite3 최신 버전이 Node >=22를 요구함(그 미만이면 DB 여는 순간 세그폴트 발생).
+NODE_MAJOR="$(command -v node >/dev/null 2>&1 && node -e 'console.log(process.versions.node.split(".")[0])' || echo 0)"
+if [ "$NODE_MAJOR" -lt 22 ]; then
+  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
   sudo apt-get install -y nodejs
 fi
 node -v

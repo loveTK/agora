@@ -131,7 +131,7 @@ socket.on("region:update", ({ region_id, status }) => {
 
 ### 구성
 - Lightsail 인스턴스 (Ubuntu 22.04, 최소 사양 $3.5~5/월 플랜으로 충분)
-- Node.js 20 + PM2 (프로세스 관리, 재부팅 시 자동 기동)
+- Node.js 22 + PM2 (프로세스 관리, 재부팅 시 자동 기동) — `better-sqlite3` 최신 버전이 Node 22 이상을 요구하므로, 그보다 낮은 버전에서는 DB를 여는 순간 세그폴트가 발생함
 - Nginx 리버스 프록시 (80/443 → 4000, Socket.io WebSocket 업그레이드 포함)
 - Let's Encrypt(certbot)로 HTTPS
 - SQLite 파일은 인스턴스 로컬 디스크에 저장 (`data/agora.db`) — Lightsail 자동 스냅샷으로 백업 권장
