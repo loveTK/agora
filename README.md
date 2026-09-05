@@ -123,6 +123,45 @@ socket.on("region:update", ({ region_id, status }) => {
 - DOMINANCE 테이블: 7일 연속 무패 판정 → 지배자 등극, 처형 연출 트리거
 - 지역 상태에 `dominant` 반영 (지금은 `regionStatus.js`가 의도적으로 건드리지 않음)
 
+## 배포 (AWS Lightsail)
+
+기존에는 백엔드를 Render 무료 티어에 배포했으나, 무료 티어는 Persistent Disk를 지원하지 않아
+서버가 재시작될 때마다 SQLite 데이터가 초기화되는 문제가 있었다. AWS Lightsail 인스턴스는
+기본적으로 영구 SSD 스토리지를 제공하므로 이 문제를 해결한다.
+
+### 구성
+- Lightsail 인스턴스 (Ubuntu 22.04, 최소 사양 $3.5~5/월 플랜으로 충분)
+- Node.js 22 + PM2 (프로세스 관리, 재부팅 시 자동 기동) — `better-sqlite3` 최신 버전이 Node 22 이상을 요구하므로, 그보다 낮은 버전에서는 DB를 여는 순간 세그폴트가 발생함
+- Nginx 리버스 프록시 (80/443 → 4000, Socket.io WebSocket 업그레이드 포함)
+- Let's Encrypt(certbot)로 HTTPS
+- SQLite 파일은 인스턴스 로컬 디스크에 저장 (`data/agora.db`) — Lightsail 자동 스냅샷으로 백업 권장
+- 프론트엔드(`agora.html`)는 별도 리포/Netlify에 있다면 그대로 유지하고 API 엔드포인트만
+  Lightsail 도메인으로 교체, 또는 같은 인스턴스의 Nginx에서 정적 파일로 함께 서빙 가능
+
+### 최초 배포
+1. Lightsail 콘솔에서 Ubuntu 22.04 인스턴스 생성, 고정 IP(Static IP) 연결
+2. 방화벽(Networking 탭)에서 80, 443만 공개, 4000은 막아둔다 (Nginx를 통해서만 접근)
+3. SSH 접속 후:
+   ```bash
+   git clone https://github.com/lovetk/agora.git ~/agora
+   cd ~/agora
+   bash deploy/setup.sh
+   ```
+4. `.env`의 `JWT_SECRET`, `ADMIN_TOKEN`을 실제 운영 값으로 교체 후 `pm2 restart agora-api`
+5. 도메인 연결 후: `sudo certbot --nginx -d <도메인>`
+
+### 이후 배포 (CD)
+`.github/workflows/deploy-lightsail.yml`이 `main` 브랜치 push 시 SSH로 접속해
+`git pull` → `npm ci` → `pm2 restart`를 자동 수행한다. 아래 GitHub Secrets 등록 필요:
+- `LIGHTSAIL_HOST`: 인스턴스 고정 IP 또는 도메인
+- `LIGHTSAIL_USER`: `ubuntu`
+- `LIGHTSAIL_SSH_KEY`: 배포 전용 SSH 개인키 (Lightsail 콘솔에서 발급받은 키 또는 별도 등록한 공개키의 짝)
+
+### 운영 전환 시 DB 확장
+실사용자가 늘어 SQLite 단일 파일로는 부족해지면 `src/db.js`만 PostgreSQL 드라이버로 교체하면 된다
+(쿼리는 표준 SQL로 작성되어 있음). Lightsail의 관리형 데이터베이스(Managed Database, PostgreSQL)를
+붙이는 방식으로 확장 가능.
+
 ## 폴더 구조
 ```
 src/

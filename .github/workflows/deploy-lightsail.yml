@@ -1,0 +1,25 @@
+name: Deploy to Lightsail
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into Lightsail and pull + restart
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            set -e
+            cd /home/ubuntu/agora
+            git fetch origin main
+            git reset --hard origin/main
+            npm ci --omit=dev
+            npm run seed || true
+            pm2 restart ecosystem.config.js --update-env
