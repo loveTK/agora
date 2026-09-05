@@ -302,14 +302,13 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
-  const API_BASE = 'https://agora-ye2n.onrender.com';
+  const API_BASE = 'https://myagora.xyz';
   const RANK_LABEL = { citizen: '시민', supporter: '지지자', prophet: '선지자' };
 
   let regionsData = [];      // 지도 + 회원가입 지역 선택에서 공용으로 씀
   let authToken = localStorage.getItem('agora_token');
   let currentUser = null;
 
-  // 서버(Render 무료 티어)가 15분 넘게 쉬고 있었다면 첫 응답이 최대 50초까지 걸릴 수 있음
   const regionsPromise = fetch(`${API_BASE}/regions`)
     .then(res => res.json())
     .catch(err => {
