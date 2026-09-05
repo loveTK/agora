@@ -258,9 +258,23 @@ socket.on("region:execution", ({ region_id, user_id, cooldown_until }) => {
 ```
 
 ## 다음 스프린트(S14)에서 이어 붙일 것
-- 모바일 앱 착수(React Native/Flutter, 웹 API 재사용)
+- ~~모바일 앱 착수~~ → `mobile/` 참고 (React Native + Expo, 웹과 같은 API 재사용)
 - 문화 승리 이후의 실제 효과(버전/시즌 전환) — 기획 문서 14장 버전 시스템 구현 필요
 - 전쟁 관련 미확정 사항: 판정 투표 가중치 하락(점령 페널티), 승리 진영 한정판 아이템 지급(현재는 명성 보너스만 지급)
+
+## 모바일 앱 (S14)
+`mobile/` — Expo(React Native + TypeScript) 프로젝트, 백엔드는 웹과 동일한 `api.myagora.xyz`를 그대로 씀(별도 모바일 전용 API 없음).
+
+착수 범위: 로그인/회원가입 + Hot Issue 목록까지만 구현. 나머지 화면(지도, 세력, 전쟁 등)은 웹의 `agora.html` 로직을 참고해 이어 붙이면 됨.
+
+```bash
+cd mobile
+npm install
+npm run ios      # 또는 android — Xcode/Android Studio 필요
+npm run web       # 시뮬레이터 없이 빠르게 미리보기
+```
+
+토큰 저장은 네이티브에서 `expo-secure-store`, 웹 미리보기에서는 `localStorage`로 자동 전환됨.
 
 ## 배포 (AWS Lightsail)
 
