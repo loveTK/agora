@@ -270,6 +270,12 @@ npm start        # http://localhost:4000
 인증이 필요한 요청은 헤더에 `Authorization: Bearer <token>`을 포함하세요.
 관리자 전용(`/internal/*`) 요청은 헤더에 `x-admin-token: <ADMIN_TOKEN>`을 포함하세요. 기본값은 `.env`의 `ADMIN_TOKEN`이며, 운영 배포 전 반드시 강력한 값으로 교체하세요.
 
+### 관리자페이지 로그인 (`POST /admin/login`)
+프론트엔드 상단 네비 [관리자페이지]에서 ID/PW로 로그인하면 위 `ADMIN_TOKEN`을 그대로 내려받아
+`/internal/reports` 등 기존 관리자 API를 그대로 재사용한다(신고 검토/숨김·기각 처리).
+ID/PW는 코드에 실제 값을 넣지 않는다 — `ADMIN_TOKEN`과 같은 원칙으로, 서버의 `.env`에
+`ADMIN_ID`, `ADMIN_PASSWORD`를 설정해야 실제 로그인이 된다(코드 기본값은 둘 다 자리표시자).
+
 ## 실제 결제 연동 시 교체할 지점
 - `src/routes/items.js`의 `checkout_url`을 실제 PG(예: 토스페이먼츠, 포트원 등)의 결제 페이지 URL로 교체
 - `src/routes/internal.js`의 `POST /payments/:sessionId/confirm`을 PG 웹훅 핸들러로 교체(서명 검증 포함, 관리자 토큰 대신 PG 고유의 검증 방식 사용)

@@ -269,6 +269,8 @@
   .marker-icons{ display:flex; gap:2px; justify-content:center; }
 
   /* ---------- 상점 ---------- */
+  .shop-filters{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+  .shop-filter-btn.active{ background:var(--black); color:var(--white); }
   .shop-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:14px; }
   .shop-item{ border:1px solid var(--line); padding:18px 10px 14px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; }
   .shop-item-icon{ width:40px; height:40px; }
@@ -287,10 +289,12 @@
 
 <header>
   <div class="shell">
-    <div class="wordmark">ΑΓΟΡΑ<span>agora</span></div>
+    <div class="wordmark" id="logoHome" style="cursor:pointer;">ΑΓΟΡΑ<span>agora</span></div>
     <nav>
-      <a href="#" class="active" id="navDashboard">대시보드</a>
-      <a href="#" id="navShop">상점</a>
+      <a href="#" class="active" data-view="dashboard">대시보드</a>
+      <a href="#" data-view="shop">상점</a>
+      <a href="#" data-view="inventory">인벤토리</a>
+      <a href="#" data-view="admin">관리자페이지</a>
     </nav>
   </div>
 </header>
@@ -362,6 +366,22 @@
       <div id="shopContent"><div class="loading-text">불러오는 중...</div></div>
     </section>
   </div>
+
+  <div class="shell" id="inventoryView" style="display:none;">
+    <section class="section">
+      <span class="section-title" style="font-size:16px;">인벤토리</span>
+      <div class="section-sub">보유중인 아이템</div>
+      <div id="inventoryContent"><div class="loading-text">불러오는 중...</div></div>
+    </section>
+  </div>
+
+  <div class="shell" id="adminView" style="display:none;">
+    <section class="section">
+      <span class="section-title" style="font-size:16px;">관리자페이지</span>
+      <div class="section-sub">신고 검토 및 콘텐츠 조치</div>
+      <div id="adminContent"></div>
+    </section>
+  </div>
 </main>
 
 <div id="toast"></div>
@@ -404,7 +424,7 @@
   let authToken = localStorage.getItem('agora_token');
   let currentUser = null;
 
-  const regionsPromise = fetch(`${API_BASE}/regions`)
+  const regionsPromise = fetch(`${API_BASE}/regions`, { cache: 'no-store' })
     .then(res => res.json())
     .catch(err => {
       console.error('지역 데이터를 불러오지 못했습니다:', err);
@@ -421,29 +441,36 @@
   renderHotIssues();
   renderHallOfFame();
 
-  /* ---------------- 상단 네비게이션 (대시보드 / 상점) ---------------- */
+  /* ---------------- 상단 네비게이션 (대시보드 / 상점 / 인벤토리 / 관리자페이지) ---------------- */
 
-  document.getElementById('navDashboard').addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('navDashboard').classList.add('active');
-    document.getElementById('navShop').classList.remove('active');
-    document.getElementById('dashboardView').style.display = '';
-    document.getElementById('shopView').style.display = 'none';
+  const VIEW_IDS = { dashboard: 'dashboardView', shop: 'shopView', inventory: 'inventoryView', admin: 'adminView' };
+  function showView(name) {
+    Object.entries(VIEW_IDS).forEach(([key, id]) => {
+      document.getElementById(id).style.display = key === name ? '' : 'none';
+    });
+    document.querySelectorAll('nav a[data-view]').forEach(a => a.classList.toggle('active', a.dataset.view === name));
+  }
+
+  document.querySelectorAll('nav a[data-view]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      showView(a.dataset.view);
+      if (a.dataset.view === 'shop') renderShop();
+      if (a.dataset.view === 'inventory') renderInventoryView();
+      if (a.dataset.view === 'admin') renderAdminView();
+    });
   });
-  document.getElementById('navShop').addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('navShop').classList.add('active');
-    document.getElementById('navDashboard').classList.remove('active');
-    document.getElementById('dashboardView').style.display = 'none';
-    document.getElementById('shopView').style.display = '';
-    renderShop();
-  });
+
+  document.getElementById('logoHome').addEventListener('click', () => showView('dashboard'));
+
+  let shopItemsCache = [];
+  let shopFilter = 'all';
 
   async function renderShop() {
     const el = document.getElementById('shopContent');
     el.innerHTML = '<div class="loading-text">불러오는 중...</div>';
     try {
-      const items = await apiRequest('/items/shop');
+      shopItemsCache = await apiRequest('/items/shop');
       let owned = new Set();
       if (currentUser) {
         try {
@@ -452,32 +479,166 @@
         } catch (err) { /* 인벤토리 조회 실패해도 상점 자체는 보여줘야 하므로 무시 */ }
       }
 
-      el.innerHTML = `
-        <div class="shop-grid">
-          ${items.map(it => `
-            <div class="shop-item">
-              <div class="shop-item-icon">${SHOP_ICON_SVG[it.id] || ''}</div>
-              <div class="shop-item-name">${it.name}</div>
-              <div class="shop-item-slot">${SLOT_LABEL[it.slot_type] || it.slot_type}</div>
-              <div class="shop-item-price">무료</div>
-              ${!currentUser
-                ? '<span class="issue-meta">로그인 필요</span>'
-                : owned.has(it.id)
-                  ? '<button class="mini-btn" disabled>보유중</button>'
-                  : `<button class="mini-btn" data-acquire="${it.id}">획득</button>`}
-            </div>`).join('')}
-        </div>`;
+      const slots = [...new Set(shopItemsCache.map(it => it.slot_type))];
+      const filterBtns = ['all', ...slots].map(s =>
+        `<button type="button" class="mini-btn shop-filter-btn ${shopFilter === s ? 'active' : ''}" data-filter="${s}">${s === 'all' ? '전체' : (SLOT_LABEL[s] || s)}</button>`
+      ).join('');
 
-      el.querySelectorAll('[data-acquire]').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          try {
-            await apiRequest(`/items/${btn.dataset.acquire}/acquire`, { method: 'POST' });
-            renderShop();
-          } catch (err) { alert(err.message); }
+      el.innerHTML = `
+        <div class="shop-filters">${filterBtns}</div>
+        <div class="shop-grid" id="shopGrid"></div>`;
+
+      renderShopGrid(owned);
+
+      el.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          shopFilter = btn.dataset.filter;
+          el.querySelectorAll('[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === shopFilter));
+          renderShopGrid(owned);
         });
       });
     } catch (err) {
       el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
+  }
+
+  function renderShopGrid(owned) {
+    const grid = document.getElementById('shopGrid');
+    const items = shopFilter === 'all' ? shopItemsCache : shopItemsCache.filter(it => it.slot_type === shopFilter);
+    grid.innerHTML = items.map(it => `
+      <div class="shop-item">
+        <div class="shop-item-icon">${SHOP_ICON_SVG[it.id] || ''}</div>
+        <div class="shop-item-name">${it.name}</div>
+        <div class="shop-item-slot">${SLOT_LABEL[it.slot_type] || it.slot_type}</div>
+        <div class="shop-item-price">무료</div>
+        ${!currentUser
+          ? '<span class="issue-meta">로그인 필요</span>'
+          : owned.has(it.id)
+            ? '<button class="mini-btn" disabled>보유중</button>'
+            : `<button class="mini-btn" data-acquire="${it.id}">획득</button>`}
+      </div>`).join('');
+
+    grid.querySelectorAll('[data-acquire]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          await apiRequest(`/items/${btn.dataset.acquire}/acquire`, { method: 'POST' });
+          renderShop();
+        } catch (err) { alert(err.message); }
+      });
+    });
+  }
+
+  async function renderInventoryView() {
+    const el = document.getElementById('inventoryContent');
+    if (!currentUser) {
+      el.innerHTML = '<div class="loading-text">로그인하면 보유 아이템을 볼 수 있습니다.</div>';
+      return;
+    }
+    el.innerHTML = '<div class="loading-text">불러오는 중...</div>';
+    try {
+      const inventory = await apiRequest(`/users/${currentUser.id}/inventory`);
+      el.innerHTML = inventory.length
+        ? `<div class="shop-grid">${inventory.map(it => `
+            <div class="shop-item">
+              <div class="shop-item-icon">${SHOP_ICON_SVG[it.item_id] || ''}</div>
+              <div class="shop-item-name">${it.name || SLOT_LABEL[it.slot_type] || it.slot_type}</div>
+              <div class="shop-item-slot">${SLOT_LABEL[it.slot_type] || it.slot_type}</div>
+            </div>`).join('')}</div>`
+        : '<div class="loading-text">보유한 아이템이 없습니다.</div>';
+    } catch (err) {
+      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
+  }
+
+  let adminToken = localStorage.getItem('agora_admin_token');
+
+  async function renderAdminView() {
+    const el = document.getElementById('adminContent');
+
+    if (!adminToken) {
+      el.innerHTML = `
+        <form id="adminLoginForm">
+          <div class="auth-field">
+            <label>관리자 ID</label>
+            <input type="text" name="id" required />
+          </div>
+          <div class="auth-field">
+            <label>비밀번호</label>
+            <input type="password" name="password" required />
+          </div>
+          <div class="auth-error" id="adminLoginError" style="display:none;"></div>
+          <button type="submit" class="auth-submit">로그인</button>
+        </form>`;
+
+      document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const errorBox = document.getElementById('adminLoginError');
+        errorBox.style.display = 'none';
+        try {
+          const res = await fetch(`${API_BASE}/admin/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: form.id.value, password: form.password.value }),
+          });
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(body.error || '로그인에 실패했습니다.');
+          adminToken = body.token;
+          localStorage.setItem('agora_admin_token', adminToken);
+          renderAdminView();
+        } catch (err) {
+          errorBox.textContent = err.message;
+          errorBox.style.display = 'block';
+        }
+      });
+      return;
+    }
+
+    el.innerHTML = '<div class="loading-text">불러오는 중...</div>';
+    try {
+      const res = await fetch(`${API_BASE}/internal/reports?status=pending`, {
+        headers: { 'X-Admin-Token': adminToken },
+      });
+      const reports = await res.json().catch(() => ([]));
+      if (!res.ok) throw new Error((reports && reports.error) || '조회에 실패했습니다.');
+
+      el.innerHTML = `
+        <div class="section-sub">대기중인 신고 ${reports.length}건</div>
+        ${reports.length === 0 ? '<div class="loading-text">처리할 신고가 없습니다.</div>' : reports.map(r => `
+          <div class="hot-issue-card">
+            <div class="issue-meta">${r.target_type} · ${r.target_id}</div>
+            <div>${r.reason}</div>
+            <div class="arg-actions">
+              <button class="mini-btn" data-report-action="actioned:${r.id}">숨김 확정</button>
+              <button class="mini-btn" data-report-action="dismissed:${r.id}">기각</button>
+            </div>
+          </div>`).join('')}
+        <button type="button" class="logout-link" id="adminLogoutBtn" style="margin-top:12px;">관리자 로그아웃</button>`;
+
+      el.querySelectorAll('[data-report-action]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const [status, id] = btn.dataset.reportAction.split(':');
+          try {
+            const patchRes = await fetch(`${API_BASE}/internal/reports/${id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', 'X-Admin-Token': adminToken },
+              body: JSON.stringify({ status }),
+            });
+            const body = await patchRes.json().catch(() => ({}));
+            if (!patchRes.ok) throw new Error(body.error || '처리에 실패했습니다.');
+            renderAdminView();
+          } catch (err) { alert(err.message); }
+        });
+      });
+      document.getElementById('adminLogoutBtn').addEventListener('click', () => {
+        adminToken = null;
+        localStorage.removeItem('agora_admin_token');
+        renderAdminView();
+      });
+    } catch (err) {
+      adminToken = null;
+      localStorage.removeItem('agora_admin_token'); // 토큰이 무효화됐을 수 있으니 다시 로그인하게 함
+      renderAdminView();
     }
   }
 
@@ -675,9 +836,9 @@
         </div>
       </div>
     `;
-    // 아직 별도 인벤토리 화면이 없어서, 눌러보면 뭐가 있는지는 위 칩 목록에서 바로 보인다는 걸 알려주는 정도로만 둠.
     document.getElementById('inventoryBtn').addEventListener('click', () => {
-      alert(inventory.length ? '보유 아이템: ' + inventory.map(it => SLOT_LABEL[it.slot_type] || it.slot_type).join(', ') : '보유한 아이템이 없습니다.');
+      showView('inventory');
+      renderInventoryView();
     });
     document.getElementById('logoutBtn').addEventListener('click', () => {
       clearSession();

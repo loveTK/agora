@@ -21,6 +21,7 @@ const warRoutes = require("./routes/wars");
 const congressRoutes = require("./routes/congress");
 const hotAgendaRoutes = require("./routes/hotAgenda");
 const messageRoutes = require("./routes/messages");
+const adminRoutes = require("./routes/admin");
 const { requireAdmin } = require("./middleware/adminAuth");
 
 runMigrations();
@@ -56,6 +57,7 @@ app.use("/wars", warRoutes);
 app.use("/congress-approvals", congressRoutes);
 app.use("/hot-agenda", hotAgendaRoutes);
 app.use("/messages", messageRoutes);
+app.use("/admin", adminRoutes);
 app.use("/internal", requireAdmin, internalRoutes);
 
 app.use((req, res) => res.status(404).json({ error: "존재하지 않는 경로입니다." }));
