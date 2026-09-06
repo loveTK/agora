@@ -29,6 +29,7 @@
     color:var(--ink);
     font-family:'Archivo', sans-serif;
     -webkit-font-smoothing:antialiased;
+    overflow-x:hidden; /* 지도/장식 띠의 100vw 풀블리드가 스크롤바 폭만큼 가로 스크롤을 만들지 않게 */
   }
   .serif{ font-family:'Archivo', sans-serif; font-weight:800; letter-spacing:-0.01em; }
 
@@ -115,8 +116,12 @@
   .badge-gold{ border-color:var(--gold); color:var(--gold); }
   .cta-gold{ background:var(--gold) !important; color:var(--on-gold) !important; border-color:var(--gold) !important; }
   .cta-gold:hover{ opacity:0.88; }
+  /* 장식용 그리스 문양 띠도 지도와 마찬가지로 화면 끝까지 */
   .meander-divider{
     height:13px;
+    width:100vw;
+    margin-left:calc(50% - 50vw);
+    margin-right:calc(50% - 50vw);
     background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13' viewBox='0 0 20 13'%3E%3Crect width='20' height='13' fill='%23111110'/%3E%3Cpath d='M0 10 H4 V3 H9 V10 H13 V3 H18 V10 H20' stroke='%23f4f2ec' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") repeat-x left center;
     background-size:20px 13px;
   }
@@ -144,10 +149,14 @@
   .section-title{ font-family:'Archivo', sans-serif; font-size:17px; font-weight:800; letter-spacing:-0.01em; }
   .section-sub{ font-size:12px; color:var(--gray-2); }
 
+  /* 지도는 장식 요소라 .shell 폭 제한을 깨고 화면 끝까지(뷰포트 100%) 채운다 */
   #map{
     height:600px;
-    width:100%;
-    border:1px solid var(--line);
+    width:100vw;
+    margin-left:calc(50% - 50vw);
+    margin-right:calc(50% - 50vw);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
     filter:grayscale(1) contrast(1.08) brightness(1.02);
   }
 
@@ -298,7 +307,7 @@
       <a href="#" class="active" data-view="dashboard">대시보드</a>
       <a href="#" data-view="shop">상점</a>
       <a href="#" data-view="inventory">인벤토리</a>
-      <a href="#" data-view="admin">관리자페이지</a>
+      <a href="#" data-view="admin" id="navAdmin" hidden>관리자페이지</a>
     </nav>
   </div>
 </header>
@@ -464,6 +473,12 @@
       if (a.dataset.view === 'admin') renderAdminView();
     });
   });
+
+  // 일반 사용자 눈엔 안 띄게 링크는 기본 숨김. 이미 로그인해본 관리자(토큰 보유)거나
+  // ?admin=1로 직접 들어온 경우에만 노출 — 접속 주소는 관리자만 따로 알고 있으면 됨.
+  if (localStorage.getItem('agora_admin_token') || new URLSearchParams(location.search).get('admin') === '1') {
+    document.getElementById('navAdmin').hidden = false;
+  }
 
   document.getElementById('logoHome').addEventListener('click', () => showView('dashboard'));
 
