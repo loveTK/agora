@@ -162,6 +162,14 @@
 - "웃기다" 반응: `laugh_reactions` 테이블(신규 계정 가중치 컬럼 포함, voteWeight 재사용) + `user_tickers` 테이블 신설. `POST /threads/:id/laugh`, `POST /arguments/:id/laugh`(토글). 한 대상의 웃기다 가중치 합산이 50(`INGENIOUS_LAUGH_THRESHOLD`, `services/ingeniousTicker.js`)을 넘으면 작성자에게 "이그지니어스" 티커 자동 발급
 - 논제 상세 모달은 겸사겸사 기존 스코프컷("입장 → 버튼이 원본 API JSON으로 연결되던 문제")도 같이 해결함 — 이제 실제 논증 목록 + 반응 버튼 + 논증 등록 폼이 뜬다
 
+**"바보" 반응(구 "웃기다") 텍스트 변경 + Hot Issue 카드 직접 반응 + 논증 '기타' 입장 + 네비게이션 정리**
+- "웃기다" 버튼 표기를 "바보"로 변경(영문 idiot에 대응) — 내부 API 경로(`/threads/:id/laugh` 등)·티커 이름(`ingenious`)은 그대로, 화면 텍스트만 변경
+- Hot Issue 카드에서 모달을 열지 않고도 바로 추천/비추천/바보 반응 가능하도록 논제(thread) 단위 추천/비추천을 신규 추가
+  - `thread_votes` 테이블 + `POST /threads/:id/vote`(토글) — 기존 논증 추천/비추천(votes 테이블)과 달리 명성/계급에 영향 없는 순수 참여도 집계용
+  - `GET /hot-agenda`, `GET /threads/:id`에 `thread_upvotes`/`thread_downvotes`/`thread_laugh_count` 추가, `participant_count`도 "논증 작성자 + 반응 남긴 사람"으로 재정의(중복 제거)
+- 논증 입장(stance)에 `pro`/`con`에 이어 `other`(기타) 추가 — 논제가 항상 찬반 이분법은 아니라는 판단(테이블 재생성 방식, 008/014/017과 동일 패턴)
+- 네비게이션: 죽은 링크였던 "조직 현황"/"리포트" 제거(기획문서에만 보류), "상점" 링크 추가 — 실제 구매 백엔드가 없어 준비중 안내만 표시(20장 참고)
+
 ## 기술 스택
 - Node.js + Express
 - SQLite (better-sqlite3) — 베타 단계용. 운영 전환 시 `src/db.js`만 PostgreSQL 드라이버로 교체하면 됩니다(쿼리는 표준 SQL).

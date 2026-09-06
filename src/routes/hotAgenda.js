@@ -13,7 +13,20 @@ router.get("/", (req, res) => {
               t.author_id, u.nickname AS author_nickname,
               (SELECT COUNT(*) FROM arguments a WHERE a.thread_id = t.id) AS argument_count,
               (SELECT COALESCE(SUM(a.upvotes), 0) FROM arguments a WHERE a.thread_id = t.id) AS total_upvotes,
-              (SELECT COUNT(DISTINCT a.author_id) FROM arguments a WHERE a.thread_id = t.id) AS participant_count
+              (SELECT COALESCE(SUM(CASE WHEN tv.vote_type = 'up' THEN tv.weight ELSE 0 END), 0)
+                 FROM thread_votes tv WHERE tv.thread_id = t.id) AS thread_upvotes,
+              (SELECT COALESCE(SUM(CASE WHEN tv.vote_type = 'down' THEN tv.weight ELSE 0 END), 0)
+                 FROM thread_votes tv WHERE tv.thread_id = t.id) AS thread_downvotes,
+              (SELECT COALESCE(SUM(lr.weight), 0) FROM laugh_reactions lr
+                 WHERE lr.target_type = 'thread' AND lr.target_id = t.id) AS thread_laugh_count,
+              -- 참여 = 논증을 쓴 사람 + 이 논제에 추천/비추천/바보 반응을 남긴 사람 (중복 제거)
+              (SELECT COUNT(*) FROM (
+                 SELECT author_id AS uid FROM arguments WHERE thread_id = t.id
+                 UNION
+                 SELECT voter_id AS uid FROM thread_votes WHERE thread_id = t.id
+                 UNION
+                 SELECT user_id AS uid FROM laugh_reactions WHERE target_type = 'thread' AND target_id = t.id
+               )) AS participant_count
        FROM threads t
        JOIN users u ON u.id = t.author_id
        JOIN regions r ON r.id = t.region_id

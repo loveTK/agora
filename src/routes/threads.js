@@ -8,6 +8,7 @@ const { containsBannedWord } = require("../services/contentFilter");
 const { THREAD_BELLIGERENCE_POINTS, ARGUMENT_BELLIGERENCE_POINTS } = require("../services/belligerence");
 const { grantWeaponIfEligible } = require("../services/weapon");
 const { toggleLaugh } = require("../services/laughReaction");
+const { toggleThreadVote, getThreadVoteTally } = require("../services/threadVote");
 
 const DAILY_JUDGMENT_VOTE_LIMIT = 20; // 어뷰징 방지: 하루 20개 논제까지만 판정투표 가능
 
@@ -97,15 +98,26 @@ router.get("/:id", (req, res) => {
     .prepare("SELECT COUNT(*) AS count FROM arguments WHERE thread_id = ?")
     .get(req.params.id).count;
 
-  res.json({ ...toPublicThread(thread), argument_count: argCount });
+  const voteTally = getThreadVoteTally(req.params.id);
+  const laughCount = db
+    .prepare("SELECT COALESCE(SUM(weight), 0) AS total FROM laugh_reactions WHERE target_type = 'thread' AND target_id = ?")
+    .get(req.params.id).total;
+
+  res.json({
+    ...toPublicThread(thread),
+    argument_count: argCount,
+    thread_upvotes: voteTally.upvotes,
+    thread_downvotes: voteTally.downvotes,
+    thread_laugh_count: laughCount,
+  });
 });
 
 // POST /threads/:id/arguments
 // body: { stance: 'pro' | 'con', body: string }
 router.post("/:id/arguments", requireAuth, (req, res) => {
   const { stance, body } = req.body || {};
-  if (!stance || !["pro", "con"].includes(stance)) {
-    return res.status(400).json({ error: "stance는 'pro' 또는 'con'이어야 합니다." });
+  if (!stance || !["pro", "con", "other"].includes(stance)) {
+    return res.status(400).json({ error: "stance는 'pro', 'con', 'other' 중 하나여야 합니다." });
   }
   if (!body || !body.trim()) {
     return res.status(400).json({ error: "논증 내용을 입력해주세요." });
@@ -223,6 +235,16 @@ router.get("/:id/judgment", (req, res) => {
     thread_status: thread.status,
     pending: !tally.quorum_met,
   });
+});
+
+// POST /threads/:id/vote
+// body: { vote_type: 'up' | 'down' }
+// Hot Issue 카드에서 바로 누르는 참여도 집계용 추천/비추천 — 명성/계급에는 영향 없음(순수 카운트).
+router.post("/:id/vote", requireAuth, (req, res) => {
+  const { vote_type } = req.body || {};
+  const result = toggleThreadVote(req.userId, req.params.id, vote_type);
+  if (result.error) return res.status(result.status).json({ error: result.error });
+  res.json(result);
 });
 
 // POST /threads/:id/laugh

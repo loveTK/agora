@@ -250,15 +250,14 @@
   <div class="shell">
     <div class="wordmark">ΑΓΟΡΑ<span>agora</span></div>
     <nav>
-      <a href="#" class="active">대시보드</a>
-      <a href="#">조직 현황</a>
-      <a href="#">리포트</a>
+      <a href="#" class="active" id="navDashboard">대시보드</a>
+      <a href="#" id="navShop">상점</a>
     </nav>
   </div>
 </header>
 
 <main>
-  <div class="shell">
+  <div class="shell" id="dashboardView">
 
     <!-- 캐릭터 현황 (로그인 상태에 따라 JS가 내용을 채움) -->
     <section class="section gold-top" id="charCard">
@@ -315,6 +314,14 @@
     </section>
 
   </div>
+
+  <!-- 상점 — 아직 실제 구매 백엔드 없음(기획문서 20장 참고), 준비중 안내만 표시 -->
+  <div class="shell" id="shopView" style="display:none;">
+    <section class="section">
+      <span class="section-title" style="font-size:16px;">상점</span>
+      <div class="loading-text">상점은 아직 준비 중입니다. (장비 슬롯 14종 · 개별 구매 — 기획문서 20장)</div>
+    </section>
+  </div>
 </main>
 
 <!-- 논제 상세(입장하기) 모달 — 기본 숨김, JS가 열고 닫음 -->
@@ -355,6 +362,23 @@
 
   renderHotIssues();
   renderHallOfFame();
+
+  /* ---------------- 상단 네비게이션 (대시보드 / 상점) ---------------- */
+
+  document.getElementById('navDashboard').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('navDashboard').classList.add('active');
+    document.getElementById('navShop').classList.remove('active');
+    document.getElementById('dashboardView').style.display = '';
+    document.getElementById('shopView').style.display = 'none';
+  });
+  document.getElementById('navShop').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('navShop').classList.add('active');
+    document.getElementById('navDashboard').classList.remove('active');
+    document.getElementById('dashboardView').style.display = 'none';
+    document.getElementById('shopView').style.display = '';
+  });
 
   /* ---------------- 지도 (Leaflet/Socket.io 로드 실패해도 아래 회원가입은 정상 동작) ---------------- */
 
@@ -622,6 +646,7 @@
             <div class="hot-issue-body">
               <div class="hot-issue-quote">"${t.title}"</div>
               <div class="issue-meta">${t.region_name} 폴리스 / 참여 ${t.participant_count}명 / <span class="badge badge-gold" style="padding:1px 7px; font-size:10.5px;">추천 ${t.total_upvotes}</span></div>
+              ${currentUser && currentUser.id !== t.author_id ? reactionButtonsHtml('thread', t.id, t.thread_upvotes, t.thread_downvotes, t.thread_laugh_count) : ''}
             </div>
             <button class="hot-issue-stance" data-open-thread="${t.id}">입장 →</button>
           </div>`).join('')
@@ -635,6 +660,7 @@
           openConversation(btn.dataset.openConvQuick, btn.dataset.nickname);
         });
       });
+      attachReactionHandlers(el, renderHotIssues);
     } catch (err) {
       el.innerHTML = '<div class="issue-meta">불러오지 못했습니다.</div>';
     }
@@ -1041,21 +1067,44 @@
     });
   }
 
-  /* ---------------- 논제 상세 모달 (입장하기) — 논증 목록 + 추천/비추천/웃기다 ---------------- */
+  /* ---------------- 논제 상세 모달 (입장하기) — 논증 목록 + 추천/비추천/바보 ---------------- */
 
   const threadModal = document.getElementById('threadModal');
   document.getElementById('threadModalClose').addEventListener('click', () => { threadModal.style.display = 'none'; });
   threadModal.addEventListener('click', (e) => { if (e.target === threadModal) threadModal.style.display = 'none'; });
 
-  function reactionButtonsHtml(targetType, targetId, upvotes, downvotes) {
-    const laughAttr = targetType === 'thread' ? `data-laugh-thread="${targetId}"` : `data-laugh-arg="${targetId}"`;
-    const voteAttr = (t) => targetType === 'argument' ? `data-vote-arg="${targetId}" data-vote-type="${t}"` : 'disabled';
+  // targetType: 'thread' | 'argument' 공용 — 논제(Hot Issue 카드)와 논증(모달 안) 양쪽에서 재사용한다.
+  function reactionButtonsHtml(targetType, targetId, upvotes, downvotes, laughCount) {
     return `
       <div class="arg-actions">
-        <button class="reaction-btn" ${voteAttr('up')}>추천 <span class="reaction-count">${upvotes ?? 0}</span></button>
-        <button class="reaction-btn" ${voteAttr('down')}>비추천 <span class="reaction-count">${downvotes ?? 0}</span></button>
-        <button class="reaction-btn laugh" ${laughAttr}>웃기다</button>
+        <button class="reaction-btn" data-vote="${targetType}:${targetId}:up">추천 <span class="reaction-count">${upvotes ?? 0}</span></button>
+        <button class="reaction-btn" data-vote="${targetType}:${targetId}:down">비추천 <span class="reaction-count">${downvotes ?? 0}</span></button>
+        <button class="reaction-btn laugh" data-laugh="${targetType}:${targetId}">바보 <span class="reaction-count">${laughCount ?? 0}</span></button>
       </div>`;
+  }
+
+  // 위 reactionButtonsHtml이 만든 버튼들에 실제 클릭 핸들러를 붙인다. onDone은 반응 성공 후 다시 그릴 콜백.
+  function attachReactionHandlers(el, onDone) {
+    el.querySelectorAll('[data-vote]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const [targetType, targetId, voteType] = btn.dataset.vote.split(':');
+        const path = targetType === 'thread' ? `/threads/${targetId}/vote` : `/arguments/${targetId}/vote`;
+        try {
+          await apiRequest(path, { method: 'POST', body: JSON.stringify({ vote_type: voteType }) });
+          onDone();
+        } catch (err) { alert(err.message); }
+      });
+    });
+    el.querySelectorAll('[data-laugh]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const [targetType, targetId] = btn.dataset.laugh.split(':');
+        const path = targetType === 'thread' ? `/threads/${targetId}/laugh` : `/arguments/${targetId}/laugh`;
+        try {
+          await apiRequest(path, { method: 'POST' });
+          onDone();
+        } catch (err) { alert(err.message); }
+      });
+    });
   }
 
   async function openThreadModal(threadId) {
@@ -1069,60 +1118,35 @@
         apiRequest(`/threads/${threadId}/arguments`),
       ]);
 
+      const STANCE_LABEL = { pro: '찬성', con: '반대', other: '기타' };
       const argsHtml = args.length
         ? args.map(a => `
           <div class="arg-item">
             <div class="arg-meta">
-              <span>${a.author_nickname} · ${a.stance === 'pro' ? '찬성' : '반대'}
+              <span>${a.author_nickname} · ${STANCE_LABEL[a.stance] || a.stance}
                 ${currentUser && currentUser.id !== a.author_id ? `<button class="logout-link" data-open-conv-quick="${a.author_id}" data-nickname="${a.author_nickname}">쪽지</button>` : ''}
               </span>
             </div>
             <div class="arg-body">${a.body}</div>
-            ${reactionButtonsHtml('argument', a.id, a.upvotes, a.downvotes)}
+            ${currentUser && currentUser.id !== a.author_id ? reactionButtonsHtml('argument', a.id, a.upvotes, a.downvotes) : ''}
           </div>`).join('')
         : '<div class="issue-meta">아직 등록된 논증이 없습니다.</div>';
 
       content.innerHTML = `
         <div class="section-title" style="font-size:17px;">${thread.title}</div>
         ${thread.body ? `<div class="arg-body" style="margin:8px 0;">${thread.body}</div>` : ''}
-        ${reactionButtonsHtml('thread', thread.id, null, null)}
+        ${currentUser && currentUser.id !== thread.author_id ? reactionButtonsHtml('thread', thread.id, thread.thread_upvotes, thread.thread_downvotes, thread.thread_laugh_count) : ''}
         <div style="border-top:1px solid var(--line); margin:16px 0;"></div>
         <div id="threadModalArgs">${argsHtml}</div>
         ${currentUser ? `
           <form class="thread-form" id="argForm" style="margin-top:14px;">
-            <select name="stance"><option value="pro">찬성</option><option value="con">반대</option></select>
+            <select name="stance"><option value="pro">찬성</option><option value="con">반대</option><option value="other">기타</option></select>
             <textarea name="body" placeholder="논증을 입력하세요" required></textarea>
             <button type="submit" class="mini-btn">논증 등록</button>
           </form>` : ''}
       `;
 
-      content.querySelectorAll('[data-vote-arg]').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          try {
-            await apiRequest(`/arguments/${btn.dataset.voteArg}/vote`, {
-              method: 'POST',
-              body: JSON.stringify({ vote_type: btn.dataset.voteType }),
-            });
-            openThreadModal(threadId); // 최신 집계로 모달을 다시 그린다
-          } catch (err) { alert(err.message); }
-        });
-      });
-      content.querySelectorAll('[data-laugh-arg]').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          try {
-            await apiRequest(`/arguments/${btn.dataset.laughArg}/laugh`, { method: 'POST' });
-            openThreadModal(threadId);
-          } catch (err) { alert(err.message); }
-        });
-      });
-      content.querySelectorAll('[data-laugh-thread]').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          try {
-            await apiRequest(`/threads/${btn.dataset.laughThread}/laugh`, { method: 'POST' });
-            alert('웃기다 반응을 남겼습니다.');
-          } catch (err) { alert(err.message); }
-        });
-      });
+      attachReactionHandlers(content, () => openThreadModal(threadId));
       content.querySelectorAll('[data-open-conv-quick]').forEach(btn => {
         btn.addEventListener('click', () => {
           threadModal.style.display = 'none';
