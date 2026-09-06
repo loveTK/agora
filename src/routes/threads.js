@@ -127,16 +127,25 @@ router.get("/:id", (req, res) => {
 });
 
 // POST /threads/:id/arguments
-// body: { stance: 'pro' | 'con', body: string }
+// body: { stance: 'pro' | 'con', title: string, body: string }
 router.post("/:id/arguments", requireAuth, (req, res) => {
-  const { stance, body } = req.body || {};
+  const { stance, title, body } = req.body || {};
   if (!stance || !["pro", "con", "other"].includes(stance)) {
     return res.status(400).json({ error: "stance는 'pro', 'con', 'other' 중 하나여야 합니다." });
+  }
+  if (!title || !title.trim()) {
+    return res.status(400).json({ error: "논증 제목을 입력해주세요." });
+  }
+  if (title.length > TITLE_MAX) {
+    return res.status(400).json({ error: `제목은 ${TITLE_MAX}자 이내로 작성해주세요.` });
   }
   if (!body || !body.trim()) {
     return res.status(400).json({ error: "논증 내용을 입력해주세요." });
   }
-  if (containsBannedWord(body)) {
+  if (body.length > BODY_MAX) {
+    return res.status(400).json({ error: `설명은 ${BODY_MAX}자 이내로 작성해주세요.` });
+  }
+  if (containsBannedWord(title) || containsBannedWord(body)) {
     return res.status(400).json({ error: "부적절한 표현이 포함되어 있어 등록할 수 없습니다." });
   }
 
@@ -148,9 +157,9 @@ router.post("/:id/arguments", requireAuth, (req, res) => {
 
   const id = randomUUID();
   db.prepare(
-    `INSERT INTO arguments (id, thread_id, author_id, stance, body)
-     VALUES (?, ?, ?, ?, ?)`
-  ).run(id, req.params.id, req.userId, stance, body.trim());
+    `INSERT INTO arguments (id, thread_id, author_id, stance, title, body)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  ).run(id, req.params.id, req.userId, stance, title.trim(), body.trim());
 
   // 호전성 게이지: 답글(논증) 등록 1건당 +1 (기획 합의사항)
   db.prepare("UPDATE users SET belligerence = belligerence + ? WHERE id = ?").run(
@@ -172,7 +181,9 @@ router.get("/:id/arguments", (req, res) => {
     .prepare(
       `SELECT a.*, u.nickname AS author_nickname,
               (SELECT COALESCE(SUM(weight), 0) FROM laugh_reactions
-                 WHERE target_type = 'argument' AND target_id = a.id) AS laugh_count
+                 WHERE target_type = 'argument' AND target_id = a.id) AS laugh_count,
+              (SELECT GROUP_CONCAT(DISTINCT ticker) FROM user_tickers
+                 WHERE user_id = a.author_id) AS tickers_csv
        FROM arguments a JOIN users u ON u.id = a.author_id
        WHERE a.thread_id = ? AND a.hidden = 0
        ORDER BY a.created_at ASC`

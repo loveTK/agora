@@ -240,7 +240,8 @@
   .modal-backdrop{ position:fixed; inset:0; background:rgba(17,17,16,0.55); display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; z-index:100; overflow-y:auto; }
   .modal-box{ background:var(--white); max-width:1080px; width:100%; padding:28px; position:relative; }
   .modal-close{ position:absolute; top:18px; right:20px; background:none; border:none; font-size:18px; cursor:pointer; color:var(--gray-1); font-family:'Archivo',sans-serif; }
-  .arg-item{ border-bottom:1px solid var(--gray-4); padding:14px 0; }
+  .arg-item{ border-bottom:1px solid var(--gray-4); padding:14px 0 14px 12px; cursor:pointer; border-left:2px solid transparent; }
+  .arg-item.selected{ background:rgba(186,117,23,0.12); border-left-color:var(--gold); }
 
   /* ---------- 논제 상세: 원형극장 무대(캐릭터 발언 + 참여자) + 다른 의견 사이드 패널 ---------- */
   .thread-layout{ display:flex; flex-direction:column; gap:20px; margin-top:14px; }
@@ -282,15 +283,25 @@
   .thread-side-list{ max-height:440px; overflow-y:auto; display:flex; flex-direction:column; }
   .arg-item:last-child{ border-bottom:none; }
   .arg-meta{ display:flex; justify-content:space-between; align-items:baseline; font-size:12px; color:var(--gray-2); margin-bottom:6px; gap:8px; }
+  .arg-title{ font-size:14px; font-weight:700; margin-bottom:3px; }
   .arg-body{ font-size:13.5px; line-height:1.5; }
   .arg-actions{ display:flex; gap:8px; margin-top:8px; align-items:center; }
-  .reaction-btn{ font-size:11px; padding:4px 9px; border:1px solid var(--black); background:var(--white); cursor:pointer; font-family:'Archivo',sans-serif; }
+  .reaction-btn{ font-size:11px; padding:4px 9px; border:1px solid var(--black); background:var(--white); color:var(--black); cursor:pointer; font-family:'Archivo',sans-serif; }
   .reaction-btn:hover{ background:var(--black); color:var(--white); }
   .reaction-btn.laugh:hover{ background:var(--gold); border-color:var(--gold); color:var(--on-gold); }
   .reaction-count{ font-size:11px; color:var(--gray-2); }
   .reaction-btn:active{ transform:scale(0.94); }
   @keyframes popScale{ 0%{ transform:scale(1); } 50%{ transform:scale(1.35); } 100%{ transform:scale(1); } }
   .reaction-count.pop{ display:inline-block; animation:popScale 0.3s ease; }
+  .ticker-badge{ font-size:9.5px; padding:1px 6px; border:1px solid var(--gold); color:var(--gold); margin-left:6px; letter-spacing:0.02em; vertical-align:middle; }
+
+  /* ---------- 논증 대댓글 ---------- */
+  .reply-toggle{ background:none; border:none; font-size:11.5px; color:var(--gray-2); cursor:pointer; padding:0; font-family:'Archivo',sans-serif; text-decoration:underline; }
+  .reply-list{ margin-top:10px; padding-left:14px; border-left:1px solid var(--gray-4); display:flex; flex-direction:column; gap:10px; }
+  .reply-item{ font-size:12.5px; }
+  .reply-meta{ color:var(--gray-2); font-size:11px; margin-bottom:3px; }
+  .reply-form-mini{ display:flex; gap:6px; margin-top:10px; }
+  .reply-form-mini input{ flex:1; border:1px solid var(--line); background:var(--white); color:var(--ink); padding:6px 8px; font-size:12px; font-family:'Archivo',sans-serif; }
 
   /* ---------- Hot Issue 카드: hover/press + 아코디언 반응 패널 ---------- */
   .hot-issue-card{ cursor:pointer; transition:transform 0.15s; }
@@ -1443,7 +1454,7 @@
   document.getElementById('threadModalClose').addEventListener('click', () => { threadModal.style.display = 'none'; });
   threadModal.addEventListener('click', (e) => { if (e.target === threadModal) threadModal.style.display = 'none'; });
 
-  // targetType: 'thread' | 'argument' 공용 — 논제(Hot Issue 카드)와 논증(모달 안) 양쪽에서 재사용한다.
+  // targetType: 'thread' | 'argument' | 'reply' 공용 — Hot Issue 카드/논증/대댓글 세 군데서 재사용한다.
   function reactionButtonsHtml(targetType, targetId, upvotes, downvotes, laughCount) {
     return `
       <div class="arg-actions">
@@ -1451,6 +1462,24 @@
         <button class="reaction-btn" data-vote="${targetType}:${targetId}:down">비추천 <span class="reaction-count">${downvotes ?? 0}</span></button>
         <button class="reaction-btn laugh" data-laugh="${targetType}:${targetId}">바보 <span class="reaction-count">${laughCount ?? 0}</span></button>
       </div>`;
+  }
+
+  // targetType별 API 경로 매핑 — reactionButtonsHtml이 만든 버튼 3종(vote/laugh) 공용.
+  function reactionPath(targetType, targetId, action) {
+    const base = { thread: '/threads', argument: '/arguments', reply: '/replies' }[targetType];
+    return `${base}/${targetId}/${action}`;
+  }
+
+  // 19장 티커 도감 — 현재는 "이그지니어스"(자동 발급) 하나뿐이라 표시용 라벨만 매핑해둔다.
+  const TICKER_LABELS = { ingenious: '이그지니어스' };
+  function tickerBadgesHtml(tickersCsv) {
+    if (!tickersCsv) return '';
+    return tickersCsv.split(',').filter(Boolean).map(t => `<span class="ticker-badge">${TICKER_LABELS[t] || t}</span>`).join('');
+  }
+
+  // 논증/대댓글 본문 — title이 있으면(=논증) 제목을 굵게, 없으면(=논제 자체 설명) 본문만 표시.
+  function argContentHtml(title, body) {
+    return `${title ? `<div class="arg-title">${title}</div>` : ''}<div class="arg-body">${body}</div>`;
   }
 
   // 숫자가 바뀌었다는 걸 보여주는 pop 애니메이션 — 같은 값이 연달아 와도 reflow로 매번 처음부터 재생.
@@ -1478,9 +1507,8 @@
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const [targetType, targetId, voteType] = btn.dataset.vote.split(':');
-        const path = targetType === 'thread' ? `/threads/${targetId}/vote` : `/arguments/${targetId}/vote`;
         try {
-          const result = await apiRequest(path, { method: 'POST', body: JSON.stringify({ vote_type: voteType }) });
+          const result = await apiRequest(reactionPath(targetType, targetId, 'vote'), { method: 'POST', body: JSON.stringify({ vote_type: voteType }) });
           const countSpan = btn.querySelector('.reaction-count');
           countSpan.textContent = voteType === 'up' ? result.upvotes : result.downvotes;
           popBadge(countSpan);
@@ -1491,15 +1519,50 @@
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const [targetType, targetId] = btn.dataset.laugh.split(':');
-        const path = targetType === 'thread' ? `/threads/${targetId}/laugh` : `/arguments/${targetId}/laugh`;
         try {
-          const result = await apiRequest(path, { method: 'POST' });
+          const result = await apiRequest(reactionPath(targetType, targetId, 'laugh'), { method: 'POST' });
           const countSpan = btn.querySelector('.reaction-count');
           countSpan.textContent = result.laugh_count;
           popBadge(countSpan);
         } catch (err) { alert(err.message); }
       });
     });
+  }
+
+  // 논증 하나의 대댓글 목록 + 등록 폼을 그린다. list는 이미 DOM에 있는 .reply-list 컨테이너.
+  function renderReplyList(list, argId, replies) {
+    const itemsHtml = replies.length
+      ? replies.map(r => `
+        <div class="reply-item">
+          <div class="reply-meta">${r.author_nickname}</div>
+          <div class="arg-body">${r.body}</div>
+          ${currentUser && currentUser.id !== r.author_id ? reactionButtonsHtml('reply', r.id, r.upvotes, r.downvotes, r.laugh_count) : ''}
+        </div>`).join('')
+      : '<div class="issue-meta">아직 답글이 없습니다.</div>';
+
+    const formHtml = currentUser ? `
+      <form class="reply-form-mini" data-reply-form="${argId}">
+        <input name="body" placeholder="답글을 입력하세요" required maxlength="300">
+        <button type="submit" class="mini-btn">등록</button>
+      </form>` : '';
+
+    list.innerHTML = itemsHtml + formHtml;
+    attachReactionHandlers(list);
+
+    const form = list.querySelector('[data-reply-form]');
+    if (form) {
+      form.addEventListener('click', (e) => e.stopPropagation());
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const body = new FormData(form).get('body');
+        try {
+          await apiRequest(`/arguments/${argId}/replies`, { method: 'POST', body: JSON.stringify({ body }) });
+          const fresh = await apiRequest(`/arguments/${argId}/replies`);
+          renderReplyList(list, argId, fresh);
+        } catch (err) { alert(err.message); }
+      });
+    }
   }
 
   async function openThreadModal(threadId) {
@@ -1515,20 +1578,31 @@
 
       const STANCE_LABEL = { pro: '찬성', con: '반대', other: '기타' };
 
+      // 무대(stage) 말풍선 내용 — 기본은 논제 자체, 사이드에서 의견을 클릭하면 그 사람 것으로 바뀐다.
+      function stageBubbleHtml(label, tickersCsv, title, body, targetType, targetId, upvotes, downvotes, laughCount, authorId) {
+        return `
+          <div class="thread-stage-label">${label}${tickerBadgesHtml(tickersCsv)}</div>
+          ${argContentHtml(title, body)}
+          ${currentUser && currentUser.id !== authorId ? reactionButtonsHtml(targetType, targetId, upvotes, downvotes, laughCount) : ''}
+        `;
+      }
+
       // 활성화 순(추천+비추천+바보 합산) — 참여가 많을수록 위로
       const sortedArgs = [...args].sort((a, b) =>
         (b.upvotes + b.downvotes + (b.laugh_count || 0)) - (a.upvotes + a.downvotes + (a.laugh_count || 0))
       );
       const argsHtml = sortedArgs.length
         ? sortedArgs.map(a => `
-          <div class="arg-item">
+          <div class="arg-item" data-arg-id="${a.id}">
             <div class="arg-meta">
-              <span>${a.author_nickname} · ${STANCE_LABEL[a.stance] || a.stance}
+              <span>${a.author_nickname}${tickerBadgesHtml(a.tickers_csv)} · ${STANCE_LABEL[a.stance] || a.stance}
                 ${currentUser && currentUser.id !== a.author_id ? `<button class="logout-link" data-open-conv-quick="${a.author_id}" data-nickname="${a.author_nickname}">쪽지</button>` : ''}
               </span>
             </div>
-            <div class="arg-body">${a.body}</div>
+            ${argContentHtml(a.title, a.body)}
             ${currentUser && currentUser.id !== a.author_id ? reactionButtonsHtml('argument', a.id, a.upvotes, a.downvotes, a.laugh_count) : ''}
+            <div><button class="reply-toggle" data-toggle-replies="${a.id}">답글</button></div>
+            <div class="reply-list" id="replyList-${a.id}" hidden></div>
           </div>`).join('')
         : '<div class="issue-meta">아직 등록된 논증이 없습니다.</div>';
 
@@ -1553,9 +1627,7 @@
                 </svg>
               </div>
               <div class="thread-stage-bubble">
-                <div class="thread-stage-label">${thread.author_nickname || '캐릭터'}</div>
-                <div class="arg-body">${thread.body || '이 논제에 대한 별도 설명은 없습니다.'}</div>
-                ${currentUser && currentUser.id !== thread.author_id ? reactionButtonsHtml('thread', thread.id, thread.thread_upvotes, thread.thread_downvotes, thread.thread_laugh_count) : ''}
+                ${stageBubbleHtml(thread.author_nickname || '캐릭터', null, null, thread.body || '이 논제에 대한 별도 설명은 없습니다.', 'thread', thread.id, thread.thread_upvotes, thread.thread_downvotes, thread.thread_laugh_count, thread.author_id)}
               </div>
               <div class="thread-participants">
                 <div class="crowd">
@@ -1569,7 +1641,8 @@
             ${currentUser ? `
               <form class="thread-form" id="argForm" style="margin-top:14px;">
                 <select name="stance"><option value="pro">찬성</option><option value="con">반대</option><option value="other">기타</option></select>
-                <textarea name="body" placeholder="논증을 입력하세요" required></textarea>
+                <input name="title" placeholder="타이틀" required maxlength="50">
+                <textarea name="body" placeholder="설명을 입력하세요" required></textarea>
                 <button type="submit" class="mini-btn">논증 등록</button>
               </form>` : ''}
           </div>
@@ -1582,10 +1655,43 @@
 
       attachReactionHandlers(content);
       content.querySelectorAll('[data-open-conv-quick]').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
           threadModal.style.display = 'none';
           document.getElementById('messagesCard').scrollIntoView({ behavior: 'smooth' });
           openConversation(btn.dataset.openConvQuick, btn.dataset.nickname);
+        });
+      });
+
+      // 사이드의 의견을 클릭하면 무대(stage)가 그 사람의 발언으로 바뀐다(선택 표시는 배경 강조로).
+      content.querySelectorAll('.arg-item[data-arg-id]').forEach(item => {
+        item.addEventListener('click', (e) => {
+          if (e.target.closest('.reply-list, .arg-actions, .reply-toggle, .logout-link')) return;
+          const a = sortedArgs.find(x => x.id === item.dataset.argId);
+          if (!a) return;
+          content.querySelectorAll('.arg-item').forEach(el => el.classList.remove('selected'));
+          item.classList.add('selected');
+          const bubble = content.querySelector('.thread-stage-bubble');
+          bubble.innerHTML = stageBubbleHtml(a.author_nickname, a.tickers_csv, a.title, a.body, 'argument', a.id, a.upvotes, a.downvotes, a.laugh_count, a.author_id);
+          attachReactionHandlers(bubble);
+        });
+      });
+
+      // 답글 토글 — 처음 열 때만 서버에서 불러오고, 이후엔 보이기/숨기기만 전환.
+      content.querySelectorAll('[data-toggle-replies]').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const argId = btn.dataset.toggleReplies;
+          const list = document.getElementById(`replyList-${argId}`);
+          if (!list.hidden) { list.hidden = true; return; }
+          list.hidden = false;
+          if (list.dataset.loaded) return;
+          list.dataset.loaded = '1';
+          list.innerHTML = '<div class="issue-meta">불러오는 중...</div>';
+          try {
+            const replies = await apiRequest(`/arguments/${argId}/replies`);
+            renderReplyList(list, argId, replies);
+          } catch (err) { list.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`; }
         });
       });
 
@@ -1597,7 +1703,7 @@
           try {
             await apiRequest(`/threads/${threadId}/arguments`, {
               method: 'POST',
-              body: JSON.stringify({ stance: form.get('stance'), body: form.get('body') }),
+              body: JSON.stringify({ stance: form.get('stance'), title: form.get('title'), body: form.get('body') }),
             });
             openThreadModal(threadId);
           } catch (err) { alert(err.message); }

@@ -6,22 +6,24 @@ const { checkAndGrantIngeniousTicker } = require("./ingeniousTicker");
 // votes.js의 DAILY_VOTE_LIMIT과 동일한 취지 — 반복 토글로 우회하지 못하게 하루 총 횟수로 제한한다.
 const DAILY_LAUGH_LIMIT = 100;
 
+const TARGET_TABLES = { thread: "threads", argument: "arguments", reply: "argument_replies" };
+
 function targetExists(targetType, targetId) {
-  const table = targetType === "thread" ? "threads" : "arguments";
+  const table = TARGET_TABLES[targetType];
   return !!db.prepare(`SELECT id FROM ${table} WHERE id = ?`).get(targetId);
 }
 
-// thread/argument 공용 "웃기다" 토글. 같은 대상에 재요청하면 취소된다(추천/비추천과 동일한 패턴).
+// thread/argument/reply 공용 "웃기다" 토글. 같은 대상에 재요청하면 취소된다(추천/비추천과 동일한 패턴).
 // 정책: 본인 글에는 반응 불가, 신규 계정은 가중치가 낮음(voteWeight 재사용), 하루 총 횟수 제한.
 function toggleLaugh(userId, targetType, targetId) {
-  if (!["thread", "argument"].includes(targetType)) {
-    return { error: "target_type은 'thread' 또는 'argument'여야 합니다.", status: 400 };
+  if (!Object.keys(TARGET_TABLES).includes(targetType)) {
+    return { error: "target_type은 'thread', 'argument', 'reply' 중 하나여야 합니다.", status: 400 };
   }
   if (!targetExists(targetType, targetId)) {
     return { error: "대상을 찾을 수 없습니다.", status: 404 };
   }
 
-  const table = targetType === "thread" ? "threads" : "arguments";
+  const table = TARGET_TABLES[targetType];
   const target = db.prepare(`SELECT author_id FROM ${table} WHERE id = ?`).get(targetId);
   if (target.author_id === userId) {
     return { error: "본인 글에는 반응할 수 없습니다.", status: 403 };
@@ -54,7 +56,8 @@ function toggleLaugh(userId, targetType, targetId) {
   });
   const result = tx();
 
-  if (result === "cast") checkAndGrantIngeniousTicker(targetType, targetId);
+  // 티커 도감은 논제/논증에만 존재한다(21장 관리자 페이지 몫인 수동 티커와 별개) — 대댓글은 대상에서 제외.
+  if (result === "cast" && targetType !== "reply") checkAndGrantIngeniousTicker(targetType, targetId);
 
   const totalWeight = db
     .prepare("SELECT COALESCE(SUM(weight), 0) AS total FROM laugh_reactions WHERE target_type = ? AND target_id = ?")

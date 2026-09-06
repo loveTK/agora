@@ -9,9 +9,11 @@ const { checkVoteBrigading } = require("../services/abuseDetection");
 const { isReputationGainBlocked } = require("../services/war");
 const { applyInfluenceDelta } = require("../services/influence");
 const { toggleLaugh } = require("../services/laughReaction");
+const { containsBannedWord } = require("../services/contentFilter");
 
 const router = express.Router();
 const DAILY_VOTE_LIMIT = 100; // 어뷰징 방지: 하루 추천/비추천 총 횟수 상한
+const REPLY_BODY_MAX = 300; // threads.js의 BODY_MAX와 동일한 기준
 
 // POST /arguments/:id/vote
 // body: { vote_type: 'up' | 'down' }
@@ -135,6 +137,56 @@ router.post("/:id/laugh", requireAuth, (req, res) => {
   const result = toggleLaugh(req.userId, "argument", req.params.id);
   if (result.error) return res.status(result.status).json({ error: result.error });
   res.json(result);
+});
+
+// POST /arguments/:id/replies — body: { body }
+// 정책: 대댓글은 찬반 구분 없이 자유 형식 한 줄 답글. 로그인만 요구(본인 글 제한 없음 — 자기 논증에 스스로
+// 부연 설명을 다는 것도 자연스러운 사용 패턴이라 votes/laugh와 달리 본인 제한을 두지 않는다).
+router.post("/:id/replies", requireAuth, (req, res) => {
+  const { body } = req.body || {};
+  if (!body || !body.trim()) {
+    return res.status(400).json({ error: "답글 내용을 입력해주세요." });
+  }
+  if (body.length > REPLY_BODY_MAX) {
+    return res.status(400).json({ error: `답글은 ${REPLY_BODY_MAX}자 이내로 작성해주세요.` });
+  }
+  if (containsBannedWord(body)) {
+    return res.status(400).json({ error: "부적절한 표현이 포함되어 있어 등록할 수 없습니다." });
+  }
+
+  const arg = db.prepare("SELECT id FROM arguments WHERE id = ?").get(req.params.id);
+  if (!arg) return res.status(404).json({ error: "논증을 찾을 수 없습니다." });
+
+  const id = randomUUID();
+  db.prepare(
+    "INSERT INTO argument_replies (id, argument_id, author_id, body) VALUES (?, ?, ?, ?)"
+  ).run(id, req.params.id, req.userId, body.trim());
+
+  const reply = db.prepare("SELECT * FROM argument_replies WHERE id = ?").get(id);
+  res.status(201).json(reply);
+});
+
+// GET /arguments/:id/replies
+router.get("/:id/replies", (req, res) => {
+  const arg = db.prepare("SELECT id FROM arguments WHERE id = ?").get(req.params.id);
+  if (!arg) return res.status(404).json({ error: "논증을 찾을 수 없습니다." });
+
+  const replies = db
+    .prepare(
+      `SELECT r.*, u.nickname AS author_nickname,
+              COALESCE((SELECT SUM(CASE WHEN vote_type = 'up' THEN weight ELSE 0 END)
+                          FROM reply_votes WHERE reply_id = r.id), 0) AS upvotes,
+              COALESCE((SELECT SUM(CASE WHEN vote_type = 'down' THEN weight ELSE 0 END)
+                          FROM reply_votes WHERE reply_id = r.id), 0) AS downvotes,
+              COALESCE((SELECT SUM(weight) FROM laugh_reactions
+                          WHERE target_type = 'reply' AND target_id = r.id), 0) AS laugh_count
+       FROM argument_replies r JOIN users u ON u.id = r.author_id
+       WHERE r.argument_id = ?
+       ORDER BY r.created_at ASC`
+    )
+    .all(req.params.id);
+
+  res.json(replies);
 });
 
 module.exports = router;
