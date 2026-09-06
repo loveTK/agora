@@ -145,7 +145,7 @@
   .section-sub{ font-size:12px; color:var(--gray-2); }
 
   #map{
-    height:420px;
+    height:600px;
     width:100%;
     border:1px solid var(--line);
     filter:grayscale(1) contrast(1.08) brightness(1.02);
@@ -680,7 +680,12 @@
       console.warn('Leaflet을 불러오지 못해 지도를 표시할 수 없습니다.');
       return;
     }
-    const map = L.map('map', { zoomControl:false, attributionControl:false }).setView([25, 20], 2);
+    const worldBounds = [[-90, -180], [90, 180]];
+    const map = L.map('map', {
+      zoomControl:false, attributionControl:false,
+      maxBounds: worldBounds, maxBoundsViscosity: 1.0, // 확대해서 옆으로 끌어도 지도 밖 회색 영역으로는 안 나가게 고정
+    }).setView([25, 20], 2);
+    map.setMinZoom(2);
     // CartoDB 무료 타일이 API 키를 요구하도록 바뀌어서(워터마크 노출) OSM 표준 타일로 교체 — 흑백 필터는 #map CSS에서 그대로 처리
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, subdomains:'abc' }).addTo(map);
 
