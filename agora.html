@@ -202,6 +202,41 @@
   .mini-btn:hover{ background:var(--black); color:var(--white); }
   .mini-btn:disabled{ opacity:0.5; cursor:default; }
 
+  /* ---------- 논제 등록 폼 ---------- */
+  .thread-form{ display:flex; flex-direction:column; gap:10px; align-items:flex-start; }
+  .thread-form input, .thread-form textarea, .thread-form select{
+    border:1px solid var(--line); padding:9px 10px; font-size:13px;
+    font-family:'Archivo',sans-serif; color:var(--ink); width:100%;
+  }
+  .thread-form textarea{ resize:vertical; min-height:70px; }
+  .thread-form-hint{ font-size:11.5px; color:var(--gray-2); }
+
+  /* ---------- 쪽지함 ---------- */
+  .msg-conv-item{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid var(--gray-4); cursor:pointer; background:none; border-left:none; border-right:none; border-top:none; width:100%; text-align:left; font-family:'Archivo',sans-serif; }
+  .msg-conv-item:last-child{ border-bottom:none; }
+  .msg-conv-preview{ font-size:12px; color:var(--gray-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:360px; }
+  .msg-conv-unread{ background:var(--black); color:var(--white); border-radius:999px; font-size:10px; padding:2px 7px; flex-shrink:0; }
+  .msg-chat-box{ border:1px solid var(--line); padding:14px; margin-top:12px; display:flex; flex-direction:column; gap:10px; max-height:340px; overflow-y:auto; }
+  .msg-bubble{ max-width:75%; padding:8px 12px; font-size:13px; border:1px solid var(--line); }
+  .msg-bubble.mine{ align-self:flex-end; background:var(--black); color:var(--white); border-color:var(--black); }
+  .msg-bubble.theirs{ align-self:flex-start; background:var(--white); }
+  .msg-send-row{ display:flex; gap:8px; margin-top:10px; }
+  .msg-send-row input{ flex:1; border:1px solid var(--line); padding:9px 10px; font-size:13px; font-family:'Archivo',sans-serif; }
+
+  /* ---------- 논제 상세 모달 ---------- */
+  .modal-backdrop{ position:fixed; inset:0; background:rgba(17,17,16,0.55); display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; z-index:100; overflow-y:auto; }
+  .modal-box{ background:var(--white); max-width:640px; width:100%; padding:28px; position:relative; }
+  .modal-close{ position:absolute; top:18px; right:20px; background:none; border:none; font-size:18px; cursor:pointer; color:var(--gray-1); font-family:'Archivo',sans-serif; }
+  .arg-item{ border-bottom:1px solid var(--gray-4); padding:14px 0; }
+  .arg-item:last-child{ border-bottom:none; }
+  .arg-meta{ display:flex; justify-content:space-between; align-items:baseline; font-size:12px; color:var(--gray-2); margin-bottom:6px; gap:8px; }
+  .arg-body{ font-size:13.5px; line-height:1.5; }
+  .arg-actions{ display:flex; gap:8px; margin-top:8px; align-items:center; }
+  .reaction-btn{ font-size:11px; padding:4px 9px; border:1px solid var(--black); background:var(--white); cursor:pointer; font-family:'Archivo',sans-serif; }
+  .reaction-btn:hover{ background:var(--black); color:var(--white); }
+  .reaction-btn.laugh:hover{ background:var(--gold); border-color:var(--gold); color:var(--black); }
+  .reaction-count{ font-size:11px; color:var(--gray-2); }
+
   @media (max-width:480px){
     .lists-row{ grid-template-columns:1fr; gap:14px; }
     nav{ gap:18px; }
@@ -249,6 +284,16 @@
       <div id="hotIssueList"><div class="loading-text">불러오는 중...</div></div>
     </section>
 
+    <section class="section" id="threadFormCard">
+      <span class="section-title" style="font-size:16px;">논제 등록</span>
+      <div id="threadFormContent"><div class="loading-text">로그인하면 논제를 등록할 수 있습니다.</div></div>
+    </section>
+
+    <section class="section" id="messagesCard">
+      <span class="section-title" style="font-size:16px;">쪽지함</span>
+      <div id="messagesContent"><div class="loading-text">로그인하면 쪽지함을 볼 수 있습니다.</div></div>
+    </section>
+
     <section class="section">
       <span class="section-title" style="font-size:16px;">주요 분쟁 지역</span>
       <div id="disputeList"><div class="loading-text">불러오는 중...</div></div>
@@ -271,6 +316,14 @@
 
   </div>
 </main>
+
+<!-- 논제 상세(입장하기) 모달 — 기본 숨김, JS가 열고 닫음 -->
+<div class="modal-backdrop" id="threadModal" style="display:none;">
+  <div class="modal-box">
+    <button class="modal-close" id="threadModalClose">×</button>
+    <div id="threadModalContent"><div class="loading-text">불러오는 중...</div></div>
+  </div>
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -471,6 +524,9 @@
 
     renderFactions();
     renderWars();
+    renderThreadForm();
+    renderMessages();
+    renderHotIssues(); // currentUser가 생겨야 "쪽지" 퀵링크가 붙으므로 로그인 후 다시 그린다
   }
 
   function renderAuthForm(mode) {
@@ -561,14 +617,24 @@
                 </svg>
               </div>
               <div class="hot-issue-author">${t.author_nickname}</div>
+              ${currentUser && currentUser.id !== t.author_id ? `<button class="logout-link" data-open-conv-quick="${t.author_id}" data-nickname="${t.author_nickname}" style="font-size:10px;">쪽지</button>` : ''}
             </div>
             <div class="hot-issue-body">
               <div class="hot-issue-quote">"${t.title}"</div>
               <div class="issue-meta">${t.region_name} 폴리스 / 참여 ${t.participant_count}명 / <span class="badge badge-gold" style="padding:1px 7px; font-size:10.5px;">추천 ${t.total_upvotes}</span></div>
             </div>
-            <a class="hot-issue-stance" href="${API_BASE}/threads/${t.id}" target="_blank" rel="noopener">입장 →</a>
+            <button class="hot-issue-stance" data-open-thread="${t.id}">입장 →</button>
           </div>`).join('')
         : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
+      el.querySelectorAll('[data-open-thread]').forEach(btn => {
+        btn.addEventListener('click', () => openThreadModal(btn.dataset.openThread));
+      });
+      el.querySelectorAll('[data-open-conv-quick]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('messagesCard').scrollIntoView({ behavior: 'smooth' });
+          openConversation(btn.dataset.openConvQuick, btn.dataset.nickname);
+        });
+      });
     } catch (err) {
       el.innerHTML = '<div class="issue-meta">불러오지 못했습니다.</div>';
     }
@@ -870,6 +936,217 @@
       attachWarActionHandlers(el);
     } catch (err) {
       el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
+  }
+
+  /* ---------------- 논제 등록 폼 (로그인 후에만 노출) ---------------- */
+
+  const THREAD_TITLE_MAX = 50;
+  const THREAD_BODY_MAX = 300;
+
+  function renderThreadForm() {
+    const el = document.getElementById('threadFormContent');
+    const regionOptions = regionsData.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+    el.innerHTML = `
+      <form class="thread-form" id="threadForm">
+        <select name="region_id">${regionOptions}</select>
+        <input type="text" name="title" placeholder="제목 (${THREAD_TITLE_MAX}자 이내)" maxlength="${THREAD_TITLE_MAX}" required>
+        <textarea name="body" placeholder="부연 설명 (선택, ${THREAD_BODY_MAX}자 이내)" maxlength="${THREAD_BODY_MAX}"></textarea>
+        <button type="submit" class="mini-btn">등록</button>
+        <div class="thread-form-hint">하루 3건까지 등록할 수 있습니다.</div>
+        <div class="auth-error" id="threadFormError" style="display:none;"></div>
+      </form>`;
+
+    document.getElementById('threadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errorBox = document.getElementById('threadFormError');
+      errorBox.style.display = 'none';
+      const form = new FormData(e.target);
+      try {
+        await apiRequest('/threads', {
+          method: 'POST',
+          body: JSON.stringify({
+            region_id: form.get('region_id'),
+            title: form.get('title'),
+            body: form.get('body') || undefined,
+          }),
+        });
+        alert('논제가 등록되었습니다.');
+        e.target.reset();
+        renderHotIssues();
+      } catch (err) {
+        errorBox.textContent = err.message;
+        errorBox.style.display = 'block';
+      }
+    });
+  }
+
+  /* ---------------- 쪽지함 (로그인 후에만 노출) ---------------- */
+
+  async function renderMessages() {
+    const el = document.getElementById('messagesContent');
+    try {
+      const conversations = await apiRequest('/messages/conversations');
+      el.innerHTML = conversations.length
+        ? conversations.map(c => `
+          <button class="msg-conv-item" data-open-conv="${c.user_id}" data-nickname="${c.nickname}">
+            <span>${c.nickname} <span class="msg-conv-preview">${c.last_message || ''}</span></span>
+            ${c.unread_count > 0 ? `<span class="msg-conv-unread">${c.unread_count}</span>` : ''}
+          </button>`).join('')
+        : '<div class="issue-meta">주고받은 쪽지가 없습니다. Hot Issue의 발의자 이름 옆 "쪽지" 버튼으로 시작해보세요.</div>';
+
+      el.querySelectorAll('[data-open-conv]').forEach(btn => {
+        btn.addEventListener('click', () => openConversation(btn.dataset.openConv, btn.dataset.nickname));
+      });
+    } catch (err) {
+      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
+  }
+
+  async function openConversation(userId, nickname) {
+    const el = document.getElementById('messagesContent');
+    el.innerHTML = `
+      <button class="logout-link" id="msgBackBtn">‹ 목록으로</button>
+      <div class="section-sub" style="margin-top:6px;">${nickname}</div>
+      <div class="msg-chat-box" id="msgChatBox"><div class="loading-text">불러오는 중...</div></div>
+      <div class="msg-send-row">
+        <input type="text" id="msgInput" placeholder="쪽지 내용을 입력하세요">
+        <button class="mini-btn" id="msgSendBtn">전송</button>
+      </div>`;
+
+    document.getElementById('msgBackBtn').addEventListener('click', renderMessages);
+
+    async function loadHistory() {
+      const history = await apiRequest(`/messages/${userId}`);
+      const box = document.getElementById('msgChatBox');
+      box.innerHTML = history.length
+        ? history.map(m => `<div class="msg-bubble ${m.sender_id === currentUser.id ? 'mine' : 'theirs'}">${m.body}</div>`).join('')
+        : '<div class="issue-meta">아직 대화가 없습니다.</div>';
+      box.scrollTop = box.scrollHeight;
+      // 상대가 보낸 것 중 안 읽은 쪽지를 읽음 처리
+      history.filter(m => m.receiver_id === currentUser.id && !m.read_at)
+        .forEach(m => apiRequest(`/messages/${m.id}/read`, { method: 'PATCH' }).catch(() => {}));
+    }
+    await loadHistory();
+
+    document.getElementById('msgSendBtn').addEventListener('click', async () => {
+      const input = document.getElementById('msgInput');
+      const body = input.value.trim();
+      if (!body) return;
+      try {
+        await apiRequest('/messages', { method: 'POST', body: JSON.stringify({ receiver_id: userId, body }) });
+        input.value = '';
+        await loadHistory();
+      } catch (err) { alert(err.message); }
+    });
+  }
+
+  /* ---------------- 논제 상세 모달 (입장하기) — 논증 목록 + 추천/비추천/웃기다 ---------------- */
+
+  const threadModal = document.getElementById('threadModal');
+  document.getElementById('threadModalClose').addEventListener('click', () => { threadModal.style.display = 'none'; });
+  threadModal.addEventListener('click', (e) => { if (e.target === threadModal) threadModal.style.display = 'none'; });
+
+  function reactionButtonsHtml(targetType, targetId, upvotes, downvotes) {
+    const laughAttr = targetType === 'thread' ? `data-laugh-thread="${targetId}"` : `data-laugh-arg="${targetId}"`;
+    const voteAttr = (t) => targetType === 'argument' ? `data-vote-arg="${targetId}" data-vote-type="${t}"` : 'disabled';
+    return `
+      <div class="arg-actions">
+        <button class="reaction-btn" ${voteAttr('up')}>추천 <span class="reaction-count">${upvotes ?? 0}</span></button>
+        <button class="reaction-btn" ${voteAttr('down')}>비추천 <span class="reaction-count">${downvotes ?? 0}</span></button>
+        <button class="reaction-btn laugh" ${laughAttr}>웃기다</button>
+      </div>`;
+  }
+
+  async function openThreadModal(threadId) {
+    threadModal.style.display = 'flex';
+    const content = document.getElementById('threadModalContent');
+    content.innerHTML = '<div class="loading-text">불러오는 중...</div>';
+
+    try {
+      const [thread, args] = await Promise.all([
+        apiRequest(`/threads/${threadId}`),
+        apiRequest(`/threads/${threadId}/arguments`),
+      ]);
+
+      const argsHtml = args.length
+        ? args.map(a => `
+          <div class="arg-item">
+            <div class="arg-meta">
+              <span>${a.author_nickname} · ${a.stance === 'pro' ? '찬성' : '반대'}
+                ${currentUser && currentUser.id !== a.author_id ? `<button class="logout-link" data-open-conv-quick="${a.author_id}" data-nickname="${a.author_nickname}">쪽지</button>` : ''}
+              </span>
+            </div>
+            <div class="arg-body">${a.body}</div>
+            ${reactionButtonsHtml('argument', a.id, a.upvotes, a.downvotes)}
+          </div>`).join('')
+        : '<div class="issue-meta">아직 등록된 논증이 없습니다.</div>';
+
+      content.innerHTML = `
+        <div class="section-title" style="font-size:17px;">${thread.title}</div>
+        ${thread.body ? `<div class="arg-body" style="margin:8px 0;">${thread.body}</div>` : ''}
+        ${reactionButtonsHtml('thread', thread.id, null, null)}
+        <div style="border-top:1px solid var(--line); margin:16px 0;"></div>
+        <div id="threadModalArgs">${argsHtml}</div>
+        ${currentUser ? `
+          <form class="thread-form" id="argForm" style="margin-top:14px;">
+            <select name="stance"><option value="pro">찬성</option><option value="con">반대</option></select>
+            <textarea name="body" placeholder="논증을 입력하세요" required></textarea>
+            <button type="submit" class="mini-btn">논증 등록</button>
+          </form>` : ''}
+      `;
+
+      content.querySelectorAll('[data-vote-arg]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            await apiRequest(`/arguments/${btn.dataset.voteArg}/vote`, {
+              method: 'POST',
+              body: JSON.stringify({ vote_type: btn.dataset.voteType }),
+            });
+            openThreadModal(threadId); // 최신 집계로 모달을 다시 그린다
+          } catch (err) { alert(err.message); }
+        });
+      });
+      content.querySelectorAll('[data-laugh-arg]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            await apiRequest(`/arguments/${btn.dataset.laughArg}/laugh`, { method: 'POST' });
+            openThreadModal(threadId);
+          } catch (err) { alert(err.message); }
+        });
+      });
+      content.querySelectorAll('[data-laugh-thread]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            await apiRequest(`/threads/${btn.dataset.laughThread}/laugh`, { method: 'POST' });
+            alert('웃기다 반응을 남겼습니다.');
+          } catch (err) { alert(err.message); }
+        });
+      });
+      content.querySelectorAll('[data-open-conv-quick]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          threadModal.style.display = 'none';
+          document.getElementById('messagesCard').scrollIntoView({ behavior: 'smooth' });
+          openConversation(btn.dataset.openConvQuick, btn.dataset.nickname);
+        });
+      });
+
+      const argForm = document.getElementById('argForm');
+      if (argForm) {
+        argForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const form = new FormData(e.target);
+          try {
+            await apiRequest(`/threads/${threadId}/arguments`, {
+              method: 'POST',
+              body: JSON.stringify({ stance: form.get('stance'), body: form.get('body') }),
+            });
+            openThreadModal(threadId);
+          } catch (err) { alert(err.message); }
+        });
+      }
+    } catch (err) {
+      content.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
     }
   }
 

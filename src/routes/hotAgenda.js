@@ -10,7 +10,7 @@ router.get("/", (req, res) => {
   const threads = db
     .prepare(
       `SELECT t.id, t.title, t.status, t.created_at, t.region_id, r.name AS region_name,
-              u.nickname AS author_nickname,
+              t.author_id, u.nickname AS author_nickname,
               (SELECT COUNT(*) FROM arguments a WHERE a.thread_id = t.id) AS argument_count,
               (SELECT COALESCE(SUM(a.upvotes), 0) FROM arguments a WHERE a.thread_id = t.id) AS total_upvotes,
               (SELECT COUNT(DISTINCT a.author_id) FROM arguments a WHERE a.thread_id = t.id) AS participant_count

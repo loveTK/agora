@@ -8,6 +8,7 @@ const { refreshTyrantStatus } = require("../services/tyranny");
 const { checkVoteBrigading } = require("../services/abuseDetection");
 const { isReputationGainBlocked } = require("../services/war");
 const { applyInfluenceDelta } = require("../services/influence");
+const { toggleLaugh } = require("../services/laughReaction");
 
 const router = express.Router();
 const DAILY_VOTE_LIMIT = 100; // 어뷰징 방지: 하루 추천/비추천 총 횟수 상한
@@ -126,6 +127,14 @@ router.post("/:id/vote", requireAuth, (req, res) => {
   if (result === "cast") checkVoteBrigading(req.params.id, req.ip); // 신규 투표일 때만 몰표 패턴 탐지
   const updated = db.prepare("SELECT * FROM arguments WHERE id = ?").get(req.params.id);
   res.json({ result, weight, upvotes: updated.upvotes, downvotes: updated.downvotes });
+});
+
+// POST /arguments/:id/laugh
+// 논제(thread)와 동일한 토글/가중치/이그지니어스 로직을 논증(argument)에도 그대로 적용한다.
+router.post("/:id/laugh", requireAuth, (req, res) => {
+  const result = toggleLaugh(req.userId, "argument", req.params.id);
+  if (result.error) return res.status(result.status).json({ error: result.error });
+  res.json(result);
 });
 
 module.exports = router;

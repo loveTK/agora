@@ -7,6 +7,7 @@ const { refreshRegionStatus } = require("../services/regionStatus");
 const { containsBannedWord } = require("../services/contentFilter");
 const { THREAD_BELLIGERENCE_POINTS, ARGUMENT_BELLIGERENCE_POINTS } = require("../services/belligerence");
 const { grantWeaponIfEligible } = require("../services/weapon");
+const { toggleLaugh } = require("../services/laughReaction");
 
 const DAILY_JUDGMENT_VOTE_LIMIT = 20; // 어뷰징 방지: 하루 20개 논제까지만 판정투표 가능
 
@@ -222,6 +223,15 @@ router.get("/:id/judgment", (req, res) => {
     thread_status: thread.status,
     pending: !tally.quorum_met,
   });
+});
+
+// POST /threads/:id/laugh
+// 정책: 토글(재요청 시 취소), 본인 글 불가, 신규 계정 가중치 적용(voteWeight 재사용).
+// 이 논제의 웃기다 가중치 합산이 임계값을 넘으면 작성자에게 "이그지니어스" 티커가 자동 발급된다.
+router.post("/:id/laugh", requireAuth, (req, res) => {
+  const result = toggleLaugh(req.userId, "thread", req.params.id);
+  if (result.error) return res.status(result.status).json({ error: result.error });
+  res.json(result);
 });
 
 module.exports = router;

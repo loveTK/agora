@@ -155,6 +155,13 @@
 - DB 스키마 추가: `congress_approvals`, `congress_votes`
 - **미확정 사항 그대로 남김**(기획 문서 16.4절): 국회 승인투표가 반복 부결될 때의 재시도 쿨다운은 아직 없음(현재는 기존 선포 쿨다운 7일/14일만 적용됨)
 
+**쪽지(DM) / 논제 등록 화면 / 비추천 버튼 / "웃기다" 반응**
+- 쪽지: `messages` 테이블 신설. `POST /messages`, `GET /messages/conversations`, `GET /messages/:userId`, `PATCH /messages/:id/read`. 본문에 기존 금칙어 필터(`contentFilter`) 재사용, `reports.target_type`에 `'message'` 추가(테이블 재생성 방식, 008/014와 동일 패턴)해 쪽지도 신고 가능
+- 논제 등록 화면: `agora.html`에 폼 추가(제목 50자/부연설명 300자 제한, 지역 선택, 하루 3건 초과 시 백엔드 429 메시지 그대로 노출) — 백엔드는 기존 `POST /threads` 그대로 사용
+- 비추천 버튼: 프론트에 논제 상세 모달(입장하기 클릭 시 오픈)을 새로 만들고 그 안에 추천/비추천 버튼 배치 — 기존 `POST /arguments/:id/vote`(vote_type: down, 토글) 그대로 사용
+- "웃기다" 반응: `laugh_reactions` 테이블(신규 계정 가중치 컬럼 포함, voteWeight 재사용) + `user_tickers` 테이블 신설. `POST /threads/:id/laugh`, `POST /arguments/:id/laugh`(토글). 한 대상의 웃기다 가중치 합산이 50(`INGENIOUS_LAUGH_THRESHOLD`, `services/ingeniousTicker.js`)을 넘으면 작성자에게 "이그지니어스" 티커 자동 발급
+- 논제 상세 모달은 겸사겸사 기존 스코프컷("입장 → 버튼이 원본 API JSON으로 연결되던 문제")도 같이 해결함 — 이제 실제 논증 목록 + 반응 버튼 + 논증 등록 폼이 뜬다
+
 ## 기술 스택
 - Node.js + Express
 - SQLite (better-sqlite3) — 베타 단계용. 운영 전환 시 `src/db.js`만 PostgreSQL 드라이버로 교체하면 됩니다(쿼리는 표준 SQL).
