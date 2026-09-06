@@ -1,3 +1,7 @@
+require("dotenv").config({ quiet: true }); // index.js와 동일하게 .env(DB_PATH 등)를 로드 — 이게 없으면
+// `npm run seed`를 단독 실행할 때 DB_PATH가 적용 안 돼서, 운영 서버가 실제로 읽는 DB가 아니라
+// 리포 루트의 기본 경로(agora.db)에 시드가 들어가는 사고가 난다(실제로 이 버그로 지역 확장이
+// 운영 DB에 반영되지 않고 있었음).
 const { randomUUID, randomBytes } = require("crypto");
 const bcrypt = require("bcryptjs");
 const { db, runMigrations } = require("./db");
