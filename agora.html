@@ -420,7 +420,7 @@
   .inv-col-slots{ flex-shrink:0; width:100%; }
   @media (min-width:900px){ .inv-col-slots{ width:190px; } }
   .inv-character-box{
-    height:120px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    height:220px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
     margin-bottom:10px; position:relative;
   }
   .inv-slot-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
@@ -647,7 +647,7 @@
   // 슬롯별로 아이템 아이콘을 실루엣의 어느 위치/크기에 겹쳐 그릴지 — 아이콘이 전부 같은 24x24
   // viewBox에 대략 (12,12) 중심으로 그려져 있다는 전제로, 목표 지점(x,y)과 축소 비율(scale)만 정한다.
   const CHARACTER_ITEM_PLACEMENT = {
-    background: { x: 12, y: 12, scale: 1.0, behind: true },
+    background: { x: 12, y: 12, scale: 1.5, behind: true },
     cloak:      { x: 12, y: 13, scale: 0.85, behind: true },
     hat:        { x: 12, y: 2.2, scale: 0.5 },
     face:       { x: 12, y: 5.2, scale: 0.4 },
@@ -885,7 +885,7 @@
       <div class="inv-layout">
         <div class="inv-col-slots">
           <div class="inv-character-box">
-            ${characterAvatarInnerHtml(Object.values(equippedBySlot), 48)}
+            ${characterAvatarInnerHtml(Object.values(equippedBySlot), 90)}
           </div>
           <div class="inv-slot-grid">${slotGridHtml}</div>
         </div>
