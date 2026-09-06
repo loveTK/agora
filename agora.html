@@ -96,11 +96,6 @@
     position:relative;
   }
   .char-avatar-glow{ filter:drop-shadow(0 0 5px var(--gold)); }
-  .char-avatar-badges{
-    position:absolute; bottom:-1px; left:50%; transform:translate(-50%, 50%);
-    display:flex; gap:2px; background:var(--white); border:1px solid var(--line); padding:2px 3px;
-  }
-  .char-avatar-badge svg{ width:12px; height:12px; display:block; }
   .profile-info{ display:flex; flex-direction:column; gap:9px; flex:1; min-width:0; padding-top:4px; }
   .char-name-row{ display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:13.5px; }
   .char-name{ font-weight:600; color:var(--ink); }
@@ -648,23 +643,50 @@
     shop_background_columns: '아고라를 둘러싼 신전 기둥을 배경으로.',
   };
   const SLOT_ORDER = ['hat', 'face', 'glasses', 'top', 'pants', 'shoes', 'shield', 'jewelry', 'effect', 'background', 'weapon', 'cloak'];
-  // 캐릭터 아이콘에 착용 아이템을 반영 — 이 앱의 아이콘은 전부 같은 실루엣 하나뿐이라, 진짜 옷 입히듯
-  // 겹쳐 그리는 건 불가능하다(그럴 목적으로 그려진 레이어가 아님). 대신 착용한 아이템들을 실루엣 아래에
-  // 작은 배지로 붙이고, '이펙트' 슬롯만 실루엣 자체에 은은한 빛(glow)으로 반영한다.
+
+  // 슬롯별로 아이템 아이콘을 실루엣의 어느 위치/크기에 겹쳐 그릴지 — 아이콘이 전부 같은 24x24
+  // viewBox에 대략 (12,12) 중심으로 그려져 있다는 전제로, 목표 지점(x,y)과 축소 비율(scale)만 정한다.
+  const CHARACTER_ITEM_PLACEMENT = {
+    background: { x: 12, y: 12, scale: 1.0, behind: true },
+    cloak:      { x: 12, y: 13, scale: 0.85, behind: true },
+    hat:        { x: 12, y: 2.2, scale: 0.5 },
+    face:       { x: 12, y: 5.2, scale: 0.4 },
+    glasses:    { x: 12, y: 4.2, scale: 0.32 },
+    jewelry:    { x: 12, y: 8.4, scale: 0.28 },
+    top:        { x: 12, y: 11.5, scale: 0.5 },
+    shield:     { x: 6, y: 12.5, scale: 0.4 },
+    weapon:     { x: 18, y: 12.5, scale: 0.4 },
+    pants:      { x: 12, y: 18, scale: 0.42 },
+    shoes:      { x: 12, y: 22, scale: 0.38 },
+  };
+
+  // SHOP_ICON_SVG 문자열(완결된 <svg>...</svg>)에서 안쪽 도형만 뽑아, 캐릭터 실루엣 SVG 안에
+  // <g transform>으로 겹쳐 그릴 수 있게 만든다.
+  function placedItemIconHtml(item) {
+    const placement = CHARACTER_ITEM_PLACEMENT[item.slot_type];
+    const svg = SHOP_ICON_SVG[item.item_id];
+    if (!placement || !svg) return '';
+    const inner = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+    const tx = placement.x - 12 * placement.scale;
+    const ty = placement.y - 12 * placement.scale;
+    return `<g transform="translate(${tx},${ty}) scale(${placement.scale})">${inner}</g>`;
+  }
+
+  // 캐릭터 아이콘에 착용 아이템을 실제로 겹쳐 그린다 — 새 전신 실루엣이 머리/팔/다리 위치가
+  // 뚜렷해서 각 슬롯 아이콘을 해당 부위 좌표에 축소 배치하는 방식으로 진짜 레이어링이 가능하다.
+  // 배경/망토는 실루엣 뒤에, 나머지는 실루엣 위에 그린다. 아이콘이 없는 슬롯(무기/망토 커스텀
+  // 지급분 등)은 조용히 생략된다.
   function characterAvatarInnerHtml(equippedItems, avatarSize) {
     const hasEffect = equippedItems.some(it => it.slot_type === 'effect');
-    const badgeItems = equippedItems.filter(it => it.slot_type !== 'effect');
-    const badgesHtml = badgeItems.length
-      ? `<div class="char-avatar-badges">${badgeItems.map(it =>
-          `<span class="char-avatar-badge" title="${it.name || SLOT_LABEL[it.slot_type]}">${SHOP_ICON_SVG[it.item_id] || ''}</span>`
-        ).join('')}</div>`
-      : '';
+    const behindLayer = equippedItems.filter(it => CHARACTER_ITEM_PLACEMENT[it.slot_type]?.behind).map(placedItemIconHtml).join('');
+    const frontLayer = equippedItems.filter(it => !CHARACTER_ITEM_PLACEMENT[it.slot_type]?.behind).map(placedItemIconHtml).join('');
     return `
       <svg width="${avatarSize}" height="${avatarSize}" viewBox="0 0 24 24" fill="none" class="${hasEffect ? 'char-avatar-glow' : ''}">
+        ${behindLayer}
         <circle cx="12" cy="4.3" r="2.3" stroke="currentColor" stroke-width="1.4"/>
         <path d="M8 8.8 Q12 6.3 16 8.8 M9.2 8.8 L6.5 14.2 M14.8 8.8 L17.5 14.2 M12 8.6 L12 15 M12 15 L8.3 22 M12 15 L15.7 22" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
-      </svg>
-      ${badgesHtml}`;
+        ${frontLayer}
+      </svg>`;
   }
   function equipConditionLabel(ownerType) {
     return { shop: '없음', dominance: '현재 지배자 재위 중', religion: '해당 종교 소속', party: '해당 정당 소속', system: '없음' }[ownerType] || '없음';
