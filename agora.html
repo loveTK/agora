@@ -6,18 +6,21 @@
 <title>AGORA — 전황 개요</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --black:#111110;
-    --ink:#1c1c1a;
-    --gray-1:#4a4a46;
-    --gray-2:#8a8a84;
-    --gray-3:#c9c9c2;
-    --gray-4:#e6e6e0;
-    --white:#ffffff;
-    --line: rgba(17,17,16,0.14);
+    /* 블랙 메인 — 기존 흑백 토큰의 역할(강한 잉크/배경/보조 텍스트/미묘한 경계선)은 그대로 두고
+       명도만 반전. var(--black)/var(--white) 등을 쓰는 기존 규칙 전부가 자동으로 맞게 뒤집힌다. */
+    --black:#f4f2ec;
+    --ink:#ece9e2;
+    --gray-1:#c9c9c2;
+    --gray-2:#9a9a94;
+    --gray-3:#4a4a46;
+    --gray-4:#2a2a28;
+    --white:#111110;
+    --line: rgba(244,242,236,0.16);
     --gold:#BA7517;
+    --on-gold:#111110; /* 골드 배경 위 텍스트는 테마와 무관하게 항상 짙게 — 대비 확보용 */
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{height:100%;}
@@ -27,11 +30,11 @@
     font-family:'Archivo', sans-serif;
     -webkit-font-smoothing:antialiased;
   }
-  .serif{ font-family:'Cormorant Garamond', serif; }
+  .serif{ font-family:'Archivo', sans-serif; font-weight:800; letter-spacing:-0.01em; }
 
   /* ---------- layout shell (single vertical column — same stack on phone and desktop) ---------- */
   .shell{
-    max-width:960px;
+    max-width:1440px;
     margin:0 auto;
   }
 
@@ -47,12 +50,13 @@
     padding:0 28px;
   }
   .wordmark{
-    font-family:'Cormorant Garamond', serif;
-    font-size:26px;
-    font-weight:600;
+    font-family:'Archivo', sans-serif;
+    font-size:22px;
+    font-weight:800;
     letter-spacing:0.14em;
+    cursor:pointer;
   }
-  .wordmark span{ font-style:italic; font-weight:400; color:var(--gray-2); font-size:14px; letter-spacing:0.02em; margin-left:10px;}
+  .wordmark span{ font-weight:500; color:var(--gray-2); font-size:13px; letter-spacing:0.02em; margin-left:10px;}
   nav{ display:flex; gap:34px; }
   nav a{
     color:var(--gray-1);
@@ -109,11 +113,11 @@
   .gold-top{ border-top:3px solid var(--gold); }
   #charCard{ border-bottom:none; } /* 아래쪽은 hairline 대신 .meander-divider 띠로 마무리 */
   .badge-gold{ border-color:var(--gold); color:var(--gold); }
-  .cta-gold{ background:var(--gold) !important; color:var(--black) !important; border-color:var(--gold) !important; }
+  .cta-gold{ background:var(--gold) !important; color:var(--on-gold) !important; border-color:var(--gold) !important; }
   .cta-gold:hover{ opacity:0.88; }
   .meander-divider{
     height:13px;
-    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13' viewBox='0 0 20 13'%3E%3Crect width='20' height='13' fill='white'/%3E%3Cpath d='M0 10 H4 V3 H9 V10 H13 V3 H18 V10 H20' stroke='%23111110' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") repeat-x left center;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13' viewBox='0 0 20 13'%3E%3Crect width='20' height='13' fill='%23111110'/%3E%3Cpath d='M0 10 H4 V3 H9 V10 H13 V3 H18 V10 H20' stroke='%23f4f2ec' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") repeat-x left center;
     background-size:20px 13px;
   }
 
@@ -128,7 +132,7 @@
     font-family:'Archivo',sans-serif; color:var(--ink); background:var(--white);
   }
   .auth-submit{
-    margin-top:4px; width:100%; padding:11px 0; background:var(--gold); color:var(--black);
+    margin-top:4px; width:100%; padding:11px 0; background:var(--gold); color:var(--on-gold);
     border:none; font-size:13px; letter-spacing:0.02em; cursor:pointer; font-family:'Archivo',sans-serif;
   }
   .auth-submit:hover{ opacity:0.85; }
@@ -137,7 +141,7 @@
   .logout-link{ font-size:11.5px; color:var(--gray-2); text-decoration:underline; cursor:pointer; margin-top:2px; align-self:flex-start; background:none; border:none; padding:0; font-family:'Archivo',sans-serif; }
   .loading-text{ font-size:13px; color:var(--gray-2); }
 
-  .section-title{ font-family:'Cormorant Garamond', serif; font-size:19px; font-weight:600; }
+  .section-title{ font-family:'Archivo', sans-serif; font-size:17px; font-weight:800; letter-spacing:-0.01em; }
   .section-sub{ font-size:12px; color:var(--gray-2); }
 
   #map{
@@ -206,7 +210,7 @@
   .thread-form{ display:flex; flex-direction:column; gap:10px; align-items:flex-start; }
   .thread-form input, .thread-form textarea, .thread-form select{
     border:1px solid var(--line); padding:9px 10px; font-size:13px;
-    font-family:'Archivo',sans-serif; color:var(--ink); width:100%;
+    font-family:'Archivo',sans-serif; color:var(--ink); background:var(--white); width:100%;
   }
   .thread-form textarea{ resize:vertical; min-height:70px; }
   .thread-form-hint{ font-size:11.5px; color:var(--gray-2); }
@@ -221,7 +225,7 @@
   .msg-bubble.mine{ align-self:flex-end; background:var(--black); color:var(--white); border-color:var(--black); }
   .msg-bubble.theirs{ align-self:flex-start; background:var(--white); }
   .msg-send-row{ display:flex; gap:8px; margin-top:10px; }
-  .msg-send-row input{ flex:1; border:1px solid var(--line); padding:9px 10px; font-size:13px; font-family:'Archivo',sans-serif; }
+  .msg-send-row input{ flex:1; border:1px solid var(--line); padding:9px 10px; font-size:13px; font-family:'Archivo',sans-serif; color:var(--ink); background:var(--white); }
 
   /* ---------- 논제 상세 모달 ---------- */
   .modal-backdrop{ position:fixed; inset:0; background:rgba(17,17,16,0.55); display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; z-index:100; overflow-y:auto; }
@@ -234,7 +238,7 @@
   .arg-actions{ display:flex; gap:8px; margin-top:8px; align-items:center; }
   .reaction-btn{ font-size:11px; padding:4px 9px; border:1px solid var(--black); background:var(--white); cursor:pointer; font-family:'Archivo',sans-serif; }
   .reaction-btn:hover{ background:var(--black); color:var(--white); }
-  .reaction-btn.laugh:hover{ background:var(--gold); border-color:var(--gold); color:var(--black); }
+  .reaction-btn.laugh:hover{ background:var(--gold); border-color:var(--gold); color:var(--on-gold); }
   .reaction-count{ font-size:11px; color:var(--gray-2); }
   .reaction-btn:active{ transform:scale(0.94); }
   @keyframes popScale{ 0%{ transform:scale(1); } 50%{ transform:scale(1.35); } 100%{ transform:scale(1); } }
@@ -405,16 +409,16 @@
     shield: '방패', jewelry: '장신구', glasses: '안경', effect: '이펙트', background: '배경',
   };
   const SHOP_ICON_SVG = {
-    shop_hat_laurel: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 14c2-6 6-9 8-9s6 3 8 9" stroke="#111110" stroke-width="1.6"/><path d="M6 13c1-1 2-1 3 0M9 10c1-1 2-1 3 0M12 9c1-1 2-1 3 0M15 10c1-1 2-1 3 0M18 13c1-1 2-1 3 0" stroke="#111110" stroke-width="1.2"/></svg>`,
-    shop_face_beard: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M7 6c0 5 1 9 5 12 4-3 5-7 5-12" stroke="#111110" stroke-width="1.6"/><path d="M9 9c1 3 1 6 3 8M15 9c-1 3-1 6-3 8" stroke="#111110" stroke-width="1"/></svg>`,
-    shop_top_chiton: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M6 4l6 3 6-3v5l-3 13H9L6 9z" stroke="#111110" stroke-width="1.6"/><path d="M9 8l1 11M15 8l-1 11" stroke="#111110" stroke-width="1"/></svg>`,
-    shop_pants_greaves: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="6" y="4" width="5" height="16" rx="1" stroke="#111110" stroke-width="1.6"/><rect x="13" y="4" width="5" height="16" rx="1" stroke="#111110" stroke-width="1.6"/><path d="M6 8h5M6 12h5M6 16h5M13 8h5M13 12h5M13 16h5" stroke="#111110" stroke-width="1"/></svg>`,
-    shop_shoes_sandal: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 16c0-2 2-3 4-3h8c3 0 5 1 6 3-2 1-16 1-18 0z" stroke="#111110" stroke-width="1.6"/><path d="M8 13V8M13 13V8M8 8h5" stroke="#111110" stroke-width="1.4"/></svg>`,
-    shop_shield_hoplon: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#111110" stroke-width="1.6"/><circle cx="12" cy="12" r="5" stroke="#111110" stroke-width="1.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="#111110" stroke-width="1.2"/></svg>`,
-    shop_jewelry_olive: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#111110" stroke-width="1.6"/><path d="M12 9c-2-3-5-3-6-1 2 1 3 3 6 1zM12 15c2 3 5 3 6 1-2-1-3-3-6-1z" stroke="#111110" stroke-width="1.2"/></svg>`,
-    shop_glasses_round: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="4" stroke="#111110" stroke-width="1.6"/><circle cx="16" cy="12" r="4" stroke="#111110" stroke-width="1.6"/><path d="M12 12h0M2 12h2M20 12h2" stroke="#111110" stroke-width="1.6"/></svg>`,
-    shop_effect_halo: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="#111110" stroke-width="1.6"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.5 4.5l2 2M17.5 17.5l2 2M19.5 4.5l-2 2M6.5 17.5l-2 2" stroke="#111110" stroke-width="1.2"/></svg>`,
-    shop_background_columns: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 4h6M3 20h6M6 5v14" stroke="#111110" stroke-width="1.6"/><path d="M15 4h6M15 20h6M18 5v14" stroke="#111110" stroke-width="1.6"/></svg>`,
+    shop_hat_laurel: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 14c2-6 6-9 8-9s6 3 8 9" stroke="currentColor" stroke-width="1.6"/><path d="M6 13c1-1 2-1 3 0M9 10c1-1 2-1 3 0M12 9c1-1 2-1 3 0M15 10c1-1 2-1 3 0M18 13c1-1 2-1 3 0" stroke="currentColor" stroke-width="1.2"/></svg>`,
+    shop_face_beard: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M7 6c0 5 1 9 5 12 4-3 5-7 5-12" stroke="currentColor" stroke-width="1.6"/><path d="M9 9c1 3 1 6 3 8M15 9c-1 3-1 6-3 8" stroke="currentColor" stroke-width="1"/></svg>`,
+    shop_top_chiton: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M6 4l6 3 6-3v5l-3 13H9L6 9z" stroke="currentColor" stroke-width="1.6"/><path d="M9 8l1 11M15 8l-1 11" stroke="currentColor" stroke-width="1"/></svg>`,
+    shop_pants_greaves: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="6" y="4" width="5" height="16" rx="1" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="4" width="5" height="16" rx="1" stroke="currentColor" stroke-width="1.6"/><path d="M6 8h5M6 12h5M6 16h5M13 8h5M13 12h5M13 16h5" stroke="currentColor" stroke-width="1"/></svg>`,
+    shop_shoes_sandal: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 16c0-2 2-3 4-3h8c3 0 5 1 6 3-2 1-16 1-18 0z" stroke="currentColor" stroke-width="1.6"/><path d="M8 13V8M13 13V8M8 8h5" stroke="currentColor" stroke-width="1.4"/></svg>`,
+    shop_shield_hoplon: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="currentColor" stroke-width="1.2"/></svg>`,
+    shop_jewelry_olive: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 9c-2-3-5-3-6-1 2 1 3 3 6 1zM12 15c2 3 5 3 6 1-2-1-3-3-6-1z" stroke="currentColor" stroke-width="1.2"/></svg>`,
+    shop_glasses_round: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M12 12h0M2 12h2M20 12h2" stroke="currentColor" stroke-width="1.6"/></svg>`,
+    shop_effect_halo: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.5 4.5l2 2M17.5 17.5l2 2M19.5 4.5l-2 2M6.5 17.5l-2 2" stroke="currentColor" stroke-width="1.2"/></svg>`,
+    shop_background_columns: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 4h6M3 20h6M6 5v14" stroke="currentColor" stroke-width="1.6"/><path d="M15 4h6M15 20h6M18 5v14" stroke="currentColor" stroke-width="1.6"/></svg>`,
   };
   const BELLIGERENCE_TIER_LABEL = { warrior: '논전사', elite_warrior: '정예 논전사' };
   const WAR_STATUS_LABEL = { voting: '수락 투표중', accepted: '전투 진행중', avoided: '회피(부결)', void: '성립 불가' };
@@ -723,8 +727,8 @@
   const avatarSvg = `
     <div class="char-avatar">
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="7.5" r="4" stroke="#111110" stroke-width="1.4"/>
-        <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="#111110" stroke-width="1.4" fill="none"/>
+        <circle cx="12" cy="7.5" r="4" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
       </svg>
     </div>`;
 
@@ -809,8 +813,8 @@
         <div class="profile-avatar-col">
           <div class="profile-avatar">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="7.5" r="4" stroke="#111110" stroke-width="1.4"/>
-              <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="#111110" stroke-width="1.4" fill="none"/>
+              <circle cx="12" cy="7.5" r="4" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
             </svg>
           </div>
           <button class="mini-btn" id="inventoryBtn">인벤토리</button>
@@ -935,8 +939,8 @@
             <div class="hot-issue-left">
               <div class="hot-issue-avatar">
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="7.5" r="4" stroke="#111110" stroke-width="1.4"/>
-                  <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="#111110" stroke-width="1.4" fill="none"/>
+                  <circle cx="12" cy="7.5" r="4" stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
                 </svg>
               </div>
               <div class="hot-issue-author">${t.author_nickname}</div>
@@ -981,7 +985,7 @@
         <div class="dispute-item">
           <span class="dispute-region">${r.name}</span>
           <span class="dispute-flag">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="#111110" stroke-width="1.6"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="currentColor" stroke-width="1.6"/></svg>
             ${r.status === 'contested' ? '판정 진행중' : '분쟁 지역'}
           </span>
         </div>`).join('')
