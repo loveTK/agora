@@ -304,7 +304,9 @@ npm run web       # 시뮬레이터 없이 빠르게 미리보기
 - Nginx 리버스 프록시 (80/443 → 4000, Socket.io WebSocket 업그레이드 포함)
 - Let's Encrypt(certbot)로 HTTPS
 - SQLite 파일은 인스턴스 로컬 디스크에 저장 (`data/agora.db`) — Lightsail 자동 스냅샷으로 백업 권장
-- 프론트엔드(`agora.html`)는 Netlify에 배포, API는 `api.myagora.xyz` 서브도메인으로 분리
+- 프론트엔드(`agora.html`)도 같은 Lightsail 인스턴스에서 Nginx가 정적 파일로 직접 서빙 (`myagora.xyz`), API는 `api.myagora.xyz` 서브도메인으로 분리 — 둘 다 같은 서버라 Netlify는 더 이상 쓰지 않음
+  - Nginx 설정: `deploy/nginx-frontend.conf` (`root /home/ubuntu/agora; try_files /agora.html =404;`), `/etc/nginx/sites-enabled/agora-frontend`로 심볼릭 링크
+  - 주의: 홈 디렉터리 기본 권한(750) 때문에 Nginx(www-data)가 파일에 접근 못 할 수 있음 — `chmod o+x /home/ubuntu`, `chmod o+rx /home/ubuntu/agora`, `chmod o+r /home/ubuntu/agora/agora.html` 필요
 
 ### 최초 배포
 1. Lightsail 콘솔에서 Ubuntu 22.04 인스턴스 생성, 고정 IP(Static IP) 연결
