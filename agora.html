@@ -268,6 +268,14 @@
   .marker-dot{ width:16px; height:16px; border-radius:50%; animation:markerPulse 2s ease-out infinite; }
   .marker-icons{ display:flex; gap:2px; justify-content:center; }
 
+  /* ---------- 상점 ---------- */
+  .shop-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:14px; }
+  .shop-item{ border:1px solid var(--line); padding:18px 10px 14px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; }
+  .shop-item-icon{ width:40px; height:40px; }
+  .shop-item-name{ font-size:12.5px; font-weight:500; }
+  .shop-item-slot{ font-size:10.5px; color:var(--gray-2); }
+  .shop-item-price{ font-size:11px; color:var(--gold); font-weight:600; }
+
   @media (max-width:480px){
     .lists-row{ grid-template-columns:1fr; gap:14px; }
     nav{ gap:18px; }
@@ -346,11 +354,12 @@
 
   </div>
 
-  <!-- 상점 — 아직 실제 구매 백엔드 없음(기획문서 20장 참고), 준비중 안내만 표시 -->
+  <!-- 상점 — 1차 오픈: 무료 코스메틱 10종, 착용 조건 없음(기획문서 20장의 유료/조건부 상점은 이후 단계) -->
   <div class="shell" id="shopView" style="display:none;">
     <section class="section">
       <span class="section-title" style="font-size:16px;">상점</span>
-      <div class="loading-text">상점은 아직 준비 중입니다. (장비 슬롯 14종 · 개별 구매 — 기획문서 20장)</div>
+      <div class="section-sub">전부 무료 · 착용 조건 없음</div>
+      <div id="shopContent"><div class="loading-text">불러오는 중...</div></div>
     </section>
   </div>
 </main>
@@ -370,7 +379,23 @@
 <script>
   const API_BASE = 'https://api.myagora.xyz';
   const RANK_LABEL = { citizen: '시민', supporter: '지지자', prophet: '선지자' };
-  const SLOT_LABEL = { accessory: '악세사리', badge: '뱃지', cloak: '망토', weapon: '무기' };
+  const SLOT_LABEL = {
+    accessory: '악세사리', badge: '뱃지', cloak: '망토', weapon: '무기',
+    hat: '모자', face: '얼굴', top: '상의', pants: '바지', shoes: '신발',
+    shield: '방패', jewelry: '장신구', glasses: '안경', effect: '이펙트', background: '배경',
+  };
+  const SHOP_ICON_SVG = {
+    shop_hat_laurel: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 14c2-6 6-9 8-9s6 3 8 9" stroke="#111110" stroke-width="1.6"/><path d="M6 13c1-1 2-1 3 0M9 10c1-1 2-1 3 0M12 9c1-1 2-1 3 0M15 10c1-1 2-1 3 0M18 13c1-1 2-1 3 0" stroke="#111110" stroke-width="1.2"/></svg>`,
+    shop_face_beard: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M7 6c0 5 1 9 5 12 4-3 5-7 5-12" stroke="#111110" stroke-width="1.6"/><path d="M9 9c1 3 1 6 3 8M15 9c-1 3-1 6-3 8" stroke="#111110" stroke-width="1"/></svg>`,
+    shop_top_chiton: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M6 4l6 3 6-3v5l-3 13H9L6 9z" stroke="#111110" stroke-width="1.6"/><path d="M9 8l1 11M15 8l-1 11" stroke="#111110" stroke-width="1"/></svg>`,
+    shop_pants_greaves: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="6" y="4" width="5" height="16" rx="1" stroke="#111110" stroke-width="1.6"/><rect x="13" y="4" width="5" height="16" rx="1" stroke="#111110" stroke-width="1.6"/><path d="M6 8h5M6 12h5M6 16h5M13 8h5M13 12h5M13 16h5" stroke="#111110" stroke-width="1"/></svg>`,
+    shop_shoes_sandal: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 16c0-2 2-3 4-3h8c3 0 5 1 6 3-2 1-16 1-18 0z" stroke="#111110" stroke-width="1.6"/><path d="M8 13V8M13 13V8M8 8h5" stroke="#111110" stroke-width="1.4"/></svg>`,
+    shop_shield_hoplon: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#111110" stroke-width="1.6"/><circle cx="12" cy="12" r="5" stroke="#111110" stroke-width="1.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="#111110" stroke-width="1.2"/></svg>`,
+    shop_jewelry_olive: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#111110" stroke-width="1.6"/><path d="M12 9c-2-3-5-3-6-1 2 1 3 3 6 1zM12 15c2 3 5 3 6 1-2-1-3-3-6-1z" stroke="#111110" stroke-width="1.2"/></svg>`,
+    shop_glasses_round: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="4" stroke="#111110" stroke-width="1.6"/><circle cx="16" cy="12" r="4" stroke="#111110" stroke-width="1.6"/><path d="M12 12h0M2 12h2M20 12h2" stroke="#111110" stroke-width="1.6"/></svg>`,
+    shop_effect_halo: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="#111110" stroke-width="1.6"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.5 4.5l2 2M17.5 17.5l2 2M19.5 4.5l-2 2M6.5 17.5l-2 2" stroke="#111110" stroke-width="1.2"/></svg>`,
+    shop_background_columns: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 4h6M3 20h6M6 5v14" stroke="#111110" stroke-width="1.6"/><path d="M15 4h6M15 20h6M18 5v14" stroke="#111110" stroke-width="1.6"/></svg>`,
+  };
   const BELLIGERENCE_TIER_LABEL = { warrior: '논전사', elite_warrior: '정예 논전사' };
   const WAR_STATUS_LABEL = { voting: '수락 투표중', accepted: '전투 진행중', avoided: '회피(부결)', void: '성립 불가' };
   const CONGRESS_STATUS_LABEL = { voting: '국회 승인투표중', approved: '승인 → 선포됨', rejected: '국회 부결' };
@@ -411,7 +436,50 @@
     document.getElementById('navDashboard').classList.remove('active');
     document.getElementById('dashboardView').style.display = 'none';
     document.getElementById('shopView').style.display = '';
+    renderShop();
   });
+
+  async function renderShop() {
+    const el = document.getElementById('shopContent');
+    el.innerHTML = '<div class="loading-text">불러오는 중...</div>';
+    try {
+      const items = await apiRequest('/items/shop');
+      let owned = new Set();
+      if (currentUser) {
+        try {
+          const inv = await apiRequest(`/users/${currentUser.id}/inventory`);
+          owned = new Set(inv.map(i => i.item_id));
+        } catch (err) { /* 인벤토리 조회 실패해도 상점 자체는 보여줘야 하므로 무시 */ }
+      }
+
+      el.innerHTML = `
+        <div class="shop-grid">
+          ${items.map(it => `
+            <div class="shop-item">
+              <div class="shop-item-icon">${SHOP_ICON_SVG[it.id] || ''}</div>
+              <div class="shop-item-name">${it.name}</div>
+              <div class="shop-item-slot">${SLOT_LABEL[it.slot_type] || it.slot_type}</div>
+              <div class="shop-item-price">무료</div>
+              ${!currentUser
+                ? '<span class="issue-meta">로그인 필요</span>'
+                : owned.has(it.id)
+                  ? '<button class="mini-btn" disabled>보유중</button>'
+                  : `<button class="mini-btn" data-acquire="${it.id}">획득</button>`}
+            </div>`).join('')}
+        </div>`;
+
+      el.querySelectorAll('[data-acquire]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            await apiRequest(`/items/${btn.dataset.acquire}/acquire`, { method: 'POST' });
+            renderShop();
+          } catch (err) { alert(err.message); }
+        });
+      });
+    } catch (err) {
+      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
+  }
 
   /* ---------------- 토스트 (여러 이벤트 연속 시 애니메이션 재시작) ---------------- */
 

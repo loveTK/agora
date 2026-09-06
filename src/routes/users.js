@@ -139,7 +139,7 @@ router.get("/:id/inventory", (req, res) => {
 
   const rows = db
     .prepare(
-      `SELECT ui.item_id, ui.acquired_at, i.slot_type, i.owner_type, i.owner_id, i.design_asset_url
+      `SELECT ui.item_id, ui.acquired_at, i.slot_type, i.owner_type, i.owner_id, i.design_asset_url, i.name
        FROM user_inventory ui JOIN items i ON i.id = ui.item_id
        WHERE ui.user_id = ?`
     )
