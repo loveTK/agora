@@ -139,7 +139,7 @@ router.get("/:id/inventory", (req, res) => {
 
   const rows = db
     .prepare(
-      `SELECT ui.item_id, ui.acquired_at, i.slot_type, i.owner_type, i.owner_id, i.design_asset_url, i.name
+      `SELECT ui.item_id, ui.acquired_at, ui.equipped, i.slot_type, i.owner_type, i.owner_id, i.design_asset_url, i.name
        FROM user_inventory ui JOIN items i ON i.id = ui.item_id
        WHERE ui.user_id = ?`
     )
@@ -155,6 +155,63 @@ router.get("/:id/inventory", (req, res) => {
   });
 
   res.json(inventory);
+});
+
+// POST /users/:id/inventory/:itemId/equip
+// 토글: 이미 착용 중이면 해제, 아니면 착용 — 같은 슬롯(모자/얼굴 등)의 다른 아이템은 자동으로 해제된다.
+// 본인 인벤토리만 조작 가능.
+router.post("/:id/inventory/:itemId/equip", requireAuth, (req, res) => {
+  if (req.params.id !== req.userId) {
+    return res.status(403).json({ error: "본인 인벤토리만 조작할 수 있습니다." });
+  }
+
+  const row = db
+    .prepare(
+      `SELECT ui.equipped, i.slot_type FROM user_inventory ui JOIN items i ON i.id = ui.item_id
+       WHERE ui.user_id = ? AND ui.item_id = ?`
+    )
+    .get(req.userId, req.params.itemId);
+  if (!row) return res.status(404).json({ error: "보유하지 않은 아이템입니다." });
+
+  const tx = db.transaction(() => {
+    if (row.equipped) {
+      db.prepare("UPDATE user_inventory SET equipped = 0 WHERE user_id = ? AND item_id = ?").run(
+        req.userId,
+        req.params.itemId
+      );
+      return false;
+    }
+    // 같은 슬롯 착용 중인 다른 아이템 해제 (슬롯당 1개 제한)
+    db.prepare(
+      `UPDATE user_inventory SET equipped = 0
+       WHERE user_id = ? AND equipped = 1
+         AND item_id IN (SELECT id FROM items WHERE slot_type = ?)`
+    ).run(req.userId, row.slot_type);
+    db.prepare("UPDATE user_inventory SET equipped = 1 WHERE user_id = ? AND item_id = ?").run(
+      req.userId,
+      req.params.itemId
+    );
+    return true;
+  });
+  const equipped = tx();
+
+  res.json({ item_id: req.params.itemId, equipped });
+});
+
+// GET /users/:id/tickers
+// 19장 티커 도감 — 자동 발급된 티커 목록(중복 종류 제거, 최신 발급순).
+router.get("/:id/tickers", (req, res) => {
+  const user = db.prepare("SELECT id FROM users WHERE id = ?").get(req.params.id);
+  if (!user) return res.status(404).json({ error: "유저를 찾을 수 없습니다." });
+
+  const tickers = db
+    .prepare(
+      `SELECT ticker, MAX(granted_at) AS granted_at FROM user_tickers
+       WHERE user_id = ? GROUP BY ticker ORDER BY granted_at DESC`
+    )
+    .all(req.params.id);
+
+  res.json(tickers);
 });
 
 // GET /users/:id/influence

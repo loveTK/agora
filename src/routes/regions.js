@@ -41,11 +41,26 @@ router.get("/:id/threads", (req, res) => {
   const region = db.prepare("SELECT id FROM regions WHERE id = ?").get(req.params.id);
   if (!region) return res.status(404).json({ error: "지역을 찾을 수 없습니다." });
 
+  // 지도지역위젯(700x500)에서 발의자/소속국가/참여인원/추천비추천바보까지 한 번에 보여주기 위해
+  // 참여자 수·반응 집계까지 이 목록 응답에 같이 실어 보낸다(위젯에서 논제 하나씩 추가 요청 안 해도 되게).
   const threads = db
     .prepare(
       `SELECT t.id, t.title, t.status, t.created_at, u.nickname AS author_nickname,
-              (SELECT COUNT(*) FROM arguments a WHERE a.thread_id = t.id) AS argument_count
-       FROM threads t JOIN users u ON u.id = t.author_id
+              ur.name AS author_region_name,
+              (SELECT COUNT(*) FROM arguments a WHERE a.thread_id = t.id) AS argument_count,
+              COALESCE((SELECT SUM(CASE WHEN vote_type = 'up' THEN weight ELSE 0 END) FROM thread_votes WHERE thread_id = t.id), 0) AS thread_upvotes,
+              COALESCE((SELECT SUM(CASE WHEN vote_type = 'down' THEN weight ELSE 0 END) FROM thread_votes WHERE thread_id = t.id), 0) AS thread_downvotes,
+              COALESCE((SELECT SUM(weight) FROM laugh_reactions WHERE target_type = 'thread' AND target_id = t.id), 0) AS thread_laugh_count,
+              (SELECT COUNT(*) FROM (
+                 SELECT author_id AS uid FROM arguments WHERE thread_id = t.id
+                 UNION
+                 SELECT voter_id AS uid FROM thread_votes WHERE thread_id = t.id
+                 UNION
+                 SELECT user_id AS uid FROM laugh_reactions WHERE target_type = 'thread' AND target_id = t.id
+               )) AS participant_count
+       FROM threads t
+       JOIN users u ON u.id = t.author_id
+       LEFT JOIN regions ur ON ur.id = u.region_id
        WHERE t.region_id = ? AND t.hidden = 0
        ORDER BY t.created_at DESC`
     )
@@ -62,7 +77,12 @@ router.get("/:id/dominance", (req, res) => {
 
   const ruler = db
     .prepare(
-      `SELECT d.*, u.nickname FROM dominance d JOIN users u ON u.id = d.user_id
+      `SELECT d.*, u.nickname,
+              (SELECT p.name FROM party_members pm JOIN parties p ON p.id = pm.party_id
+                 WHERE pm.user_id = d.user_id) AS party_name,
+              (SELECT r.name FROM religion_members rm JOIN religions r ON r.id = rm.religion_id
+                 WHERE rm.user_id = d.user_id) AS religion_name
+       FROM dominance d JOIN users u ON u.id = d.user_id
        WHERE d.region_id = ?`
     )
     .get(req.params.id);

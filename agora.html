@@ -9,16 +9,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* 화이트 메인 — 블랙 메인에서 뉴트럴 램프 전체를 다시 원래대로 뒤집는다(양쪽 다 var(--black)/
-       var(--white) 등을 쓰는 기존 규칙이 그대로 맞물리게, 극단값 두 개만이 아니라 회색조 전체를 반전). */
-    --black:#111110;
-    --ink:#1c1c1a;
-    --gray-1:#4a4a46;
-    --gray-2:#8a8a84;
-    --gray-3:#c9c9c2;
-    --gray-4:#e6e6e0;
-    --white:#ffffff;
-    --line: rgba(17,17,16,0.14);
+    /* 블랙 메인 — 승인된 목업(Agora Broadsheet)의 토큰 값 그대로 재적용.
+       var(--black)/var(--white) 등을 쓰는 기존 규칙 전부가 자동으로 맞게 뒤집힌다. */
+    --black:#f4f2ec;
+    --ink:#ece9e2;
+    --gray-1:#c9c9c2;
+    --gray-2:#9a9a94;
+    --gray-3:#4a4a46;
+    --gray-4:#2a2a28;
+    --white:#111110;
+    --line: rgba(244,242,236,0.16);
     --gold:#BA7517;
     --on-gold:#111110; /* 골드 배경 위 텍스트는 테마와 무관하게 항상 짙게 — 대비 확보용 */
   }
@@ -122,7 +122,7 @@
     width:100vw;
     margin-left:calc(50% - 50vw);
     margin-right:calc(50% - 50vw);
-    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13' viewBox='0 0 20 13'%3E%3Crect width='20' height='13' fill='%23ffffff'/%3E%3Cpath d='M0 10 H4 V3 H9 V10 H13 V3 H18 V10 H20' stroke='%23111110' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") repeat-x left center;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13' viewBox='0 0 20 13'%3E%3Crect width='20' height='13' fill='%23111110'/%3E%3Cpath d='M0 10 H4 V3 H9 V10 H13 V3 H18 V10 H20' stroke='%23f4f2ec' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") repeat-x left center;
     background-size:20px 13px;
   }
 
@@ -148,6 +148,30 @@
 
   .section-title{ font-family:'Archivo', sans-serif; font-size:17px; font-weight:800; letter-spacing:-0.01em; }
   .section-sub{ font-size:12px; color:var(--gray-2); }
+
+  /* ---------------- 히어로 (목업 Agora Broadsheet의 비대칭 헤드라인 + 실시간 패널) ---------------- */
+  .hero-band{
+    padding:clamp(32px,6vw,64px) 0 clamp(28px,5vw,48px);
+    display:grid; grid-template-columns:1fr; gap:24px;
+  }
+  @media (min-width:860px){ .hero-band{ grid-template-columns:8fr 4fr; align-items:end; } }
+  .hero-headline{
+    font-family:'Archivo', sans-serif; font-weight:800;
+    font-size:clamp(30px,5.2vw,64px); line-height:1.05; letter-spacing:-0.02em;
+    margin:0 0 14px;
+  }
+  .hero-headline em{ font-style:normal; color:var(--gold); }
+  .hero-lede{ font-size:14.5px; color:var(--gray-1); max-width:52ch; line-height:1.6; margin:0; }
+  .hero-live{ border-left:1px solid var(--line); padding-left:20px; }
+  .hero-live-row{ display:flex; align-items:center; gap:9px; margin-bottom:10px; }
+  .live-dot{ width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0; animation:heroPulse 2.2s ease-out infinite; }
+  @keyframes heroPulse{ 0%{ box-shadow:0 0 0 0 rgba(186,117,23,0.45);} 100%{ box-shadow:0 0 0 10px rgba(186,117,23,0);} }
+  .hero-live-row span:last-child{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray-2); }
+  .hero-live-number{ font-family:'Archivo', sans-serif; font-size:clamp(36px,4.4vw,52px); font-weight:800; line-height:1; }
+  .hero-live-caption{ font-size:12.5px; color:var(--gray-2); margin-top:4px; }
+  .map-eyebrow{ font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
+  .map-wrap{ position:relative; }
+  .map-thread-btn{ position:absolute; top:16px; right:24px; z-index:10; border:none; padding:10px 16px; font-size:12.5px; cursor:pointer; font-family:'Archivo',sans-serif; }
 
   /* 지도는 장식 요소라 .shell 폭 제한을 깨고 화면 끝까지(뷰포트 100%) 채운다 */
   #map{
@@ -200,6 +224,18 @@
   .region-list-item[data-open-thread]{ cursor:pointer; }
   .dispute-item.region-link{ cursor:pointer; }
 
+  /* 지도지역위젯 — 700x500 고정 크기, 목업 '지도지역위젯.jpg' 참고 */
+  #regionModal .modal-box{ width:700px; max-width:92vw; height:500px; overflow-y:auto; }
+  .region-widget-top{ display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
+  .region-widget-left{ flex:1; min-width:0; }
+  .region-widget-stats{ font-size:12.5px; color:var(--gray-1); margin-top:6px; }
+  .region-widget-ruler{ display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; }
+  .region-widget-ruler-label{ font-size:10.5px; color:var(--gray-2); text-transform:uppercase; letter-spacing:0.05em; }
+  .region-widget-ruler-name{ font-size:11.5px; color:var(--gray-1); max-width:90px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .region-hot-item{ padding:10px 0; border-bottom:1px solid var(--gray-4); cursor:pointer; }
+  .region-hot-item:last-child{ border-bottom:none; }
+  .region-hot-title{ font-size:13.5px; margin-bottom:4px; }
+
   /* ---------- lists-row: used only for the Hall of Fame's two ranking columns ---------- */
   .lists-row{
     display:grid;
@@ -215,7 +251,8 @@
   .hot-issue-avatar{ width:76px; height:76px; border:1px solid var(--black); display:flex; align-items:center; justify-content:center; }
   .hot-issue-author{ font-size:11px; color:var(--gray-2); text-align:center; max-width:76px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .hot-issue-body{ flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; }
-  .hot-issue-quote{ font-size:14.5px; color:var(--ink); line-height:1.5; }
+  .hot-issue-index{ font-family:'Archivo', sans-serif; font-weight:700; font-size:13px; color:var(--gray-2); margin-right:8px; }
+  .hot-issue-quote{ font-size:16px; font-weight:600; color:var(--ink); line-height:1.4; }
   .hot-issue-stance{
     width:60px; height:60px; border-radius:50%; border:1px solid var(--black);
     display:flex; align-items:center; justify-content:center; text-align:center;
@@ -375,6 +412,40 @@
   .shop-item-slot{ font-size:10.5px; color:var(--gray-2); }
   .shop-item-price{ font-size:11px; color:var(--gold); font-weight:600; }
 
+  /* ---------------- 인벤토리 페이지 — 캐릭터/슬롯 · 선택한 아이템 상세 · 전체 보유 아이템 3열 ---------------- */
+  .inv-layout{ display:flex; flex-direction:column; gap:24px; }
+  @media (min-width:900px){ .inv-layout{ flex-direction:row; align-items:flex-start; } }
+  .inv-col-slots{ flex-shrink:0; width:100%; }
+  @media (min-width:900px){ .inv-col-slots{ width:190px; } }
+  .inv-character-box{
+    height:120px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    margin-bottom:10px;
+  }
+  .inv-slot-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+  .inv-slot-box{
+    aspect-ratio:1; border:1px solid var(--line); display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:2px; cursor:pointer; padding:4px;
+  }
+  .inv-slot-box svg{ width:22px; height:22px; }
+  .inv-slot-box.empty{ opacity:0.32; cursor:default; }
+  .inv-slot-box.selected{ border-color:var(--gold); }
+  .inv-slot-box-label{ font-size:9px; color:var(--gray-2); }
+  .inv-col-detail{ flex-shrink:0; width:100%; }
+  @media (min-width:900px){ .inv-col-detail{ width:230px; } }
+  .inv-detail-icon{ width:100%; height:130px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+  .inv-detail-icon svg{ width:56px; height:56px; }
+  .inv-detail-name{ font-size:15px; font-weight:700; margin-bottom:6px; }
+  .inv-detail-desc{ font-size:12.5px; color:var(--gray-1); line-height:1.5; margin-bottom:10px; }
+  .inv-detail-row{ font-size:11.5px; color:var(--gray-2); margin-bottom:4px; }
+  .inv-detail-status{ font-size:11.5px; font-weight:600; margin-bottom:12px; }
+  .inv-detail-status.equipped{ color:var(--gold); }
+  .inv-col-grid{ flex:1; min-width:0; }
+  .inv-grid-item{ position:relative; cursor:pointer; }
+  .inv-grid-item.selected{ border-color:var(--gold); }
+  .inv-grid-item-equipped-badge{
+    position:absolute; top:6px; right:6px; font-size:9px; padding:1px 5px; background:var(--gold); color:var(--on-gold);
+  }
+
   @media (max-width:480px){
     .lists-row{ grid-template-columns:1fr; gap:14px; }
     nav{ gap:18px; }
@@ -399,6 +470,17 @@
 <main>
   <div class="shell" id="dashboardView">
 
+    <!-- 목업(Agora Broadsheet)의 비대칭 히어로 — 헤드라인 + 실시간 접전 현황 -->
+    <section class="hero-band">
+      <h1 class="hero-headline">19개 폴리스가<br>매일 <em>여론으로</em> 겨룬다</h1>
+      <p class="hero-lede">추천 · 비추천 · 국회 승인투표로 갈리는 지배권. 판정은 사람이 아니라 논증의 총합이 내린다.</p>
+      <div class="hero-live">
+        <div class="hero-live-row"><span class="live-dot"></span><span>실시간 판정 진행중</span></div>
+        <div class="hero-live-number" id="heroRegionCount">·</div>
+        <div class="hero-live-caption">폴리스 동시 접전</div>
+      </div>
+    </section>
+
     <!-- 캐릭터 현황 (로그인 상태에 따라 JS가 내용을 채움) -->
     <section class="section gold-top" id="charCard">
       <div class="loading-text">불러오는 중...</div>
@@ -407,10 +489,13 @@
 
     <section class="section">
       <div>
-        <span class="section-title">전황 개요</span>
-        <div class="section-sub">실시간 폴리스 지배 현황</div>
+        <div class="map-eyebrow">전황 개요</div>
+        <span class="section-title" id="mapStatusHeadline">실시간 폴리스 지배 현황</span>
       </div>
-      <div id="map"></div>
+      <div class="map-wrap">
+        <div id="map"></div>
+        <button class="cta-gold map-thread-btn" id="mapThreadBtn">+ 논제 등록</button>
+      </div>
       <div class="map-legend">
         <span><i class="dot dominant"></i>지배 확정</span>
         <span><i class="dot contested"></i>판정 진행중</span>
@@ -479,6 +564,26 @@
       <div id="adminContent"></div>
     </section>
   </div>
+
+  <!-- 지역(폴리스) 전용 페이지 — 지도 마커나 위젯의 "입장하기"로 진입, ?region=<id>로 직접 링크 가능 -->
+  <div class="shell" id="regionPageView" style="display:none;">
+    <section class="section gold-top">
+      <span class="section-title" style="font-size:22px;" id="regionPageTitle">불러오는 중...</span>
+      <div class="region-stat-grid" id="regionPageStats"></div>
+    </section>
+    <section class="section">
+      <span class="section-title" style="font-size:16px;">지도</span>
+      <div id="regionPageMap" style="height:320px; border:1px solid var(--line);"></div>
+    </section>
+    <section class="section" id="regionPageThreadFormCard">
+      <span class="section-title" style="font-size:16px;">논제 등록</span>
+      <div id="regionPageThreadFormContent"></div>
+    </section>
+    <section class="section">
+      <span class="section-title" style="font-size:16px;">이 지역의 Hot 논쟁</span>
+      <div id="regionPageHotList"></div>
+    </section>
+  </div>
 </main>
 
 <div id="toast"></div>
@@ -509,6 +614,8 @@
     hat: '모자', face: '얼굴', top: '상의', pants: '바지', shoes: '신발',
     shield: '방패', jewelry: '장신구', glasses: '안경', effect: '이펙트', background: '배경',
   };
+  // 19장 티커 도감 — 현재는 자동 발급되는 두 종류만 존재(둘 다 참여도 임계값 기반).
+  const TICKER_LABELS = { ingenious: '이그지니어스', sphinx: '스핑크스' };
   const SHOP_ICON_SVG = {
     shop_hat_laurel: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M4 14c2-6 6-9 8-9s6 3 8 9" stroke="currentColor" stroke-width="1.6"/><path d="M6 13c1-1 2-1 3 0M9 10c1-1 2-1 3 0M12 9c1-1 2-1 3 0M15 10c1-1 2-1 3 0M18 13c1-1 2-1 3 0" stroke="currentColor" stroke-width="1.2"/></svg>`,
     shop_face_beard: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M7 6c0 5 1 9 5 12 4-3 5-7 5-12" stroke="currentColor" stroke-width="1.6"/><path d="M9 9c1 3 1 6 3 8M15 9c-1 3-1 6-3 8" stroke="currentColor" stroke-width="1"/></svg>`,
@@ -521,6 +628,22 @@
     shop_effect_halo: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.5 4.5l2 2M17.5 17.5l2 2M19.5 4.5l-2 2M6.5 17.5l-2 2" stroke="currentColor" stroke-width="1.2"/></svg>`,
     shop_background_columns: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 4h6M3 20h6M6 5v14" stroke="currentColor" stroke-width="1.6"/><path d="M15 4h6M15 20h6M18 5v14" stroke="currentColor" stroke-width="1.6"/></svg>`,
   };
+  const ITEM_DESCRIPTIONS = {
+    shop_hat_laurel: '승자에게 씌워지던 월계관. 논쟁에서 이긴 자의 표식.',
+    shop_face_beard: '철학자라면 응당 갖춰야 할 위엄있는 수염.',
+    shop_top_chiton: '고대 아고라를 거닐던 시민의 기본 복장, 키톤.',
+    shop_pants_greaves: '정강이를 감싸는 가죽 각반. 실용적이고 튼튼하다.',
+    shop_shoes_sandal: '먼 길도 마다 않는 가죽 샌들.',
+    shop_shield_hoplon: '중장보병의 상징, 호플론 방패. 논쟁도 방어가 먼저다.',
+    shop_jewelry_olive: '평화와 지혜를 뜻하는 올리브 가지 브로치.',
+    shop_glasses_round: '작은 글씨의 논증도 놓치지 않는 둥근테 안경.',
+    shop_effect_halo: '탁월한 언변에만 허락되는 은은한 빛무리.',
+    shop_background_columns: '아고라를 둘러싼 신전 기둥을 배경으로.',
+  };
+  const SLOT_ORDER = ['hat', 'face', 'glasses', 'top', 'pants', 'shoes', 'shield', 'jewelry', 'effect', 'background', 'weapon', 'cloak'];
+  function equipConditionLabel(ownerType) {
+    return { shop: '없음', dominance: '현재 지배자 재위 중', religion: '해당 종교 소속', party: '해당 정당 소속', system: '없음' }[ownerType] || '없음';
+  }
   const BELLIGERENCE_TIER_LABEL = { warrior: '논전사', elite_warrior: '정예 논전사' };
   const WAR_STATUS_LABEL = { voting: '수락 투표중', accepted: '전투 진행중', avoided: '회피(부결)', void: '성립 불가' };
   const CONGRESS_STATUS_LABEL = { voting: '국회 승인투표중', approved: '승인 → 선포됨', rejected: '국회 부결' };
@@ -541,6 +664,20 @@
     renderCharCard(); // 지역 목록이 있어야 회원가입 폼의 지역 선택을 만들 수 있음
     initMap(regions);
     renderDisputes();
+
+    document.getElementById('heroRegionCount').textContent = regions.length || '·';
+    const dominantCount = regions.filter(r => r.status === 'dominant').length;
+    const contestedCount = regions.filter(r => r.status === 'contested').length;
+    const disputeCount = regions.length - dominantCount - contestedCount;
+    document.getElementById('mapStatusHeadline').textContent =
+      `지배 확정 ${dominantCount} · 판정 진행중 ${contestedCount} · 분쟁 지역 ${disputeCount}`;
+
+    // ?region=<id>로 직접 들어온 경우 대시보드 대신 그 지역 페이지를 바로 보여준다.
+    const initialRegionId = new URLSearchParams(location.search).get('region');
+    if (initialRegionId) {
+      showView('regionPage');
+      renderRegionPage(initialRegionId);
+    }
   });
 
   renderHotIssues();
@@ -548,12 +685,16 @@
 
   /* ---------------- 상단 네비게이션 (대시보드 / 상점 / 인벤토리 / 관리자페이지) ---------------- */
 
-  const VIEW_IDS = { dashboard: 'dashboardView', shop: 'shopView', inventory: 'inventoryView', admin: 'adminView' };
+  const VIEW_IDS = { dashboard: 'dashboardView', shop: 'shopView', inventory: 'inventoryView', admin: 'adminView', regionPage: 'regionPageView' };
   function showView(name) {
     Object.entries(VIEW_IDS).forEach(([key, id]) => {
       document.getElementById(id).style.display = key === name ? '' : 'none';
     });
     document.querySelectorAll('nav a[data-view]').forEach(a => a.classList.toggle('active', a.dataset.view === name));
+    // 지역 페이지가 아닌 다른 화면으로 이동하면 주소창의 ?region= 흔적도 지운다(새로고침 시 다시 지역 페이지로 안 가게).
+    if (name !== 'regionPage' && new URLSearchParams(location.search).get('region')) {
+      history.pushState({}, '', location.pathname);
+    }
   }
 
   document.querySelectorAll('nav a[data-view]').forEach(a => {
@@ -573,6 +714,14 @@
   }
 
   document.getElementById('logoHome').addEventListener('click', () => showView('dashboard'));
+
+  // 지도 위 "+ 논제 등록" 버튼 — 아래에 이미 있는 논제 등록 폼으로 스크롤 + 포커스(로그인 안 했으면 안내만).
+  document.getElementById('mapThreadBtn').addEventListener('click', () => {
+    document.getElementById('threadFormCard').scrollIntoView({ behavior: 'smooth' });
+    if (!currentUser) return;
+    const titleInput = document.querySelector('#threadFormContent input[name="title"]');
+    if (titleInput) setTimeout(() => titleInput.focus(), 400);
+  });
 
   let shopItemsCache = [];
   let shopFilter = 'all';
@@ -639,6 +788,8 @@
     });
   }
 
+  let inventorySelectedItemId = null;
+
   async function renderInventoryView() {
     const el = document.getElementById('inventoryContent');
     if (!currentUser) {
@@ -648,17 +799,80 @@
     el.innerHTML = '<div class="loading-text">불러오는 중...</div>';
     try {
       const inventory = await apiRequest(`/users/${currentUser.id}/inventory`);
-      el.innerHTML = inventory.length
-        ? `<div class="shop-grid">${inventory.map(it => `
-            <div class="shop-item">
-              <div class="shop-item-icon">${SHOP_ICON_SVG[it.item_id] || ''}</div>
-              <div class="shop-item-name">${it.name || SLOT_LABEL[it.slot_type] || it.slot_type}</div>
-              <div class="shop-item-slot">${SLOT_LABEL[it.slot_type] || it.slot_type}</div>
-            </div>`).join('')}</div>`
-        : '<div class="loading-text">보유한 아이템이 없습니다.</div>';
+      renderInventoryLayout(el, inventory);
     } catch (err) {
       el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
     }
+  }
+
+  function renderInventoryLayout(el, inventory) {
+    if (!inventory.length) {
+      el.innerHTML = '<div class="loading-text">보유한 아이템이 없습니다.</div>';
+      return;
+    }
+    if (!inventory.some(it => it.item_id === inventorySelectedItemId)) {
+      inventorySelectedItemId = inventory[0].item_id;
+    }
+    const equippedBySlot = {};
+    inventory.forEach(it => { if (it.equipped) equippedBySlot[it.slot_type] = it; });
+    const selected = inventory.find(it => it.item_id === inventorySelectedItemId);
+
+    const slotGridHtml = SLOT_ORDER.map(slot => {
+      const it = equippedBySlot[slot];
+      return it
+        ? `<div class="inv-slot-box selected" data-select-item="${it.item_id}">${SHOP_ICON_SVG[it.item_id] || ''}<span class="inv-slot-box-label">${SLOT_LABEL[slot]}</span></div>`
+        : `<div class="inv-slot-box empty"><span class="inv-slot-box-label">${SLOT_LABEL[slot]}</span></div>`;
+    }).join('');
+
+    const gridHtml = inventory.map(it => `
+      <div class="shop-item inv-grid-item ${it.item_id === inventorySelectedItemId ? 'selected' : ''}" data-select-item="${it.item_id}">
+        ${it.equipped ? '<span class="inv-grid-item-equipped-badge">착용중</span>' : ''}
+        <div class="shop-item-icon">${SHOP_ICON_SVG[it.item_id] || ''}</div>
+        <div class="shop-item-name">${it.name || SLOT_LABEL[it.slot_type] || it.slot_type}</div>
+        <div class="shop-item-slot">${SLOT_LABEL[it.slot_type] || it.slot_type}</div>
+      </div>`).join('');
+
+    const statusLabel = selected.equipped ? '착용중' : '착용가능';
+
+    el.innerHTML = `
+      <div class="inv-layout">
+        <div class="inv-col-slots">
+          <div class="inv-character-box">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="7.5" r="4" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
+            </svg>
+          </div>
+          <div class="inv-slot-grid">${slotGridHtml}</div>
+        </div>
+        <div class="inv-col-detail">
+          <div class="inv-detail-icon">${SHOP_ICON_SVG[selected.item_id] || ''}</div>
+          <div class="inv-detail-name">${selected.name || SLOT_LABEL[selected.slot_type] || selected.slot_type}</div>
+          <div class="inv-detail-desc">${ITEM_DESCRIPTIONS[selected.item_id] || '설명이 없는 아이템입니다.'}</div>
+          <div class="inv-detail-status ${selected.equipped ? 'equipped' : ''}">${statusLabel}</div>
+          <div class="inv-detail-row">착용 조건: ${equipConditionLabel(selected.owner_type)}</div>
+          <div class="inv-detail-row">필요 티커: 없음</div>
+          <button class="mini-btn" id="inventoryEquipBtn">${selected.equipped ? '해제하기' : '착용하기'}</button>
+        </div>
+        <div class="inv-col-grid">
+          <div class="shop-grid">${gridHtml}</div>
+        </div>
+      </div>
+    `;
+
+    el.querySelectorAll('[data-select-item]').forEach(node => {
+      node.addEventListener('click', () => {
+        inventorySelectedItemId = node.dataset.selectItem;
+        renderInventoryLayout(el, inventory);
+      });
+    });
+    document.getElementById('inventoryEquipBtn').addEventListener('click', async () => {
+      try {
+        await apiRequest(`/users/${currentUser.id}/inventory/${selected.item_id}/equip`, { method: 'POST' });
+        const fresh = await apiRequest(`/users/${currentUser.id}/inventory`);
+        renderInventoryLayout(el, fresh);
+      } catch (err) { alert(err.message); }
+    });
   }
 
   let adminToken = localStorage.getItem('agora_admin_token');
@@ -906,19 +1120,15 @@
       if (d.ruler && d.ruler.user_id === currentUser.id) dominanceStatus = d.ruler.status;
     } catch (err) { /* 조회 실패해도 카드 자체는 그려야 하므로 무시 */ }
 
-    let inventory = [];
-    try { inventory = await apiRequest(`/users/${currentUser.id}/inventory`); } catch (err) {}
+    let tickers = [];
+    try { tickers = await apiRequest(`/users/${currentUser.id}/tickers`); } catch (err) {}
 
     const dominanceBadge = dominanceStatus === 'tyrant'
       ? `<span class="badge" style="background:var(--black); color:var(--white);">폭군</span>`
       : dominanceStatus === 'ruler' ? `<span class="badge">지배자</span>` : '';
 
-    const itemChips = inventory.length
-      ? inventory.map(it => {
-          const label = SLOT_LABEL[it.slot_type] || it.slot_type;
-          const extra = it.slot_type === 'cloak' && it.color === 'black' ? ' (검정)' : '';
-          return `<span class="badge">${label}${extra}</span>`;
-        }).join('')
+    const tickerChips = tickers.length
+      ? tickers.map(t => `<span class="badge">${TICKER_LABELS[t.ticker] || t.ticker}</span>`).join('')
       : '<span class="stat-label">없음</span>';
 
     charCard.innerHTML = `
@@ -948,7 +1158,7 @@
           </div>
           <div class="profile-ticker">
             <span>›</span>
-            <div class="chip-row">${itemChips}</div>
+            <div class="chip-row">${tickerChips}</div>
           </div>
         </div>
       </div>
@@ -1047,7 +1257,7 @@
     try {
       const threads = await apiRequest('/hot-agenda');
       el.innerHTML = threads.length
-        ? threads.slice(0, 5).map(t => `
+        ? threads.slice(0, 5).map((t, i) => `
           <div class="hot-issue-card" data-toggle-card>
             <div class="hot-issue-left">
               <div class="hot-issue-avatar">
@@ -1060,7 +1270,7 @@
               ${currentUser && currentUser.id !== t.author_id ? `<button class="logout-link" data-open-conv-quick="${t.author_id}" data-nickname="${t.author_nickname}" style="font-size:10px;">쪽지</button>` : ''}
             </div>
             <div class="hot-issue-body">
-              <div class="hot-issue-quote">"${t.title}"</div>
+              <div class="hot-issue-quote"><span class="hot-issue-index">${String(i + 1).padStart(2, '0')}</span>"${t.title}"</div>
               <div class="issue-meta">${t.region_name} 폴리스 / 참여 <span class="count-up" data-target="${t.participant_count}">0</span>명 / <span class="badge badge-gold" style="padding:1px 7px; font-size:10.5px;">추천 ${t.total_upvotes}</span></div>
               ${currentUser && currentUser.id !== t.author_id ? `<div class="hot-issue-reactions">${reactionButtonsHtml('thread', t.id, t.thread_upvotes, t.thread_downvotes, t.thread_laugh_count)}</div>` : ''}
             </div>
@@ -1397,22 +1607,26 @@
   const THREAD_TITLE_MAX = 50;
   const THREAD_BODY_MAX = 300;
 
-  function renderThreadForm() {
-    const el = document.getElementById('threadFormContent');
-    const regionOptions = regionsData.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+  // targetElId/formId를 파라미터로 받아 대시보드 카드와 지역 전용 페이지 양쪽에서 재사용한다.
+  // presetRegionId가 있으면 그 지역으로 고정 선택된 채로 렌더링(지역 페이지에서 씀).
+  function renderThreadForm(targetElId = 'threadFormContent', formId = 'threadForm', presetRegionId = null) {
+    const el = document.getElementById(targetElId);
+    const regionOptions = regionsData
+      .map(r => `<option value="${r.id}" ${presetRegionId === r.id ? 'selected' : ''}>${r.name}</option>`)
+      .join('');
     el.innerHTML = `
-      <form class="thread-form" id="threadForm">
+      <form class="thread-form" id="${formId}">
         <select name="region_id">${regionOptions}</select>
         <input type="text" name="title" placeholder="제목 (${THREAD_TITLE_MAX}자 이내)" maxlength="${THREAD_TITLE_MAX}" required>
         <textarea name="body" placeholder="부연 설명 (선택, ${THREAD_BODY_MAX}자 이내)" maxlength="${THREAD_BODY_MAX}"></textarea>
         <button type="submit" class="mini-btn">등록</button>
         <div class="thread-form-hint">하루 3건까지 등록할 수 있습니다.</div>
-        <div class="auth-error" id="threadFormError" style="display:none;"></div>
+        <div class="auth-error" id="${formId}Error" style="display:none;"></div>
       </form>`;
 
-    document.getElementById('threadForm').addEventListener('submit', async (e) => {
+    document.getElementById(formId).addEventListener('submit', async (e) => {
       e.preventDefault();
-      const errorBox = document.getElementById('threadFormError');
+      const errorBox = document.getElementById(`${formId}Error`);
       errorBox.style.display = 'none';
       const form = new FormData(e.target);
       try {
@@ -1427,6 +1641,7 @@
         alert('논제가 등록되었습니다.');
         e.target.reset();
         renderHotIssues();
+        if (targetElId !== 'threadFormContent') renderRegionPage(presetRegionId);
       } catch (err) {
         errorBox.textContent = err.message;
         errorBox.style.display = 'block';
@@ -1518,8 +1733,6 @@
     return `${base}/${targetId}/${action}`;
   }
 
-  // 19장 티커 도감 — 현재는 "이그지니어스"(자동 발급) 하나뿐이라 표시용 라벨만 매핑해둔다.
-  const TICKER_LABELS = { ingenious: '이그지니어스' };
   function tickerBadgesHtml(tickersCsv) {
     if (!tickersCsv) return '';
     return tickersCsv.split(',').filter(Boolean).map(t => `<span class="ticker-badge">${TICKER_LABELS[t] || t}</span>`).join('');
@@ -1784,65 +1997,61 @@
 
   const REGION_STATUS_LABEL = { dominant: '지배 확정', contested: '판정 진행중' };
 
+  // 지도지역위젯(700x500 참고 목업) — 지역 개요 + Hot 논제 몇 개만 훑고, 더 보려면 입장하기로 전체 페이지 이동.
   async function openRegionModal(regionId) {
     regionModal.style.display = 'flex';
     const content = document.getElementById('regionModalContent');
     content.innerHTML = '<div class="loading-text">불러오는 중...</div>';
 
     try {
-      const [region, dominance, wars, threads, military] = await Promise.all([
+      const [region, dominance, wars, threads] = await Promise.all([
         apiRequest(`/regions/${regionId}`),
         apiRequest(`/regions/${regionId}/dominance`),
         apiRequest(`/regions/${regionId}/wars`),
         apiRequest(`/regions/${regionId}/threads`),
-        apiRequest(`/regions/${regionId}/military-power`),
       ]);
 
       const statusKey = region.status === 'dominant' ? 'dominant' : (region.status === 'contested' ? 'contested' : 'dispute');
       const activeWars = wars.filter(w => w.status === 'voting' || w.status === 'accepted');
+      const ruler = dominance.ruler;
 
-      const rulerHtml = dominance.ruler
-        ? `<div class="issue-meta">${dominance.ruler.nickname}${dominance.ruler.status === 'tyrant' ? ' (폭군)' : ' (지배자)'}</div>`
-        : '<div class="issue-meta">현재 지배자가 없습니다.</div>';
-
-      const warsHtml = activeWars.length
-        ? activeWars.map(w => `
-          <div class="region-list-item">
-            <span>${w.attacker_region_id === regionId ? '공격측' : '방어측'}</span>
-            <span class="issue-meta">${WAR_STATUS_LABEL[w.status] || w.status}</span>
-          </div>`).join('')
-        : '<div class="issue-meta">진행 중인 전쟁이 없습니다.</div>';
-
-      const threadsHtml = threads.length
-        ? threads.slice(0, 8).map(t => `
-          <div class="region-list-item" data-open-thread="${t.id}">
-            <span>${t.title}</span>
-            <span class="issue-meta">논증 ${t.argument_count}개</span>
+      const sortedThreads = [...threads].sort((a, b) =>
+        (b.thread_upvotes + b.thread_downvotes + b.thread_laugh_count) - (a.thread_upvotes + a.thread_downvotes + a.thread_laugh_count)
+      );
+      const threadsHtml = sortedThreads.length
+        ? sortedThreads.slice(0, 4).map(t => `
+          <div class="region-hot-item" data-open-thread="${t.id}">
+            <div class="region-hot-title">"${t.title}"</div>
+            <div class="issue-meta">${t.author_nickname}${t.author_region_name ? ' · ' + t.author_region_name : ''} / 참여 ${t.participant_count}명 / 추천 ${Math.round(t.thread_upvotes)} 비추천 ${Math.round(t.thread_downvotes)} 바보 ${Math.round(t.thread_laugh_count)}</div>
           </div>`).join('')
         : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
 
       content.innerHTML = `
-        <div class="region-hero">
-          <span class="section-title" style="font-size:20px;">${region.name}</span>
-          <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>
-        </div>
-        <div class="region-stat-grid">
-          <div class="region-stat"><span class="region-stat-label">인구</span><span class="region-stat-value">${region.population}</span></div>
-          <div class="region-stat"><span class="region-stat-label">병력</span><span class="region-stat-value">${military.power}</span></div>
-          <div class="region-stat"><span class="region-stat-label">진행 중 전쟁</span><span class="region-stat-value">${activeWars.length}</span></div>
+        <div class="region-widget-top">
+          <div class="region-widget-left">
+            <div class="region-hero">
+              <span class="section-title" style="font-size:20px;">${region.name} 폴리스</span>
+              <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>
+            </div>
+            <div class="region-widget-stats">소속인원: ${region.population}명 &nbsp; 전쟁현황: ${activeWars.length ? `전쟁 중(${activeWars.length})` : '평시'}</div>
+            <div class="region-widget-stats">지배정당: ${ruler && ruler.party_name ? ruler.party_name : '없음'} &nbsp; 국교: ${ruler && ruler.religion_name ? ruler.religion_name : '없음'}</div>
+          </div>
+          <div class="region-widget-ruler">
+            <div class="region-widget-ruler-label">지배자</div>
+            <div class="thread-stage-avatar">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="7.5" r="4" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
+              </svg>
+            </div>
+            <div class="region-widget-ruler-name">${ruler ? ruler.nickname + (ruler.status === 'tyrant' ? ' (폭군)' : '') : '없음'}</div>
+          </div>
         </div>
         <div class="region-section">
-          <div class="thread-side-title">지배 현황</div>
-          ${rulerHtml}
-        </div>
-        <div class="region-section">
-          <div class="thread-side-title">전쟁</div>
-          ${warsHtml}
-        </div>
-        <div class="region-section">
-          <div class="thread-side-title">최근 논제</div>
+          <div class="thread-side-title">지역 Hot 논제</div>
           ${threadsHtml}
         </div>
+        <button class="cta-gold" id="regionWidgetEnterBtn" style="margin-top:16px;">입장하기</button>
       `;
 
       content.querySelectorAll('[data-open-thread]').forEach(item => {
@@ -1851,10 +2060,84 @@
           openThreadModal(item.dataset.openThread);
         });
       });
+      document.getElementById('regionWidgetEnterBtn').addEventListener('click', () => {
+        regionModal.style.display = 'none';
+        goToRegionPage(regionId);
+      });
     } catch (err) {
       content.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
     }
   }
+
+  /* ---------------- 지역(폴리스) 전용 페이지 — ?region=<id> 로 직접 진입 가능한 별도 페이지 ---------------- */
+
+  function goToRegionPage(regionId) {
+    history.pushState({}, '', `?region=${regionId}`);
+    showView('regionPage');
+    renderRegionPage(regionId);
+  }
+
+  let regionPageMap = null;
+
+  async function renderRegionPage(regionId) {
+    document.getElementById('regionPageTitle').textContent = '불러오는 중...';
+    document.getElementById('regionPageStats').innerHTML = '';
+    document.getElementById('regionPageHotList').innerHTML = '<div class="loading-text">불러오는 중...</div>';
+    if (currentUser) {
+      renderThreadForm('regionPageThreadFormContent', 'regionPageThreadForm', regionId);
+    } else {
+      document.getElementById('regionPageThreadFormContent').innerHTML = '<div class="loading-text">로그인하면 논제를 등록할 수 있습니다.</div>';
+    }
+
+    try {
+      const [region, dominance, threads] = await Promise.all([
+        apiRequest(`/regions/${regionId}`),
+        apiRequest(`/regions/${regionId}/dominance`),
+        apiRequest(`/regions/${regionId}/threads`),
+      ]);
+
+      const statusKey = region.status === 'dominant' ? 'dominant' : (region.status === 'contested' ? 'contested' : 'dispute');
+      document.getElementById('regionPageTitle').innerHTML =
+        `${region.name} 폴리스 <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>`;
+
+      const ruler = dominance.ruler;
+      document.getElementById('regionPageStats').innerHTML = `
+        <div class="region-stat"><span class="region-stat-label">인구</span><span class="region-stat-value">${region.population}</span></div>
+        <div class="region-stat"><span class="region-stat-label">지배자</span><span class="region-stat-value" style="font-size:15px;">${ruler ? ruler.nickname + (ruler.status === 'tyrant' ? ' (폭군)' : '') : '없음'}</span></div>
+        <div class="region-stat"><span class="region-stat-label">지배정당</span><span class="region-stat-value" style="font-size:15px;">${ruler && ruler.party_name ? ruler.party_name : '없음'}</span></div>
+        <div class="region-stat"><span class="region-stat-label">국교</span><span class="region-stat-value" style="font-size:15px;">${ruler && ruler.religion_name ? ruler.religion_name : '없음'}</span></div>
+      `;
+
+      const sortedThreads = [...threads].sort((a, b) =>
+        (b.thread_upvotes + b.thread_downvotes + b.thread_laugh_count) - (a.thread_upvotes + a.thread_downvotes + a.thread_laugh_count)
+      );
+      document.getElementById('regionPageHotList').innerHTML = sortedThreads.length
+        ? sortedThreads.map(t => `
+          <div class="region-hot-item" data-open-thread="${t.id}">
+            <div class="region-hot-title">"${t.title}"</div>
+            <div class="issue-meta">${t.author_nickname}${t.author_region_name ? ' · ' + t.author_region_name : ''} / 참여 ${t.participant_count}명 / 추천 ${Math.round(t.thread_upvotes)} 비추천 ${Math.round(t.thread_downvotes)} 바보 ${Math.round(t.thread_laugh_count)}</div>
+          </div>`).join('')
+        : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
+      document.getElementById('regionPageHotList').querySelectorAll('[data-open-thread]').forEach(item => {
+        item.addEventListener('click', () => openThreadModal(item.dataset.openThread));
+      });
+
+      if (typeof L !== 'undefined') {
+        if (regionPageMap) { regionPageMap.remove(); regionPageMap = null; }
+        regionPageMap = L.map('regionPageMap', { zoomControl: false, attributionControl: false }).setView([region.lat, region.lng], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, subdomains: 'abc' }).addTo(regionPageMap);
+        L.marker([region.lat, region.lng], { icon: markerIcon(region) }).addTo(regionPageMap);
+      }
+    } catch (err) {
+      document.getElementById('regionPageTitle').textContent = '불러오지 못했습니다: ' + err.message;
+    }
+  }
+
+  window.addEventListener('popstate', () => {
+    const rid = new URLSearchParams(location.search).get('region');
+    if (rid) { showView('regionPage'); renderRegionPage(rid); }
+    else showView('dashboard');
+  });
 
   tryRestoreSession();
 </script>

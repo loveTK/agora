@@ -9,6 +9,7 @@ const { THREAD_BELLIGERENCE_POINTS, ARGUMENT_BELLIGERENCE_POINTS } = require("..
 const { grantWeaponIfEligible } = require("../services/weapon");
 const { toggleLaugh } = require("../services/laughReaction");
 const { toggleThreadVote, getThreadVoteTally } = require("../services/threadVote");
+const { checkAndGrantSphinxTicker } = require("../services/sphinxTicker");
 
 const DAILY_JUDGMENT_VOTE_LIMIT = 20; // 어뷰징 방지: 하루 20개 논제까지만 판정투표 가능
 
@@ -167,6 +168,7 @@ router.post("/:id/arguments", requireAuth, (req, res) => {
     req.userId
   );
   grantWeaponIfEligible(req.userId); // 논전사 티어(100) 이상이면 무기 슬롯 자동 지급
+  checkAndGrantSphinxTicker(req.params.id); // 이 논제의 참여자 수가 임계값을 넘으면 발의자에게 티커 발급
 
   const arg = db.prepare("SELECT * FROM arguments WHERE id = ?").get(id);
   res.status(201).json(arg);
