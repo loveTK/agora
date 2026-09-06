@@ -8,6 +8,13 @@ const { createBattle, getBattleTally, isWarParticipant, resolveBattle } = requir
 
 const router = express.Router();
 
+// 마이크로 인터랙션(지도 칼 아이콘) 실시간 갱신용 — 전쟁에 얽힌 두 지역 모두에 쏜다.
+function emitWarStatus(io, war) {
+  if (!io || !war) return;
+  io.emit("region:war_status", { region_id: war.attacker_region_id });
+  io.emit("region:war_status", { region_id: war.defender_region_id });
+}
+
 // POST /wars
 // body: { defender_region_id }
 // 정책: 선포자는 현재 지배자여야 하며, 상대 지역에도 지배자가 있어야 함.
@@ -30,6 +37,7 @@ router.post("/", requireAuth, (req, res) => {
   if (result.approval) {
     return res.status(202).json({ pending_congress_approval: true, ...result.approval });
   }
+  emitWarStatus(req.app.get("io"), result.war);
   res.status(201).json(result.war);
 });
 
@@ -75,6 +83,7 @@ router.post("/:id/vote", requireAuth, (req, res) => {
   );
 
   const resolved = resolveWarIfReady(req.params.id);
+  if (resolved) emitWarStatus(req.app.get("io"), war); // accepted/avoided로 상태 전환 -> 칼 아이콘 갱신
   const tally = getWarTally(req.params.id);
 
   res.status(201).json({

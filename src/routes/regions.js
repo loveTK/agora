@@ -10,9 +10,17 @@ const router = express.Router();
 // 지도 렌더링용 경량 목록 (상태값만)
 router.get("/", (req, res) => {
   const regions = db
-    .prepare("SELECT id, name, status, lat, lng FROM regions ORDER BY name")
+    .prepare(
+      `SELECT id, name, status, lat, lng,
+              EXISTS(
+                SELECT 1 FROM wars w
+                WHERE (w.attacker_region_id = regions.id OR w.defender_region_id = regions.id)
+                  AND w.status IN ('voting', 'accepted')
+              ) AS has_active_war
+       FROM regions ORDER BY name`
+    )
     .all();
-  res.json(regions);
+  res.json(regions.map((r) => ({ ...r, has_active_war: !!r.has_active_war })));
 });
 
 // GET /regions/:id

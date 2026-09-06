@@ -57,6 +57,14 @@ router.post("/:id/vote", requireAuth, (req, res) => {
   );
 
   const resolved = resolveApprovalIfReady(req.params.id);
+  if (resolved && resolved.war) {
+    // 승인 가결 -> 실제 전쟁 생성됨. 지도 칼 아이콘 실시간 갱신.
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("region:war_status", { region_id: resolved.war.attacker_region_id });
+      io.emit("region:war_status", { region_id: resolved.war.defender_region_id });
+    }
+  }
   const tally = getApprovalTally(req.params.id);
 
   res.status(201).json({

@@ -236,6 +236,37 @@
   .reaction-btn:hover{ background:var(--black); color:var(--white); }
   .reaction-btn.laugh:hover{ background:var(--gold); border-color:var(--gold); color:var(--black); }
   .reaction-count{ font-size:11px; color:var(--gray-2); }
+  .reaction-btn:active{ transform:scale(0.94); }
+  @keyframes popScale{ 0%{ transform:scale(1); } 50%{ transform:scale(1.35); } 100%{ transform:scale(1); } }
+  .reaction-count.pop{ display:inline-block; animation:popScale 0.3s ease; }
+
+  /* ---------- Hot Issue 카드: hover/press + 아코디언 반응 패널 ---------- */
+  .hot-issue-card{ cursor:pointer; transition:transform 0.15s; }
+  .hot-issue-card:active{ transform:scale(0.98); }
+  .hot-issue-reactions{ max-height:0; overflow:hidden; transition:max-height 0.25s ease; }
+  .hot-issue-reactions.expanded{ max-height:120px; margin-top:6px; }
+
+  /* ---------- 실시간 토스트 ---------- */
+  #toast{
+    position:fixed; top:18px; left:50%; transform:translate(-50%, -8px);
+    background:var(--black); color:var(--white); font-size:12.5px;
+    padding:10px 18px; z-index:300; opacity:0; pointer-events:none;
+  }
+  #toast.show{ animation:toastInOut 2s ease forwards; }
+  @keyframes toastInOut{
+    0%{ opacity:0; transform:translate(-50%, -8px); }
+    10%{ opacity:1; transform:translate(-50%, 0); }
+    85%{ opacity:1; transform:translate(-50%, 0); }
+    100%{ opacity:0; transform:translate(-50%, -8px); }
+  }
+
+  /* ---------- 지도 마커: 상태 점 pulse + 활동 아이콘(불/칼) 오버레이 ---------- */
+  @keyframes markerPulse{
+    0%{ box-shadow:0 0 0 0 rgba(17,17,16,0.35); }
+    100%{ box-shadow:0 0 0 9px rgba(17,17,16,0); }
+  }
+  .marker-dot{ width:16px; height:16px; border-radius:50%; animation:markerPulse 2s ease-out infinite; }
+  .marker-icons{ display:flex; gap:2px; justify-content:center; }
 
   @media (max-width:480px){
     .lists-row{ grid-template-columns:1fr; gap:14px; }
@@ -324,6 +355,8 @@
   </div>
 </main>
 
+<div id="toast"></div>
+
 <!-- 논제 상세(입장하기) 모달 — 기본 숨김, JS가 열고 닫음 -->
 <div class="modal-backdrop" id="threadModal" style="display:none;">
   <div class="modal-box">
@@ -380,13 +413,32 @@
     document.getElementById('shopView').style.display = '';
   });
 
+  /* ---------------- 토스트 (여러 이벤트 연속 시 애니메이션 재시작) ---------------- */
+
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.remove('show');
+    void toast.offsetWidth; // reflow 강제 -> 같은 클래스 다시 붙여도 애니메이션 처음부터 재생됨
+    toast.classList.add('show');
+  }
+
   /* ---------------- 지도 (Leaflet/Socket.io 로드 실패해도 아래 회원가입은 정상 동작) ---------------- */
 
-  function markerIcon(status){
-    const fill = status === 'dominant' ? '#111110' : (status === 'contested' ? '#ffffff' : '#c9c9c2');
+  const FIRE_ICON_SVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 2c2 4-4 5-4 10a4 4 0 0 0 8 0c0-2-1-3-1-3s2 1 2 5a6 6 0 0 1-12 0c0-6 6-7 7-12z" stroke="#111110" stroke-width="1.6" fill="white"/></svg>`;
+  const SWORD_ICON_SVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M3 21L21 3M21 21L3 3" stroke="#111110" stroke-width="1.8"/><path d="M16 3h5v5M8 3H3v5" stroke="#111110" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+
+  // status: 지배확정/판정중/분쟁 색상(기존 로직 그대로) + 점 pulse 애니메이션(CSS) + 불(정족수 도달)/칼(전쟁중) 오버레이.
+  function markerIcon(region){
+    const fill = region.status === 'dominant' ? '#111110' : (region.status === 'contested' ? '#ffffff' : '#c9c9c2');
+    const icons = `${region.status === 'contested' ? FIRE_ICON_SVG : ''}${region.has_active_war ? SWORD_ICON_SVG : ''}`;
     return L.divIcon({
-      html: `<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="${fill}" stroke="#111110" stroke-width="1.6"/></svg>`,
-      className:'', iconSize:[16,16], iconAnchor:[8,8]
+      html: `
+        <div style="width:32px; height:34px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;">
+          <div class="marker-icons">${icons}</div>
+          <div class="marker-dot"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="${fill}" stroke="#111110" stroke-width="1.6"/></svg></div>
+        </div>`,
+      className:'', iconSize:[32,34], iconAnchor:[16,17]
     });
   }
 
@@ -400,8 +452,10 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, subdomains:'abc' }).addTo(map);
 
     const markersById = {};
+    const regionsById = {};
     regions.forEach(r => {
-      const marker = L.marker([r.lat, r.lng], { icon: markerIcon(r.status) })
+      regionsById[r.id] = r;
+      const marker = L.marker([r.lat, r.lng], { icon: markerIcon(r) })
         .bindTooltip(r.name, { permanent:false, direction:'top' })
         .addTo(map);
       markersById[r.id] = marker;
@@ -411,7 +465,23 @@
       const socket = io(API_BASE);
       socket.on('region:update', ({ region_id, status }) => {
         const marker = markersById[region_id];
-        if (marker) marker.setIcon(markerIcon(status));
+        if (!marker || !regionsById[region_id]) return;
+        regionsById[region_id].status = status;
+        marker.setIcon(markerIcon(regionsById[region_id]));
+        const name = regionsById[region_id].name;
+        showToast(`${name} 지역에 새 반응이 있습니다`);
+      });
+      // 전쟁 선포/수락/부결 시 칼 아이콘만 다시 확인(정확한 값은 서버가 알고 있으니 재조회).
+      socket.on('region:war_status', async ({ region_id }) => {
+        const marker = markersById[region_id];
+        if (!marker || !regionsById[region_id]) return;
+        try {
+          const fresh = await apiRequest(`/regions`);
+          const updated = fresh.find(r => r.id === region_id);
+          if (!updated) return;
+          regionsById[region_id] = updated;
+          marker.setIcon(markerIcon(updated));
+        } catch (err) { /* 실시간 갱신 실패해도 다음 새로고침 때 정상화되므로 조용히 무시 */ }
       });
     } else {
       console.warn('Socket.io를 불러오지 못해 실시간 갱신이 비활성화됩니다.');
@@ -632,7 +702,7 @@
       const threads = await apiRequest('/hot-agenda');
       el.innerHTML = threads.length
         ? threads.slice(0, 5).map(t => `
-          <div class="hot-issue-card">
+          <div class="hot-issue-card" data-toggle-card>
             <div class="hot-issue-left">
               <div class="hot-issue-avatar">
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
@@ -645,22 +715,30 @@
             </div>
             <div class="hot-issue-body">
               <div class="hot-issue-quote">"${t.title}"</div>
-              <div class="issue-meta">${t.region_name} 폴리스 / 참여 ${t.participant_count}명 / <span class="badge badge-gold" style="padding:1px 7px; font-size:10.5px;">추천 ${t.total_upvotes}</span></div>
-              ${currentUser && currentUser.id !== t.author_id ? reactionButtonsHtml('thread', t.id, t.thread_upvotes, t.thread_downvotes, t.thread_laugh_count) : ''}
+              <div class="issue-meta">${t.region_name} 폴리스 / 참여 <span class="count-up" data-target="${t.participant_count}">0</span>명 / <span class="badge badge-gold" style="padding:1px 7px; font-size:10.5px;">추천 ${t.total_upvotes}</span></div>
+              ${currentUser && currentUser.id !== t.author_id ? `<div class="hot-issue-reactions">${reactionButtonsHtml('thread', t.id, t.thread_upvotes, t.thread_downvotes, t.thread_laugh_count)}</div>` : ''}
             </div>
             <button class="hot-issue-stance" data-open-thread="${t.id}">입장 →</button>
           </div>`).join('')
         : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
+      el.querySelectorAll('[data-toggle-card]').forEach(card => {
+        card.addEventListener('click', () => {
+          const panel = card.querySelector('.hot-issue-reactions');
+          if (panel) panel.classList.toggle('expanded');
+        });
+      });
       el.querySelectorAll('[data-open-thread]').forEach(btn => {
-        btn.addEventListener('click', () => openThreadModal(btn.dataset.openThread));
+        btn.addEventListener('click', (e) => { e.stopPropagation(); openThreadModal(btn.dataset.openThread); });
       });
       el.querySelectorAll('[data-open-conv-quick]').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
           document.getElementById('messagesCard').scrollIntoView({ behavior: 'smooth' });
           openConversation(btn.dataset.openConvQuick, btn.dataset.nickname);
         });
       });
-      attachReactionHandlers(el, renderHotIssues);
+      attachReactionHandlers(el);
+      el.querySelectorAll('.count-up').forEach(span => countUp(span, Number(span.dataset.target)));
     } catch (err) {
       el.innerHTML = '<div class="issue-meta">불러오지 못했습니다.</div>';
     }
@@ -1083,25 +1161,50 @@
       </div>`;
   }
 
-  // 위 reactionButtonsHtml이 만든 버튼들에 실제 클릭 핸들러를 붙인다. onDone은 반응 성공 후 다시 그릴 콜백.
-  function attachReactionHandlers(el, onDone) {
+  // 숫자가 바뀌었다는 걸 보여주는 pop 애니메이션 — 같은 값이 연달아 와도 reflow로 매번 처음부터 재생.
+  function popBadge(span) {
+    span.classList.remove('pop');
+    void span.offsetWidth;
+    span.classList.add('pop');
+  }
+
+  function countUp(el, target) {
+    if (!target) { el.textContent = '0'; return; }
+    let current = 0;
+    const step = Math.max(1, Math.ceil(target / 33)); // ~1초 안에 끝나도록 보폭 조절
+    const timer = setInterval(() => {
+      current = Math.min(target, current + step);
+      el.textContent = current % 1 === 0 ? current : current.toFixed(1);
+      if (current >= target) clearInterval(timer);
+    }, 30);
+  }
+
+  // 위 reactionButtonsHtml이 만든 버튼들에 실제 클릭 핸들러를 붙인다.
+  // 서버 응답에 바로 최신 집계가 들어있으므로 전체 재렌더 없이 그 버튼의 숫자만 갱신 + pop 애니메이션.
+  function attachReactionHandlers(el) {
     el.querySelectorAll('[data-vote]').forEach(btn => {
-      btn.addEventListener('click', async () => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
         const [targetType, targetId, voteType] = btn.dataset.vote.split(':');
         const path = targetType === 'thread' ? `/threads/${targetId}/vote` : `/arguments/${targetId}/vote`;
         try {
-          await apiRequest(path, { method: 'POST', body: JSON.stringify({ vote_type: voteType }) });
-          onDone();
+          const result = await apiRequest(path, { method: 'POST', body: JSON.stringify({ vote_type: voteType }) });
+          const countSpan = btn.querySelector('.reaction-count');
+          countSpan.textContent = voteType === 'up' ? result.upvotes : result.downvotes;
+          popBadge(countSpan);
         } catch (err) { alert(err.message); }
       });
     });
     el.querySelectorAll('[data-laugh]').forEach(btn => {
-      btn.addEventListener('click', async () => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
         const [targetType, targetId] = btn.dataset.laugh.split(':');
         const path = targetType === 'thread' ? `/threads/${targetId}/laugh` : `/arguments/${targetId}/laugh`;
         try {
-          await apiRequest(path, { method: 'POST' });
-          onDone();
+          const result = await apiRequest(path, { method: 'POST' });
+          const countSpan = btn.querySelector('.reaction-count');
+          countSpan.textContent = result.laugh_count;
+          popBadge(countSpan);
         } catch (err) { alert(err.message); }
       });
     });
@@ -1146,7 +1249,7 @@
           </form>` : ''}
       `;
 
-      attachReactionHandlers(content, () => openThreadModal(threadId));
+      attachReactionHandlers(content);
       content.querySelectorAll('[data-open-conv-quick]').forEach(btn => {
         btn.addEventListener('click', () => {
           threadModal.style.display = 'none';
