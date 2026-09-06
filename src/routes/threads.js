@@ -103,12 +103,26 @@ router.get("/:id", (req, res) => {
     .prepare("SELECT COALESCE(SUM(weight), 0) AS total FROM laugh_reactions WHERE target_type = 'thread' AND target_id = ?")
     .get(req.params.id).total;
 
+  // 참여자 = 논증을 쓴 사람 + 이 논제에 추천/비추천/바보 반응을 남긴 사람 (중복 제거) — hotAgenda.js와 동일 정의
+  const participantCount = db
+    .prepare(
+      `SELECT COUNT(*) AS count FROM (
+         SELECT author_id AS uid FROM arguments WHERE thread_id = ?
+         UNION
+         SELECT voter_id AS uid FROM thread_votes WHERE thread_id = ?
+         UNION
+         SELECT user_id AS uid FROM laugh_reactions WHERE target_type = 'thread' AND target_id = ?
+       )`
+    )
+    .get(req.params.id, req.params.id, req.params.id).count;
+
   res.json({
     ...toPublicThread(thread),
     argument_count: argCount,
     thread_upvotes: voteTally.upvotes,
     thread_downvotes: voteTally.downvotes,
     thread_laugh_count: laughCount,
+    participant_count: participantCount,
   });
 });
 
@@ -156,7 +170,9 @@ router.get("/:id/arguments", (req, res) => {
 
   const args = db
     .prepare(
-      `SELECT a.*, u.nickname AS author_nickname
+      `SELECT a.*, u.nickname AS author_nickname,
+              (SELECT COALESCE(SUM(weight), 0) FROM laugh_reactions
+                 WHERE target_type = 'argument' AND target_id = a.id) AS laugh_count
        FROM arguments a JOIN users u ON u.id = a.author_id
        WHERE a.thread_id = ? AND a.hidden = 0
        ORDER BY a.created_at ASC`
