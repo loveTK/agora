@@ -93,7 +93,14 @@
     width:96px; height:96px;
     border:1px solid var(--black);
     display:flex; align-items:center; justify-content:center;
+    position:relative;
   }
+  .char-avatar-glow{ filter:drop-shadow(0 0 5px var(--gold)); }
+  .char-avatar-badges{
+    position:absolute; bottom:-1px; left:50%; transform:translate(-50%, 50%);
+    display:flex; gap:2px; background:var(--white); border:1px solid var(--line); padding:2px 3px;
+  }
+  .char-avatar-badge svg{ width:12px; height:12px; display:block; }
   .profile-info{ display:flex; flex-direction:column; gap:9px; flex:1; min-width:0; padding-top:4px; }
   .char-name-row{ display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:13.5px; }
   .char-name{ font-weight:600; color:var(--ink); }
@@ -419,7 +426,7 @@
   @media (min-width:900px){ .inv-col-slots{ width:190px; } }
   .inv-character-box{
     height:120px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
-    margin-bottom:10px;
+    margin-bottom:10px; position:relative;
   }
   .inv-slot-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
   .inv-slot-box{
@@ -641,6 +648,24 @@
     shop_background_columns: '아고라를 둘러싼 신전 기둥을 배경으로.',
   };
   const SLOT_ORDER = ['hat', 'face', 'glasses', 'top', 'pants', 'shoes', 'shield', 'jewelry', 'effect', 'background', 'weapon', 'cloak'];
+  // 캐릭터 아이콘에 착용 아이템을 반영 — 이 앱의 아이콘은 전부 같은 실루엣 하나뿐이라, 진짜 옷 입히듯
+  // 겹쳐 그리는 건 불가능하다(그럴 목적으로 그려진 레이어가 아님). 대신 착용한 아이템들을 실루엣 아래에
+  // 작은 배지로 붙이고, '이펙트' 슬롯만 실루엣 자체에 은은한 빛(glow)으로 반영한다.
+  function characterAvatarInnerHtml(equippedItems, avatarSize) {
+    const hasEffect = equippedItems.some(it => it.slot_type === 'effect');
+    const badgeItems = equippedItems.filter(it => it.slot_type !== 'effect');
+    const badgesHtml = badgeItems.length
+      ? `<div class="char-avatar-badges">${badgeItems.map(it =>
+          `<span class="char-avatar-badge" title="${it.name || SLOT_LABEL[it.slot_type]}">${SHOP_ICON_SVG[it.item_id] || ''}</span>`
+        ).join('')}</div>`
+      : '';
+    return `
+      <svg width="${avatarSize}" height="${avatarSize}" viewBox="0 0 24 24" fill="none" class="${hasEffect ? 'char-avatar-glow' : ''}">
+        <circle cx="12" cy="7.5" r="4" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
+      </svg>
+      ${badgesHtml}`;
+  }
   function equipConditionLabel(ownerType) {
     return { shop: '없음', dominance: '현재 지배자 재위 중', religion: '해당 종교 소속', party: '해당 정당 소속', system: '없음' }[ownerType] || '없음';
   }
@@ -838,10 +863,7 @@
       <div class="inv-layout">
         <div class="inv-col-slots">
           <div class="inv-character-box">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="7.5" r="4" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
-            </svg>
+            ${characterAvatarInnerHtml(Object.values(equippedBySlot), 48)}
           </div>
           <div class="inv-slot-grid">${slotGridHtml}</div>
         </div>
@@ -1123,6 +1145,10 @@
     let tickers = [];
     try { tickers = await apiRequest(`/users/${currentUser.id}/tickers`); } catch (err) {}
 
+    let inventory = [];
+    try { inventory = await apiRequest(`/users/${currentUser.id}/inventory`); } catch (err) {}
+    const equippedItems = inventory.filter(it => it.equipped);
+
     const dominanceBadge = dominanceStatus === 'tyrant'
       ? `<span class="badge" style="background:var(--black); color:var(--white);">폭군</span>`
       : dominanceStatus === 'ruler' ? `<span class="badge">지배자</span>` : '';
@@ -1135,10 +1161,7 @@
       <div class="char-top">
         <div class="profile-avatar-col">
           <div class="profile-avatar">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="7.5" r="4" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
-            </svg>
+            ${characterAvatarInnerHtml(equippedItems, 34)}
           </div>
           <button class="mini-btn" id="inventoryBtn">인벤토리</button>
         </div>
