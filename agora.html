@@ -9,16 +9,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* 블랙 메인 — 기존 흑백 토큰의 역할(강한 잉크/배경/보조 텍스트/미묘한 경계선)은 그대로 두고
-       명도만 반전. var(--black)/var(--white) 등을 쓰는 기존 규칙 전부가 자동으로 맞게 뒤집힌다. */
-    --black:#f4f2ec;
-    --ink:#ece9e2;
-    --gray-1:#c9c9c2;
-    --gray-2:#9a9a94;
-    --gray-3:#4a4a46;
-    --gray-4:#2a2a28;
-    --white:#111110;
-    --line: rgba(244,242,236,0.16);
+    /* 화이트 메인 — 블랙 메인에서 뉴트럴 램프 전체를 다시 원래대로 뒤집는다(양쪽 다 var(--black)/
+       var(--white) 등을 쓰는 기존 규칙이 그대로 맞물리게, 극단값 두 개만이 아니라 회색조 전체를 반전). */
+    --black:#111110;
+    --ink:#1c1c1a;
+    --gray-1:#4a4a46;
+    --gray-2:#8a8a84;
+    --gray-3:#c9c9c2;
+    --gray-4:#e6e6e0;
+    --white:#ffffff;
+    --line: rgba(17,17,16,0.14);
     --gold:#BA7517;
     --on-gold:#111110; /* 골드 배경 위 텍스트는 테마와 무관하게 항상 짙게 — 대비 확보용 */
   }
@@ -122,7 +122,7 @@
     width:100vw;
     margin-left:calc(50% - 50vw);
     margin-right:calc(50% - 50vw);
-    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13' viewBox='0 0 20 13'%3E%3Crect width='20' height='13' fill='%23111110'/%3E%3Cpath d='M0 10 H4 V3 H9 V10 H13 V3 H18 V10 H20' stroke='%23f4f2ec' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") repeat-x left center;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='13' viewBox='0 0 20 13'%3E%3Crect width='20' height='13' fill='%23ffffff'/%3E%3Cpath d='M0 10 H4 V3 H9 V10 H13 V3 H18 V10 H20' stroke='%23111110' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") repeat-x left center;
     background-size:20px 13px;
   }
 
@@ -157,8 +157,10 @@
     margin-right:calc(50% - 50vw);
     border-top:1px solid var(--line);
     border-bottom:1px solid var(--line);
-    filter:grayscale(1) contrast(1.08) brightness(1.02);
+    cursor:pointer;
   }
+  /* 흑백 필터는 타일(배경 지도)에만 걸고 마커는 그대로 둔다 — 지배/판정/분쟁 상태색을 보여줘야 하므로 */
+  #map .leaflet-tile-pane{ filter:grayscale(1) contrast(1.08) brightness(1.02); }
 
   .map-legend{
     display:flex; gap:22px;
@@ -167,9 +169,31 @@
     color:var(--gray-1);
   }
   .map-legend .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; }
-  .dot.dominant{ background:var(--black); }
-  .dot.contested{ background:var(--white); border:1.4px solid var(--black); }
-  .dot.dispute{ background:var(--gray-3); }
+  .dot.dominant{ background:#2F7D4F; }
+  .dot.contested{ background:#BA7517; }
+  .dot.dispute{ background:#B23A3A; }
+
+  /* ---------------- 지역(폴리스) 상세 페이지 — 지도 마커/분쟁 목록 클릭 시 열림 ---------------- */
+  .region-hero{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:4px; }
+  .region-status-badge{ font-size:11px; padding:3px 10px; color:#fff; letter-spacing:0.02em; flex-shrink:0; }
+  .region-status-badge.dominant{ background:#2F7D4F; }
+  .region-status-badge.contested{ background:#BA7517; }
+  .region-status-badge.dispute{ background:#B23A3A; }
+  .region-stat-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(120px,1fr)); gap:14px;
+    margin:16px 0 22px; padding:16px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+  .region-stat{ display:flex; flex-direction:column; gap:2px; }
+  .region-stat-label{ font-size:11px; color:var(--gray-2); text-transform:uppercase; letter-spacing:0.05em; }
+  .region-stat-value{ font-size:20px; font-weight:700; }
+  .region-section{ margin-top:22px; }
+  .region-list-item{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:10px 0; border-bottom:1px solid var(--gray-4);
+  }
+  .region-list-item:last-child{ border-bottom:none; }
+  .region-list-item[data-open-thread]{ cursor:pointer; }
+  .dispute-item.region-link{ cursor:pointer; }
 
   /* ---------- lists-row: used only for the Hall of Fame's two ranking columns ---------- */
   .lists-row{
@@ -239,6 +263,11 @@
   /* ---------- 논제 상세 모달 ---------- */
   .modal-backdrop{ position:fixed; inset:0; background:rgba(17,17,16,0.55); display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; z-index:100; overflow-y:auto; }
   .modal-box{ background:var(--white); max-width:1080px; width:100%; padding:28px; position:relative; }
+  /* 논제 입장 모달은 화면의 2/3 정도를 채우도록 훨씬 크게 — 사이드 의견 목록도 그만큼 길게 보여준다.
+     align-items는 기존 flex-start를 유지 — center로 두면 내용이 뷰포트보다 길 때 위쪽이 스크롤로
+     닿지 않는 플렉스박스 오버플로 버그가 생긴다. */
+  #threadModal .modal-box{ max-width:1400px; width:min(1400px, 92vw); min-height:66vh; }
+  #threadModal .thread-side-list{ max-height:60vh; }
   .modal-close{ position:absolute; top:18px; right:20px; background:none; border:none; font-size:18px; cursor:pointer; color:var(--gray-1); font-family:'Archivo',sans-serif; }
   .arg-item{ border-bottom:1px solid var(--gray-4); padding:14px 0 14px 12px; cursor:pointer; border-left:2px solid transparent; }
   .arg-item.selected{ background:rgba(186,117,23,0.12); border-left-color:var(--gold); }
@@ -457,6 +486,14 @@
   </div>
 </div>
 
+<!-- 지역(폴리스) 상세 모달 — 지도 마커/분쟁 목록 클릭 시 JS가 열고 닫음 -->
+<div class="modal-backdrop" id="regionModal" style="display:none;">
+  <div class="modal-box">
+    <button class="modal-close" id="regionModalClose">×</button>
+    <div id="regionModalContent"><div class="loading-text">불러오는 중...</div></div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
@@ -524,9 +561,9 @@
     });
   });
 
-  // 일반 사용자 눈엔 안 띄게 링크는 기본 숨김. 이미 로그인해본 관리자(토큰 보유)거나
-  // ?admin=1로 직접 들어온 경우에만 노출 — 접속 주소는 관리자만 따로 알고 있으면 됨.
-  if (localStorage.getItem('agora_admin_token') || new URLSearchParams(location.search).get('admin') === '1') {
+  // 일반 사용자 눈엔 절대 안 띄게 링크는 항상 숨김. ?admin=1로 직접 들어온 주소를 아는 사람만
+  // 그 방문에서만 노출된다(로그인 토큰이 남아있다고 계속 보이지 않게 — 접속 주소를 따로 기억해야 함).
+  if (new URLSearchParams(location.search).get('admin') === '1') {
     document.getElementById('navAdmin').hidden = false;
   }
 
@@ -728,7 +765,7 @@
 
   // status: 지배확정/판정중/분쟁 색상(기존 로직 그대로) + 점 pulse 애니메이션(CSS) + 불(정족수 도달)/칼(전쟁중) 오버레이.
   function markerIcon(region){
-    const fill = region.status === 'dominant' ? '#111110' : (region.status === 'contested' ? '#ffffff' : '#c9c9c2');
+    const fill = region.status === 'dominant' ? '#2F7D4F' : (region.status === 'contested' ? '#BA7517' : '#B23A3A');
     const icons = `${region.status === 'contested' ? FIRE_ICON_SVG : ''}${region.has_active_war ? SWORD_ICON_SVG : ''}`;
     return L.divIcon({
       html: `
@@ -760,6 +797,7 @@
       regionsById[r.id] = r;
       const marker = L.marker([r.lat, r.lng], { icon: markerIcon(r) })
         .bindTooltip(r.name, { permanent:false, direction:'top' })
+        .on('click', () => openRegionModal(r.id))
         .addTo(map);
       markersById[r.id] = marker;
     });
@@ -1052,7 +1090,7 @@
     const notable = regionsData.filter(r => r.status !== 'dominant');
     el.innerHTML = notable.length
       ? notable.slice(0, 6).map(r => `
-        <div class="dispute-item">
+        <div class="dispute-item region-link" data-open-region="${r.id}">
           <span class="dispute-region">${r.name}</span>
           <span class="dispute-flag">
             <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -1060,6 +1098,9 @@
           </span>
         </div>`).join('')
       : '<div class="issue-meta">현재 분쟁 중인 지역이 없습니다.</div>';
+    el.querySelectorAll('[data-open-region]').forEach(item => {
+      item.addEventListener('click', () => openRegionModal(item.dataset.openRegion));
+    });
   }
 
   async function renderHallOfFame() {
@@ -1455,12 +1496,14 @@
   threadModal.addEventListener('click', (e) => { if (e.target === threadModal) threadModal.style.display = 'none'; });
 
   // targetType: 'thread' | 'argument' | 'reply' 공용 — Hot Issue 카드/논증/대댓글 세 군데서 재사용한다.
+  // 신규 계정은 서버 집계 가중치가 1 미만(voteWeight.js 참고)이라 합산값이 소수로 내려올 수 있는데,
+  // 화면에는 항상 정수로만 보여준다(클릭 시 반응은 attachReactionHandlers가 로컬에서 +-1로 처리).
   function reactionButtonsHtml(targetType, targetId, upvotes, downvotes, laughCount) {
     return `
       <div class="arg-actions">
-        <button class="reaction-btn" data-vote="${targetType}:${targetId}:up">추천 <span class="reaction-count">${upvotes ?? 0}</span></button>
-        <button class="reaction-btn" data-vote="${targetType}:${targetId}:down">비추천 <span class="reaction-count">${downvotes ?? 0}</span></button>
-        <button class="reaction-btn laugh" data-laugh="${targetType}:${targetId}">바보 <span class="reaction-count">${laughCount ?? 0}</span></button>
+        <button class="reaction-btn" data-vote="${targetType}:${targetId}:up">추천 <span class="reaction-count">${Math.round(upvotes ?? 0)}</span></button>
+        <button class="reaction-btn" data-vote="${targetType}:${targetId}:down">비추천 <span class="reaction-count">${Math.round(downvotes ?? 0)}</span></button>
+        <button class="reaction-btn laugh" data-laugh="${targetType}:${targetId}">바보 <span class="reaction-count">${Math.round(laughCount ?? 0)}</span></button>
       </div>`;
   }
 
@@ -1502,16 +1545,32 @@
 
   // 위 reactionButtonsHtml이 만든 버튼들에 실제 클릭 핸들러를 붙인다.
   // 서버 응답에 바로 최신 집계가 들어있으므로 전체 재렌더 없이 그 버튼의 숫자만 갱신 + pop 애니메이션.
+  // 화면에 보이는 숫자를 delta만큼 로컬로 조정한다. 서버가 내려주는 실제 합산값(신규 계정은
+  // 소수 가중치가 반영됨)을 그대로 쓰지 않고, 사용자가 누른 액션 하나당 항상 1만큼만 움직인다.
+  function bumpCount(btn, delta) {
+    const span = btn.querySelector('.reaction-count');
+    span.textContent = Math.max(0, parseInt(span.textContent, 10) + delta);
+    popBadge(span);
+  }
+
   function attachReactionHandlers(el) {
     el.querySelectorAll('[data-vote]').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const [targetType, targetId, voteType] = btn.dataset.vote.split(':');
+        const group = btn.closest('.arg-actions');
         try {
           const result = await apiRequest(reactionPath(targetType, targetId, 'vote'), { method: 'POST', body: JSON.stringify({ vote_type: voteType }) });
-          const countSpan = btn.querySelector('.reaction-count');
-          countSpan.textContent = voteType === 'up' ? result.upvotes : result.downvotes;
-          popBadge(countSpan);
+          if (result.result === 'cast') {
+            bumpCount(btn, 1);
+          } else if (result.result === 'cancelled') {
+            bumpCount(btn, -1);
+          } else if (result.result === 'changed') {
+            bumpCount(btn, 1);
+            const otherType = voteType === 'up' ? 'down' : 'up';
+            const otherBtn = group && group.querySelector(`[data-vote$=":${otherType}"]`);
+            if (otherBtn) bumpCount(otherBtn, -1);
+          }
         } catch (err) { alert(err.message); }
       });
     });
@@ -1521,9 +1580,7 @@
         const [targetType, targetId] = btn.dataset.laugh.split(':');
         try {
           const result = await apiRequest(reactionPath(targetType, targetId, 'laugh'), { method: 'POST' });
-          const countSpan = btn.querySelector('.reaction-count');
-          countSpan.textContent = result.laugh_count;
-          popBadge(countSpan);
+          bumpCount(btn, result.result === 'cancelled' ? -1 : 1);
         } catch (err) { alert(err.message); }
       });
     });
@@ -1709,6 +1766,86 @@
           } catch (err) { alert(err.message); }
         });
       }
+    } catch (err) {
+      content.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
+  }
+
+  /* ---------------- 지역(폴리스) 상세 모달 — 지도 마커/분쟁 목록 클릭 시 열림 ---------------- */
+
+  const regionModal = document.getElementById('regionModal');
+  document.getElementById('regionModalClose').addEventListener('click', () => { regionModal.style.display = 'none'; });
+  regionModal.addEventListener('click', (e) => { if (e.target === regionModal) regionModal.style.display = 'none'; });
+
+  const REGION_STATUS_LABEL = { dominant: '지배 확정', contested: '판정 진행중' };
+
+  async function openRegionModal(regionId) {
+    regionModal.style.display = 'flex';
+    const content = document.getElementById('regionModalContent');
+    content.innerHTML = '<div class="loading-text">불러오는 중...</div>';
+
+    try {
+      const [region, dominance, wars, threads, military] = await Promise.all([
+        apiRequest(`/regions/${regionId}`),
+        apiRequest(`/regions/${regionId}/dominance`),
+        apiRequest(`/regions/${regionId}/wars`),
+        apiRequest(`/regions/${regionId}/threads`),
+        apiRequest(`/regions/${regionId}/military-power`),
+      ]);
+
+      const statusKey = region.status === 'dominant' ? 'dominant' : (region.status === 'contested' ? 'contested' : 'dispute');
+      const activeWars = wars.filter(w => w.status === 'voting' || w.status === 'accepted');
+
+      const rulerHtml = dominance.ruler
+        ? `<div class="issue-meta">${dominance.ruler.nickname}${dominance.ruler.status === 'tyrant' ? ' (폭군)' : ' (지배자)'}</div>`
+        : '<div class="issue-meta">현재 지배자가 없습니다.</div>';
+
+      const warsHtml = activeWars.length
+        ? activeWars.map(w => `
+          <div class="region-list-item">
+            <span>${w.attacker_region_id === regionId ? '공격측' : '방어측'}</span>
+            <span class="issue-meta">${WAR_STATUS_LABEL[w.status] || w.status}</span>
+          </div>`).join('')
+        : '<div class="issue-meta">진행 중인 전쟁이 없습니다.</div>';
+
+      const threadsHtml = threads.length
+        ? threads.slice(0, 8).map(t => `
+          <div class="region-list-item" data-open-thread="${t.id}">
+            <span>${t.title}</span>
+            <span class="issue-meta">논증 ${t.argument_count}개</span>
+          </div>`).join('')
+        : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
+
+      content.innerHTML = `
+        <div class="region-hero">
+          <span class="section-title" style="font-size:20px;">${region.name}</span>
+          <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>
+        </div>
+        <div class="region-stat-grid">
+          <div class="region-stat"><span class="region-stat-label">인구</span><span class="region-stat-value">${region.population}</span></div>
+          <div class="region-stat"><span class="region-stat-label">병력</span><span class="region-stat-value">${military.power}</span></div>
+          <div class="region-stat"><span class="region-stat-label">진행 중 전쟁</span><span class="region-stat-value">${activeWars.length}</span></div>
+        </div>
+        <div class="region-section">
+          <div class="thread-side-title">지배 현황</div>
+          ${rulerHtml}
+        </div>
+        <div class="region-section">
+          <div class="thread-side-title">전쟁</div>
+          ${warsHtml}
+        </div>
+        <div class="region-section">
+          <div class="thread-side-title">최근 논제</div>
+          ${threadsHtml}
+        </div>
+      `;
+
+      content.querySelectorAll('[data-open-thread]').forEach(item => {
+        item.addEventListener('click', () => {
+          regionModal.style.display = 'none';
+          openThreadModal(item.dataset.openThread);
+        });
+      });
     } catch (err) {
       content.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
     }
