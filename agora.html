@@ -159,7 +159,7 @@
   @media (min-width:860px){ .hero-band{ grid-template-columns:8fr 4fr; align-items:end; } }
   .hero-headline{
     font-family:'Archivo', sans-serif; font-weight:800;
-    font-size:clamp(30px,5.2vw,64px); line-height:1.05; letter-spacing:-0.02em;
+    font-size:clamp(34px,7vw,96px); line-height:1.02; letter-spacing:-0.02em;
     margin:0 0 14px;
   }
   .hero-headline em{ font-style:normal; color:var(--gold); }
@@ -171,13 +171,16 @@
   .hero-live-row span:last-child{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray-2); }
   .hero-live-number{ font-family:'Archivo', sans-serif; font-size:clamp(36px,4.4vw,52px); font-weight:800; line-height:1; }
   .hero-live-caption{ font-size:12.5px; color:var(--gray-2); margin-top:4px; }
-  .map-eyebrow{ font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
   .map-wrap{ position:relative; }
-  .map-thread-btn{ position:absolute; top:16px; right:24px; z-index:10; border:none; padding:10px 16px; font-size:12.5px; cursor:pointer; font-family:'Archivo',sans-serif; }
+  .map-thread-btn{ position:absolute; top:24px; right:24px; z-index:10; border:none; padding:12px 20px; font-size:13px; cursor:pointer; font-family:'Archivo',sans-serif; }
+
+  /* V2: 전황 개요 라벨을 지도 위 오버레이로 — 목업의 "지도 위에 정보 얹기" 방향 */
+  .map-overlay-eyebrow{ position:absolute; top:24px; left:24px; z-index:10; max-width:60%; }
+  .map-overlay-eyebrow .map-eyebrow{ font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
 
   /* 지도는 장식 요소라 .shell 폭 제한을 깨고 화면 끝까지(뷰포트 100%) 채운다 */
   #map{
-    height:600px;
+    height:760px;
     width:100vw;
     margin-left:calc(50% - 50vw);
     margin-right:calc(50% - 50vw);
@@ -192,10 +195,15 @@
   }
   /* 흑백 필터는 타일(배경 지도)에만 걸고 마커는 그대로 둔다 — 지배/판정/분쟁 상태색을 보여줘야 하므로 */
   #map .leaflet-tile-pane{ filter:grayscale(1) contrast(1.08) brightness(1.02); }
+  /* Leaflet 기본 줌 컨트롤을 검정+골드 톤으로 맞춤 — V2: 실제로 조작 가능한 줌 버튼 노출 */
+  #map .leaflet-control-zoom a{ background:rgba(17,17,16,0.82); color:var(--ink); border-color:var(--line) !important; }
+  #map .leaflet-control-zoom a:hover{ background:var(--gold); color:var(--on-gold); }
 
+  /* V2: 범례를 지도 위 하단 오버레이 카드로 — 기존엔 지도 아래 평범한 한 줄이었음 */
   .map-legend{
+    position:absolute; left:24px; bottom:24px; z-index:10;
     display:flex; gap:22px;
-    margin-top:12px;
+    background:rgba(17,17,16,0.82); border:1px solid var(--line); padding:14px 20px;
     font-size:12px;
     color:var(--gray-1);
   }
@@ -247,8 +255,18 @@
   .issue-meta{ font-size:11.5px; color:var(--gray-2); margin-top:3px; }
 
   /* ---------- hot issue 카드: 발의자 아바타 / 논제 본문 / 입장 CTA ---------- */
+  /* V2: 1열 목록 → 2열 그리드 + 정렬 탭 + 참여도 바 */
+  .hot-issue-grid{ display:grid; grid-template-columns:1fr; gap:16px; }
+  @media (min-width:860px){ .hot-issue-grid{ grid-template-columns:1fr 1fr; } }
+  .hot-issue-sort-tabs{ display:flex; gap:8px; }
+  .hot-issue-sort-tab{
+    border:1px solid var(--line); color:var(--gray-1); background:none; padding:9px 16px;
+    font-size:12.5px; cursor:pointer; font-family:'Archivo',sans-serif;
+  }
+  .hot-issue-sort-tab.active{ background:var(--gold); color:var(--on-gold); border-color:var(--gold); }
+  .hot-issue-engagement{ height:4px; background:var(--gray-4); margin-top:2px; }
+  .hot-issue-engagement-fill{ height:100%; background:var(--gold); }
   .hot-issue-card{ display:flex; align-items:center; gap:20px; border:1px solid var(--line); padding:18px 20px; }
-  .hot-issue-card + .hot-issue-card{ margin-top:14px; }
   .hot-issue-left{ display:flex; flex-direction:column; align-items:center; gap:8px; flex-shrink:0; }
   .hot-issue-avatar{ width:76px; height:76px; border:1px solid var(--black); display:flex; align-items:center; justify-content:center; }
   .hot-issue-author{ font-size:11px; color:var(--gray-2); text-align:center; max-width:76px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -489,25 +507,32 @@
     </section>
     <div class="meander-divider"></div>
 
-    <section class="section">
-      <div>
-        <div class="map-eyebrow">전황 개요</div>
-        <span class="section-title" id="mapStatusHeadline">실시간 폴리스 지배 현황</span>
-      </div>
+    <section class="section" style="padding-bottom:0;">
       <div class="map-wrap">
         <div id="map"></div>
+        <div class="map-overlay-eyebrow">
+          <div class="map-eyebrow">전황 개요</div>
+          <span class="section-title" id="mapStatusHeadline">실시간 폴리스 지배 현황</span>
+        </div>
         <button class="cta-gold map-thread-btn" id="mapThreadBtn">+ 논제 등록</button>
-      </div>
-      <div class="map-legend">
-        <span><i class="dot dominant"></i>지배 확정</span>
-        <span><i class="dot contested"></i>판정 진행중</span>
-        <span><i class="dot dispute"></i>분쟁 지역</span>
+        <div class="map-legend">
+          <span><i class="dot dominant"></i>지배 확정</span>
+          <span><i class="dot contested"></i>판정 진행중</span>
+          <span><i class="dot dispute"></i>분쟁 지역</span>
+        </div>
       </div>
     </section>
 
     <section class="section">
-      <span class="section-title" style="font-size:16px;">주요 논쟁 · Hot Issue</span>
-      <div id="hotIssueList"><div class="loading-text">불러오는 중...</div></div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+        <span class="section-title" style="font-size:16px;">주요 논쟁 · Hot Issue</span>
+        <div class="hot-issue-sort-tabs" id="hotIssueSortTabs">
+          <button type="button" class="hot-issue-sort-tab active" data-sort="active">활성화순</button>
+          <button type="button" class="hot-issue-sort-tab" data-sort="recent">최신순</button>
+          <button type="button" class="hot-issue-sort-tab" data-sort="mine">내 지역</button>
+        </div>
+      </div>
+      <div class="hot-issue-grid" id="hotIssueList"><div class="loading-text">불러오는 중...</div></div>
     </section>
 
     <section class="section" id="threadFormCard">
@@ -1050,6 +1075,9 @@
       zoomControl:false, attributionControl:false,
       maxBounds: worldBounds, maxBoundsViscosity: 1.0, // 확대해서 옆으로 끌어도 지도 밖 회색 영역으로는 안 나가게 고정
     }).setView([25, 20], 2);
+    // V2: 실제로 조작 가능한 줌 버튼 노출 — 좌상단(전황 개요 오버레이)/우상단(논제 등록 버튼)과
+    // 안 겹치게 우하단에 배치.
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
     map.setMinZoom(2);
     // CartoDB 무료 타일이 API 키를 요구하도록 바뀌어서(워터마크 노출) OSM 표준 타일로 교체 — 흑백 필터는 #map CSS에서 그대로 처리
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, subdomains:'abc' }).addTo(map);
@@ -1058,8 +1086,9 @@
     const regionsById = {};
     regions.forEach(r => {
       regionsById[r.id] = r;
+      const statusLabel = r.status === 'dominant' ? '지배 확정' : (r.status === 'contested' ? '판정 진행중' : '분쟁 지역');
       const marker = L.marker([r.lat, r.lng], { icon: markerIcon(r) })
-        .bindTooltip(r.name, { permanent:false, direction:'top' })
+        .bindTooltip(`${r.name} · ${statusLabel}`, { permanent:false, direction:'top' }) // V2: 호버 시 상태까지 미리보기
         .on('click', () => openRegionModal(r.id))
         .addTo(map);
       markersById[r.id] = marker;
@@ -1297,53 +1326,90 @@
 
   /* ---------------- 핫 아젠다 / 분쟁 지역 / 명예의 전당 (비로그인 상태에서도 노출) ---------------- */
 
+  let hotIssuesCache = [];
+  let hotIssuesSort = 'active';
+
   async function renderHotIssues() {
     const el = document.getElementById('hotIssueList');
     try {
-      const threads = await apiRequest('/hot-agenda');
-      el.innerHTML = threads.length
-        ? threads.slice(0, 5).map((t, i) => `
-          <div class="hot-issue-card" data-toggle-card>
-            <div class="hot-issue-left">
-              <div class="hot-issue-avatar">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="4.3" r="2.3" stroke="currentColor" stroke-width="1.4"/>
-                  <path d="M8 8.8 Q12 6.3 16 8.8 M9.2 8.8 L6.5 14.2 M14.8 8.8 L17.5 14.2 M12 8.6 L12 15 M12 15 L8.3 22 M12 15 L15.7 22" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
-                </svg>
-              </div>
-              <div class="hot-issue-author">${t.author_nickname}</div>
-              ${currentUser && currentUser.id !== t.author_id ? `<button class="logout-link" data-open-conv-quick="${t.author_id}" data-nickname="${t.author_nickname}" style="font-size:10px;">쪽지</button>` : ''}
-            </div>
-            <div class="hot-issue-body">
-              <div class="hot-issue-quote"><span class="hot-issue-index">${String(i + 1).padStart(2, '0')}</span>"${t.title}"</div>
-              <div class="issue-meta">${t.region_name} 폴리스 / 참여 <span class="count-up" data-target="${t.participant_count}">0</span>명 / <span class="badge badge-gold" style="padding:1px 7px; font-size:10.5px;">추천 ${t.total_upvotes}</span></div>
-              ${currentUser && currentUser.id !== t.author_id ? `<div class="hot-issue-reactions">${reactionButtonsHtml('thread', t.id, t.thread_upvotes, t.thread_downvotes, t.thread_laugh_count)}</div>` : ''}
-            </div>
-            <button class="hot-issue-stance" data-open-thread="${t.id}">입장 →</button>
-          </div>`).join('')
-        : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
-      el.querySelectorAll('[data-toggle-card]').forEach(card => {
-        card.addEventListener('click', () => {
-          const panel = card.querySelector('.hot-issue-reactions');
-          if (panel) panel.classList.toggle('expanded');
-        });
-      });
-      el.querySelectorAll('[data-open-thread]').forEach(btn => {
-        btn.addEventListener('click', (e) => { e.stopPropagation(); openThreadModal(btn.dataset.openThread); });
-      });
-      el.querySelectorAll('[data-open-conv-quick]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          document.getElementById('messagesCard').scrollIntoView({ behavior: 'smooth' });
-          openConversation(btn.dataset.openConvQuick, btn.dataset.nickname);
-        });
-      });
-      attachReactionHandlers(el);
-      el.querySelectorAll('.count-up').forEach(span => countUp(span, Number(span.dataset.target)));
+      hotIssuesCache = await apiRequest('/hot-agenda');
+      renderHotIssueGrid();
     } catch (err) {
       el.innerHTML = '<div class="issue-meta">불러오지 못했습니다.</div>';
     }
   }
+
+  // V2: 정렬 탭(활성화순/최신순/내 지역) — 서버 재요청 없이 이미 받아온 hotIssuesCache를 클라이언트에서
+  // 재정렬/필터링만 한다(hot-agenda가 이미 상위 30건을 다 내려주므로 충분).
+  function renderHotIssueGrid() {
+    const el = document.getElementById('hotIssueList');
+    let list = [...hotIssuesCache];
+
+    if (hotIssuesSort === 'recent') {
+      list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    } else if (hotIssuesSort === 'mine') {
+      list = currentUser ? list.filter(t => t.region_id === currentUser.region_id) : [];
+    }
+    list = list.slice(0, 6);
+
+    if (hotIssuesSort === 'mine' && !currentUser) {
+      el.innerHTML = '<div class="issue-meta">로그인하면 내 지역 논제만 볼 수 있습니다.</div>';
+      return;
+    }
+    if (!list.length) {
+      el.innerHTML = '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
+      return;
+    }
+
+    const maxParticipants = Math.max(...list.map(t => t.participant_count), 1);
+    el.innerHTML = list.map((t, i) => `
+      <div class="hot-issue-card" data-toggle-card>
+        <div class="hot-issue-left">
+          <div class="hot-issue-avatar">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="4.3" r="2.3" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M8 8.8 Q12 6.3 16 8.8 M9.2 8.8 L6.5 14.2 M14.8 8.8 L17.5 14.2 M12 8.6 L12 15 M12 15 L8.3 22 M12 15 L15.7 22" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+          <div class="hot-issue-author">${t.author_nickname}</div>
+          ${currentUser && currentUser.id !== t.author_id ? `<button class="logout-link" data-open-conv-quick="${t.author_id}" data-nickname="${t.author_nickname}" style="font-size:10px;">쪽지</button>` : ''}
+        </div>
+        <div class="hot-issue-body">
+          <div class="hot-issue-quote"><span class="hot-issue-index">${String(i + 1).padStart(2, '0')}</span>"${t.title}"</div>
+          <div class="issue-meta">${t.region_name} 폴리스 / 참여 <span class="count-up" data-target="${t.participant_count}">0</span>명 / <span class="badge badge-gold" style="padding:1px 7px; font-size:10.5px;">추천 ${t.total_upvotes}</span></div>
+          <div class="hot-issue-engagement"><div class="hot-issue-engagement-fill" style="width:${Math.round(t.participant_count / maxParticipants * 100)}%;"></div></div>
+          ${currentUser && currentUser.id !== t.author_id ? `<div class="hot-issue-reactions">${reactionButtonsHtml('thread', t.id, t.thread_upvotes, t.thread_downvotes, t.thread_laugh_count)}</div>` : ''}
+        </div>
+        <button class="hot-issue-stance" data-open-thread="${t.id}">입장 →</button>
+      </div>`).join('');
+
+    el.querySelectorAll('[data-toggle-card]').forEach(card => {
+      card.addEventListener('click', () => {
+        const panel = card.querySelector('.hot-issue-reactions');
+        if (panel) panel.classList.toggle('expanded');
+      });
+    });
+    el.querySelectorAll('[data-open-thread]').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); openThreadModal(btn.dataset.openThread); });
+    });
+    el.querySelectorAll('[data-open-conv-quick]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('messagesCard').scrollIntoView({ behavior: 'smooth' });
+        openConversation(btn.dataset.openConvQuick, btn.dataset.nickname);
+      });
+    });
+    attachReactionHandlers(el);
+    el.querySelectorAll('.count-up').forEach(span => countUp(span, Number(span.dataset.target)));
+  }
+
+  document.getElementById('hotIssueSortTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-sort]');
+    if (!btn) return;
+    hotIssuesSort = btn.dataset.sort;
+    document.querySelectorAll('#hotIssueSortTabs .hot-issue-sort-tab').forEach(t => t.classList.toggle('active', t === btn));
+    renderHotIssueGrid();
+  });
 
   function renderDisputes() {
     const el = document.getElementById('disputeList');
