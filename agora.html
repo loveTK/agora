@@ -13,16 +13,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* 블랙 메인 — 승인된 목업(Agora Broadsheet)의 토큰 값 그대로 재적용.
-       var(--black)/var(--white) 등을 쓰는 기존 규칙 전부가 자동으로 맞게 뒤집힌다. */
-    --black:#f4f2ec;
-    --ink:#ece9e2;
-    --gray-1:#c9c9c2;
-    --gray-2:#9a9a94;
-    --gray-3:#4a4a46;
-    --gray-4:#2a2a28;
-    --white:#111110;
-    --line: rgba(244,242,236,0.16);
+    /* V3: 화이트 메인 — 블랙 메인에서 뉴트럴 램프 전체를 다시 원래대로 뒤집는다(양쪽 다
+       var(--black)/var(--white) 등을 쓰는 기존 규칙이 그대로 맞물리게, 극단값 두 개만이 아니라
+       회색조 전체를 반전 — 예전에 검증됐던 화이트 메인 토큰 값 그대로 재적용). */
+    --black:#111110;
+    --ink:#1c1c1a;
+    --gray-1:#4a4a46;
+    --gray-2:#8a8a84;
+    --gray-3:#c9c9c2;
+    --gray-4:#e6e6e0;
+    --white:#ffffff;
+    --line: rgba(17,17,16,0.14);
     --gold:#BA7517;
     --on-gold:#111110; /* 골드 배경 위 텍스트는 테마와 무관하게 항상 짙게 — 대비 확보용 */
   }
@@ -72,6 +73,9 @@
     border-bottom:2px solid transparent;
   }
   nav a.active{ color:var(--black); border-bottom-color:var(--black); }
+  nav a.nav-auth-link{ color:var(--gold); font-weight:700; }
+  nav a.nav-auth-link:hover{ border-bottom-color:var(--gold); }
+  #navAuthSlot:empty{ display:none; }
 
   /* ---------- main: one section per block, stacked top to bottom ---------- */
   main{ padding:0 0 60px; }
@@ -149,6 +153,14 @@
   .auth-submit:hover{ opacity:0.85; }
   .auth-submit:disabled{ opacity:0.5; cursor:default; }
   .auth-error{ font-size:12px; color:#B23A3A; margin-top:-6px; margin-bottom:10px; }
+  .picked-region-badge{
+    display:inline-block; margin-top:10px; padding:7px 18px; border:1.5px solid var(--gold);
+    border-radius:999px; font-size:13px; font-weight:700; color:var(--gold);
+  }
+  .auth-divider{
+    display:flex; align-items:center; gap:12px; margin:16px 0 12px; color:var(--gray-2); font-size:11.5px;
+  }
+  .auth-divider::before, .auth-divider::after{ content:''; flex:1; height:1px; background:var(--line); }
   .logout-link{ font-size:11.5px; color:var(--gray-2); text-decoration:underline; cursor:pointer; margin-top:2px; align-self:flex-start; background:none; border:none; padding:0; font-family:'Archivo',sans-serif; }
   .loading-text{ font-size:13px; color:var(--gray-2); }
 
@@ -523,6 +535,7 @@
   <div class="shell">
     <div class="wordmark" id="logoHome" style="cursor:pointer;">ΑΓΟΡΑ<span>agora</span></div>
     <nav>
+      <span id="navAuthSlot"></span>
       <a href="#" class="active" data-view="dashboard">대시보드</a>
       <a href="#" data-view="shop">상점</a>
       <a href="#" data-view="inventory">인벤토리</a>
@@ -1326,13 +1339,26 @@
   }
 
   function renderCharCard() {
-    if (currentUser) return renderLoggedIn();
+    renderNavAuthSlot();
+    if (currentUser) { charCard.style.display = ''; return renderLoggedIn(); }
     if (regionsData.length === 0 && !authToken) {
+      charCard.style.display = '';
       charCard.innerHTML = `<div class="loading-text">불러오는 중...</div>`;
       return;
     }
-    charCard.innerHTML = `<button type="button" class="cta-gold" id="openAuthModalBtn" style="align-self:flex-start; width:auto; padding-left:28px; padding-right:28px;">로그인 / 회원가입</button>`;
-    document.getElementById('openAuthModalBtn').addEventListener('click', () => openAuthModal('login'));
+    charCard.style.display = 'none';
+    charCard.innerHTML = '';
+  }
+
+  // 로그인/회원가입 버튼은 헤더 상단메뉴의 "대시보드" 왼쪽에 둔다 — 로그인 상태면 그냥 안 보임.
+  function renderNavAuthSlot() {
+    const slot = document.getElementById('navAuthSlot');
+    if (currentUser) { slot.innerHTML = ''; return; }
+    slot.innerHTML = `<a href="#" class="nav-auth-link" id="navAuthLink">로그인 / 회원가입</a>`;
+    document.getElementById('navAuthLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      openAuthModal('login');
+    });
   }
 
   const authModal = document.getElementById('authModal');
@@ -1428,7 +1454,6 @@
       ${isGoogleProfile
         ? `<div class="section-title" style="margin-bottom:14px;">구글 로그인 완료 — 시작할 폴리스만 골라주세요</div>`
         : `
-          <div id="googleSignInBtn" style="margin-bottom:14px;"></div>
           <div class="auth-tabs">
             <button type="button" class="auth-tab ${isLogin ? 'active' : ''}" data-mode="login">로그인</button>
             <button type="button" class="auth-tab ${!isLogin ? 'active' : ''}" data-mode="signup">회원가입</button>
@@ -1440,10 +1465,10 @@
           <input type="text" name="nickname" required maxlength="20" value="${googleProfile?.suggestedNickname || ''}" />
         </div>
         <div class="auth-field">
-          <label>소속 폴리스 — 지도에서 시작할 위치를 찍어주세요</label>
+          <label>소속 폴리스 — 지도에서 찍거나 목록에서 선택하세요</label>
           <div id="signupMap" style="height:220px; border:1px solid var(--line);"></div>
-          <div class="issue-meta" id="signupMapPicked" style="margin-top:6px;">${regionsData[0] ? '선택한 폴리스: ' + regionsData[0].name : '지역 정보를 불러오는 중...'}</div>
-          <select name="region_id" required style="display:none;">${regionOptions}</select>
+          <select name="region_id" required style="margin-top:8px;">${regionOptions}</select>
+          <div class="picked-region-badge" id="signupMapPicked">${regionsData[0] ? '선택한 폴리스 · ' + regionsData[0].name : '지역 정보를 불러오는 중...'}</div>
         </div>` : ''}
         ${!isGoogleProfile ? `
         <div class="auth-field">
@@ -1457,6 +1482,9 @@
         <div class="auth-error" id="authError" style="display:none;"></div>
         <button type="submit" class="auth-submit" id="authSubmit">${isLogin ? '로그인' : isGoogleProfile ? '시작하기' : '가입하고 시작하기'}</button>
       </form>
+      ${!isGoogleProfile ? `
+        <div class="auth-divider"><span>또는</span></div>
+        <div id="googleSignInBtn"></div>` : ''}
     `;
 
     authModalContent.querySelectorAll('.auth-tab').forEach(tab => {
@@ -1478,10 +1506,12 @@
       });
 
       // 정확히 그 지역의 좌표를 안 눌러도 되게, 클릭한 지점에서 제일 가까운 기존 지역(국가)을 자동으로 골라준다.
-      function pickRegion(regionId) {
+      // 드롭다운에서 골라도 지도가 그쪽으로 따라가게 해서 두 방식이 항상 같은 상태를 보여준다.
+      function pickRegion(regionId, panMap) {
         regionSelect.value = regionId;
         const region = regionsData.find(r => r.id === regionId);
-        pickedLabel.textContent = '선택한 폴리스: ' + region.name;
+        pickedLabel.textContent = '선택한 폴리스 · ' + region.name;
+        if (panMap) signupMapInstance.setView([region.lat, region.lng], 4);
       }
       function nearestRegion(lat, lng) {
         return regionsData.reduce((closest, r) => {
@@ -1495,6 +1525,7 @@
       signupMapInstance.on('click', (e) => {
         pickRegion(nearestRegion(e.latlng.lat, e.latlng.lng).id);
       });
+      regionSelect.addEventListener('change', () => pickRegion(regionSelect.value, true));
       pickRegion(first.id);
     }
 
