@@ -2,14 +2,33 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { randomUUID } = require("crypto");
+const { OAuth2Client } = require("google-auth-library");
 const { db } = require("../db");
 const { JWT_SECRET } = require("../middleware/authMiddleware");
 const { belligerenceTier } = require("../services/belligerence");
 
 const router = express.Router();
 
+// 서버 .env에 GOOGLE_CLIENT_ID가 없으면 구글 로그인 자체를 꺼둔다(프론트도 버튼을 안 그림) —
+// 설정 전에는 그냥 없는 기능처럼 동작하게 해서 반쪽짜리 기능이 배포되지 않게 함.
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || null;
+const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
+
 function issueToken(userId) {
   return jwt.sign({ sub: userId }, JWT_SECRET, { expiresIn: "30d" });
+}
+
+function toAuthUser(user) {
+  return {
+    id: user.id,
+    email: user.email,
+    nickname: user.nickname,
+    region_id: user.region_id,
+    rank: user.rank,
+    reputation: user.reputation,
+    belligerence: user.belligerence,
+    belligerence_tier: belligerenceTier(user.belligerence),
+  };
 }
 
 // POST /auth/signup
@@ -81,20 +100,64 @@ router.post("/login", (req, res) => {
     return res.status(401).json({ error: "이메일 또는 비밀번호가 올바르지 않습니다." });
   }
 
-  const token = issueToken(user.id);
-  res.json({
-    token,
-    user: {
-      id: user.id,
-      email: user.email,
-      nickname: user.nickname,
-      region_id: user.region_id,
-      rank: user.rank,
-      reputation: user.reputation,
-      belligerence: user.belligerence,
-      belligerence_tier: belligerenceTier(user.belligerence),
-    },
-  });
+  res.json({ token: issueToken(user.id), user: toAuthUser(user) });
+});
+
+// GET /auth/google-client-id
+// 프론트가 구글 로그인 버튼을 그릴지 말지 결정하는 용도.
+router.get("/google-client-id", (req, res) => {
+  res.json({ client_id: GOOGLE_CLIENT_ID });
+});
+
+// POST /auth/google
+// body: { credential, nickname?, region_id? }
+// 구글 신원확인(credential)만 먼저 검증 — 이미 있는 이메일이면 바로 로그인, 처음 보는
+// 이메일인데 nickname/region_id가 없으면 needs_profile:true로 알려주고, 있으면 그걸로 가입시킨다.
+router.post("/google", async (req, res) => {
+  if (!googleClient) {
+    return res.status(503).json({ error: "구글 로그인이 아직 설정되지 않았습니다." });
+  }
+  const { credential, nickname, region_id } = req.body || {};
+  if (!credential) {
+    return res.status(400).json({ error: "credential은 필수입니다." });
+  }
+
+  let payload;
+  try {
+    const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
+    payload = ticket.getPayload();
+  } catch (err) {
+    return res.status(401).json({ error: "구글 인증에 실패했습니다." });
+  }
+  if (!payload.email_verified) {
+    return res.status(401).json({ error: "인증되지 않은 구글 이메일입니다." });
+  }
+
+  const existing = db.prepare("SELECT * FROM users WHERE email = ?").get(payload.email);
+  if (existing) {
+    return res.json({ token: issueToken(existing.id), user: toAuthUser(existing) });
+  }
+
+  if (!nickname || !region_id) {
+    const suggestedNickname = (payload.name || payload.email.split("@")[0]).slice(0, 20);
+    return res.json({ needs_profile: true, suggested_nickname: suggestedNickname });
+  }
+
+  const region = db.prepare("SELECT id FROM regions WHERE id = ?").get(region_id);
+  if (!region) {
+    return res.status(400).json({ error: "존재하지 않는 지역입니다." });
+  }
+
+  const id = randomUUID();
+  // 구글로 가입한 계정은 비밀번호 로그인을 안 쓰지만 컬럼이 NOT NULL이라 아무도 못 맞출 랜덤값을 채워둔다.
+  const unusablePasswordHash = bcrypt.hashSync(randomUUID(), 10);
+  db.prepare(
+    `INSERT INTO users (id, email, password_hash, nickname, region_id, signup_ip)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  ).run(id, payload.email, unusablePasswordHash, nickname, region_id, req.ip || null);
+
+  const created = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
+  res.status(201).json({ token: issueToken(id), user: toAuthUser(created) });
 });
 
 module.exports = router;

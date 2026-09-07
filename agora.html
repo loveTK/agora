@@ -7,6 +7,7 @@
 <meta name="description" content="19개 폴리스가 매일 여론으로 겨루는 실시간 정치 토론 광장. 논제에 투표하고 논증을 펼쳐 폴리스의 지배권을 다투세요.">
 <link rel="canonical" href="https://myagora.xyz/" id="canonicalLink">
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1395,21 +1396,28 @@
     renderHotIssues(); // currentUser가 생겨야 "쪽지" 퀵링크가 붙으므로 로그인 후 다시 그린다
   }
 
-  function renderAuthForm(mode) {
+  // mode: 'login' | 'signup' | 'google-profile'(구글 인증은 끝났고 닉네임/지역만 더 받는 단계)
+  function renderAuthForm(mode, googleProfile) {
     const isLogin = mode === 'login';
+    const isGoogleProfile = mode === 'google-profile';
+    const showNicknameAndMap = !isLogin; // signup, google-profile 둘 다 필요
     const regionOptions = regionsData.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
 
     charCard.innerHTML = `
       ${avatarSvg}
-      <div class="auth-tabs">
-        <button type="button" class="auth-tab ${isLogin ? 'active' : ''}" data-mode="login">로그인</button>
-        <button type="button" class="auth-tab ${!isLogin ? 'active' : ''}" data-mode="signup">회원가입</button>
-      </div>
+      ${isGoogleProfile
+        ? `<div class="section-title" style="margin-bottom:14px;">구글 로그인 완료 — 시작할 폴리스만 골라주세요</div>`
+        : `
+          <div id="googleSignInBtn" style="margin-bottom:14px;"></div>
+          <div class="auth-tabs">
+            <button type="button" class="auth-tab ${isLogin ? 'active' : ''}" data-mode="login">로그인</button>
+            <button type="button" class="auth-tab ${!isLogin ? 'active' : ''}" data-mode="signup">회원가입</button>
+          </div>`}
       <form id="authForm">
-        ${!isLogin ? `
+        ${showNicknameAndMap ? `
         <div class="auth-field">
           <label>닉네임</label>
-          <input type="text" name="nickname" required maxlength="20" />
+          <input type="text" name="nickname" required maxlength="20" value="${googleProfile?.suggestedNickname || ''}" />
         </div>
         <div class="auth-field">
           <label>소속 폴리스 — 지도에서 시작할 위치를 찍어주세요</label>
@@ -1417,6 +1425,7 @@
           <div class="issue-meta" id="signupMapPicked" style="margin-top:6px;">${regionsData[0] ? '선택한 폴리스: ' + regionsData[0].name : '지역 정보를 불러오는 중...'}</div>
           <select name="region_id" required style="display:none;">${regionOptions}</select>
         </div>` : ''}
+        ${!isGoogleProfile ? `
         <div class="auth-field">
           <label>이메일</label>
           <input type="email" name="email" required />
@@ -1424,17 +1433,18 @@
         <div class="auth-field">
           <label>비밀번호${!isLogin ? ' (8자 이상)' : ''}</label>
           <input type="password" name="password" required minlength="${isLogin ? 1 : 8}" />
-        </div>
+        </div>` : ''}
         <div class="auth-error" id="authError" style="display:none;"></div>
-        <button type="submit" class="auth-submit" id="authSubmit">${isLogin ? '로그인' : '가입하고 시작하기'}</button>
+        <button type="submit" class="auth-submit" id="authSubmit">${isLogin ? '로그인' : isGoogleProfile ? '시작하기' : '가입하고 시작하기'}</button>
       </form>
     `;
 
     charCard.querySelectorAll('.auth-tab').forEach(tab => {
       tab.addEventListener('click', () => renderAuthForm(tab.dataset.mode));
     });
+    if (!isGoogleProfile) initGoogleSignIn();
 
-    if (!isLogin && typeof L !== 'undefined' && regionsData.length) {
+    if (showNicknameAndMap && typeof L !== 'undefined' && regionsData.length) {
       if (signupMapInstance) { signupMapInstance.remove(); signupMapInstance = null; }
       const regionSelect = document.querySelector('#authForm [name="region_id"]');
       const pickedLabel = document.getElementById('signupMapPicked');
@@ -1478,18 +1488,26 @@
       submitBtn.textContent = '처리 중...';
 
       try {
-        const payload = isLogin
-          ? { email: form.email.value, password: form.password.value }
-          : {
-              email: form.email.value,
-              password: form.password.value,
-              nickname: form.nickname.value,
-              region_id: form.region_id.value,
-            };
-        const result = await apiRequest(isLogin ? '/auth/login' : '/auth/signup', {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        });
+        let result;
+        if (isGoogleProfile) {
+          result = await apiRequest('/auth/google', {
+            method: 'POST',
+            body: JSON.stringify({ credential: googleProfile.credential, nickname: form.nickname.value, region_id: form.region_id.value }),
+          });
+        } else {
+          const payload = isLogin
+            ? { email: form.email.value, password: form.password.value }
+            : {
+                email: form.email.value,
+                password: form.password.value,
+                nickname: form.nickname.value,
+                region_id: form.region_id.value,
+              };
+          result = await apiRequest(isLogin ? '/auth/login' : '/auth/signup', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+          });
+        }
         setSession(result.token, result.user);
         currentUser = await apiRequest('/users/me'); // follower_count 등 로그인 응답에 없는 필드까지 채우기 위해 재조회
         renderCharCard();
@@ -1498,9 +1516,38 @@
         errorBox.textContent = err.message;
         errorBox.style.display = 'block';
         submitBtn.disabled = false;
-        submitBtn.textContent = isLogin ? '로그인' : '가입하고 시작하기';
+        submitBtn.textContent = isLogin ? '로그인' : isGoogleProfile ? '시작하기' : '가입하고 시작하기';
       }
     });
+  }
+
+  // 구글 로그인 — 서버가 GOOGLE_CLIENT_ID를 안 갖고 있으면(.env 미설정) 버튼을 그냥 안 그린다.
+  let googleClientId;
+  async function initGoogleSignIn() {
+    if (googleClientId === undefined) {
+      try { googleClientId = (await apiRequest('/auth/google-client-id')).client_id; }
+      catch (err) { googleClientId = null; }
+    }
+    const el = document.getElementById('googleSignInBtn');
+    if (!googleClientId || typeof google === 'undefined' || !el) return;
+    google.accounts.id.initialize({ client_id: googleClientId, callback: handleGoogleCredential });
+    google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', width: 280, locale: 'ko' });
+  }
+
+  async function handleGoogleCredential(response) {
+    try {
+      const result = await apiRequest('/auth/google', { method: 'POST', body: JSON.stringify({ credential: response.credential }) });
+      if (result.needs_profile) {
+        renderAuthForm('google-profile', { credential: response.credential, suggestedNickname: result.suggested_nickname });
+        return;
+      }
+      setSession(result.token, result.user);
+      currentUser = await apiRequest('/users/me');
+      renderCharCard();
+      centerMapOnUser();
+    } catch (err) {
+      alert('구글 로그인에 실패했습니다: ' + err.message);
+    }
   }
 
   /* ---------------- 핫 아젠다 / 분쟁 지역 / 명예의 전당 (비로그인 상태에서도 노출) ---------------- */
