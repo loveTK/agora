@@ -269,6 +269,7 @@
 
   /* 지도지역위젯 — 700x500 고정 크기, 목업 '지도지역위젯.jpg' 참고 */
   #regionModal .modal-box{ width:700px; max-width:92vw; height:500px; overflow-y:auto; }
+  #authModal .modal-box{ width:440px; max-width:92vw; }
   .region-widget-top{ display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
   .region-widget-left{ flex:1; min-width:0; }
   .region-widget-stats{ font-size:12.5px; color:var(--gray-1); margin-top:6px; }
@@ -676,6 +677,14 @@
   <div class="modal-box">
     <button class="modal-close" id="regionModalClose">×</button>
     <div id="regionModalContent"><div class="loading-text">불러오는 중...</div></div>
+  </div>
+</div>
+
+<!-- 로그인/회원가입 모달 — 대시보드의 "로그인 / 회원가입" 버튼 클릭 시 JS가 열고 닫음 -->
+<div class="modal-backdrop" id="authModal" style="display:none;">
+  <div class="modal-box">
+    <button class="modal-close" id="authModalClose">×</button>
+    <div id="authModalContent"></div>
   </div>
 </div>
 
@@ -1322,8 +1331,18 @@
       charCard.innerHTML = `<div class="loading-text">불러오는 중...</div>`;
       return;
     }
-    renderAuthForm('login');
+    charCard.innerHTML = `<button type="button" class="cta-gold" id="openAuthModalBtn" style="align-self:flex-start; width:auto; padding-left:28px; padding-right:28px;">로그인 / 회원가입</button>`;
+    document.getElementById('openAuthModalBtn').addEventListener('click', () => openAuthModal('login'));
   }
+
+  const authModal = document.getElementById('authModal');
+  function openAuthModal(mode) {
+    authModal.style.display = 'flex';
+    renderAuthForm(mode);
+  }
+  function closeAuthModal() { authModal.style.display = 'none'; }
+  document.getElementById('authModalClose').addEventListener('click', closeAuthModal);
+  authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
 
   async function renderLoggedIn() {
     const rankLabel = RANK_LABEL[currentUser.rank] || currentUser.rank;
@@ -1403,7 +1422,8 @@
     const showNicknameAndMap = !isLogin; // signup, google-profile 둘 다 필요
     const regionOptions = regionsData.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
 
-    charCard.innerHTML = `
+    const authModalContent = document.getElementById('authModalContent');
+    authModalContent.innerHTML = `
       ${avatarSvg}
       ${isGoogleProfile
         ? `<div class="section-title" style="margin-bottom:14px;">구글 로그인 완료 — 시작할 폴리스만 골라주세요</div>`
@@ -1439,7 +1459,7 @@
       </form>
     `;
 
-    charCard.querySelectorAll('.auth-tab').forEach(tab => {
+    authModalContent.querySelectorAll('.auth-tab').forEach(tab => {
       tab.addEventListener('click', () => renderAuthForm(tab.dataset.mode));
     });
     if (!isGoogleProfile) initGoogleSignIn();
@@ -1512,6 +1532,7 @@
         currentUser = await apiRequest('/users/me'); // follower_count 등 로그인 응답에 없는 필드까지 채우기 위해 재조회
         renderCharCard();
         centerMapOnUser();
+        closeAuthModal();
       } catch (err) {
         errorBox.textContent = err.message;
         errorBox.style.display = 'block';
@@ -1545,6 +1566,7 @@
       currentUser = await apiRequest('/users/me');
       renderCharCard();
       centerMapOnUser();
+      closeAuthModal();
     } catch (err) {
       alert('구글 로그인에 실패했습니다: ' + err.message);
     }
