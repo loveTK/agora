@@ -6,6 +6,10 @@ const { regionMilitaryPower } = require("../services/military");
 
 const router = express.Router();
 
+// "지금 뜨는 지역" 배지 기준 — 최근 1시간 내 새 논증 등록 수가 이 값 이상이면 노출.
+// 기획 확정 전 임시값이라 상수로 분리해뒀다(나중에 조정 시 이 값만 바꾸면 됨).
+const TRENDING_ARGUMENT_THRESHOLD_PER_HOUR = 3;
+
 // GET /regions
 // 지도 렌더링용 경량 목록 (상태값만)
 router.get("/", (req, res) => {
@@ -16,11 +20,21 @@ router.get("/", (req, res) => {
                 SELECT 1 FROM wars w
                 WHERE (w.attacker_region_id = regions.id OR w.defender_region_id = regions.id)
                   AND w.status IN ('voting', 'accepted')
-              ) AS has_active_war
+              ) AS has_active_war,
+              (SELECT COUNT(*) FROM arguments a
+                 JOIN threads t ON t.id = a.thread_id
+                 WHERE t.region_id = regions.id
+                   AND a.created_at >= datetime('now', '-1 hour')) AS recent_argument_count
        FROM regions ORDER BY name`
     )
     .all();
-  res.json(regions.map((r) => ({ ...r, has_active_war: !!r.has_active_war })));
+  res.json(
+    regions.map((r) => ({
+      ...r,
+      has_active_war: !!r.has_active_war,
+      is_trending: r.recent_argument_count >= TRENDING_ARGUMENT_THRESHOLD_PER_HOUR,
+    }))
+  );
 });
 
 // GET /regions/:id
@@ -32,7 +46,15 @@ router.get("/:id", (req, res) => {
     .prepare("SELECT COUNT(*) AS count FROM users WHERE region_id = ?")
     .get(req.params.id).count;
 
-  res.json({ ...region, population });
+  const recentArgumentCount = db
+    .prepare(
+      `SELECT COUNT(*) AS count FROM arguments a
+       JOIN threads t ON t.id = a.thread_id
+       WHERE t.region_id = ? AND a.created_at >= datetime('now', '-1 hour')`
+    )
+    .get(req.params.id).count;
+
+  res.json({ ...region, population, is_trending: recentArgumentCount >= TRENDING_ARGUMENT_THRESHOLD_PER_HOUR });
 });
 
 // GET /regions/:id/threads

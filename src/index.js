@@ -5,6 +5,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const { runMigrations } = require("./db");
 const { seedIfEmpty } = require("./seed");
+const { regenerateSitemap } = require("./services/sitemap");
 
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
@@ -23,10 +24,12 @@ const hotAgendaRoutes = require("./routes/hotAgenda");
 const messageRoutes = require("./routes/messages");
 const adminRoutes = require("./routes/admin");
 const replyRoutes = require("./routes/replies");
+const activityRoutes = require("./routes/activity");
 const { requireAdmin } = require("./middleware/adminAuth");
 
 runMigrations();
 seedIfEmpty(); // Shell 접근이 안 되는 환경(Render 무료 티어 등)에서도 초기 데이터가 자동으로 채워지게 함
+regenerateSitemap(); // 배포/재시작 시점 기준으로 sitemap.xml을 최신 지역/논제 목록으로 다시 씀
 
 const app = express();
 app.use(cors());
@@ -60,6 +63,7 @@ app.use("/hot-agenda", hotAgendaRoutes);
 app.use("/messages", messageRoutes);
 app.use("/admin", adminRoutes);
 app.use("/replies", replyRoutes);
+app.use("/activity", activityRoutes);
 app.use("/internal", requireAdmin, internalRoutes);
 
 app.use((req, res) => res.status(404).json({ error: "존재하지 않는 경로입니다." }));

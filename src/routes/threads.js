@@ -10,6 +10,7 @@ const { grantWeaponIfEligible } = require("../services/weapon");
 const { toggleLaugh } = require("../services/laughReaction");
 const { toggleThreadVote, getThreadVoteTally } = require("../services/threadVote");
 const { checkAndGrantSphinxTicker } = require("../services/sphinxTicker");
+const { regenerateSitemap } = require("../services/sitemap");
 
 const DAILY_JUDGMENT_VOTE_LIMIT = 20; // 어뷰징 방지: 하루 20개 논제까지만 판정투표 가능
 
@@ -85,6 +86,7 @@ router.post("/", requireAuth, (req, res) => {
     req.userId
   );
   grantWeaponIfEligible(req.userId); // 논전사 티어(100) 이상이면 무기 슬롯 자동 지급
+  regenerateSitemap(); // 새 논제도 재배포를 안 기다리고 바로 sitemap.xml에 잡히게
 
   const thread = db.prepare("SELECT * FROM threads WHERE id = ?").get(id);
   res.status(201).json(toPublicThread(thread));

@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AGORA — 전황 개요</title>
+<meta name="description" content="19개 폴리스가 매일 여론으로 겨루는 실시간 정치 토론 광장. 논제에 투표하고 논증을 펼쳐 폴리스의 지배권을 다투세요.">
+<link rel="canonical" href="https://myagora.xyz/" id="canonicalLink">
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -171,6 +174,10 @@
   .hero-live-row span:last-child{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray-2); }
   .hero-live-number{ font-family:'Archivo', sans-serif; font-size:clamp(36px,4.4vw,52px); font-weight:800; line-height:1; }
   .hero-live-caption{ font-size:12.5px; color:var(--gray-2); margin-top:4px; }
+  .hero-feed{ margin-top:16px; padding-top:14px; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:9px; }
+  .hero-feed-item{ font-size:12px; color:var(--gray-1); line-height:1.5; }
+  .hero-feed-item b{ color:var(--ink); font-weight:600; }
+  .hero-feed-time{ color:var(--gray-2); }
   .map-wrap{ position:relative; }
   .map-touch-hint{
     position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:8;
@@ -182,6 +189,22 @@
   /* V2: 전황 개요 라벨을 지도 위 오버레이로 — 목업의 "지도 위에 정보 얹기" 방향 */
   .map-overlay-eyebrow{ position:absolute; top:24px; left:24px; z-index:10; max-width:60%; }
   .map-overlay-eyebrow .map-eyebrow{ font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+  .map-search-wrap{ margin-top:12px; }
+  .map-search-wrap input{
+    font-family:'Archivo', sans-serif; font-size:13px; padding:9px 14px; width:220px; max-width:70vw;
+    background:rgba(17,17,16,0.75); color:var(--ink); border:1px solid var(--line);
+  }
+  .map-search-wrap input:focus{ outline:none; border-color:var(--gold); }
+  .map-search-wrap input::placeholder{ color:var(--gray-2); }
+  /* 마커 호버 미리보기 카드 — Leaflet 기본 툴팁을 카드처럼 보이게 스타일만 덮어씀 */
+  .leaflet-tooltip.region-preview-tooltip{
+    background:var(--white); color:var(--black); border:1px solid var(--black);
+    border-radius:0; padding:8px 12px; font-family:'Archivo', sans-serif; font-size:12px; line-height:1.5;
+    box-shadow:none; opacity:1;
+  }
+  .leaflet-tooltip.region-preview-tooltip::before{ display:none; }
+  .region-preview-tooltip .rp-title{ font-weight:700; }
+  .region-preview-tooltip .rp-meta{ color:var(--gray-3); font-size:11px; margin-top:2px; }
 
   /* 지도는 장식 요소라 .shell 폭 제한을 깨고 화면 끝까지(뷰포트 100%) 채운다 */
   #map{
@@ -223,6 +246,10 @@
   .region-status-badge.dominant{ background:#2F7D4F; }
   .region-status-badge.contested{ background:#BA7517; }
   .region-status-badge.dispute{ background:#B23A3A; }
+  .trending-badge{
+    font-size:11px; padding:3px 10px; color:var(--on-gold); background:var(--gold);
+    letter-spacing:0.02em; flex-shrink:0; margin-left:6px;
+  }
   .region-stat-grid{
     display:grid; grid-template-columns:repeat(auto-fit, minmax(120px,1fr)); gap:14px;
     margin:16px 0 22px; padding:16px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
@@ -259,7 +286,7 @@
   }
   .issue-meta{ font-size:11.5px; color:var(--gray-2); margin-top:3px; }
 
-  /* ---------- hot issue: 카드 아님 — 한 줄 리스트 + 클릭 시 드롭다운으로 상세/의견 ---------- */
+  /* ---------- hot issue: 2열 카드, 클릭 시 카드 안에서 드롭다운으로 상세/의견 ---------- */
   .hot-issue-card{ display:flex; align-items:center; gap:20px; border:1px solid var(--line); padding:18px 20px; } /* 관리자 신고 목록도 재사용 중 */
   .hot-issue-sort-tabs{ display:flex; gap:8px; }
   .hot-issue-sort-tab{
@@ -268,19 +295,22 @@
   }
   .hot-issue-sort-tab.active{ background:var(--gold); color:var(--on-gold); border-color:var(--gold); }
 
-  .issue-list-item{ border-bottom:1px solid var(--line); }
-  .issue-list-item:last-child{ border-bottom:none; }
-  .issue-row{ display:grid; grid-template-columns:30px 1fr 16px; align-items:start; gap:14px; padding:16px 4px; cursor:pointer; }
+  #hotIssueList{ display:grid; grid-template-columns:1fr; gap:14px; align-items:start; }
+  @media (min-width:820px){ #hotIssueList{ grid-template-columns:1fr 1fr; } }
+  .issue-list-item{ border:1px solid var(--line); padding:16px 18px; }
+  .issue-row{ display:grid; grid-template-columns:26px 1fr 16px; align-items:start; gap:12px; cursor:pointer; }
   .issue-row-index{ font-weight:700; font-size:13px; color:var(--gray-2); padding-top:2px; }
   .issue-row-body{ min-width:0; }
   .issue-row-title{
-    font-size:17px; font-weight:700; line-height:1.4;
+    font-size:16px; font-weight:700; line-height:1.4;
     display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
   }
   .issue-row-meta{ font-size:12px; color:var(--gray-2); margin-top:6px; }
+  .issue-bar{ height:4px; background:var(--gray-4); margin-top:10px; }
+  .issue-bar-fill{ height:100%; background:var(--gold); }
   .issue-row-caret{ transition:transform 0.15s; flex-shrink:0; margin-top:4px; }
   .issue-row.expanded .issue-row-caret{ transform:rotate(180deg); }
-  .issue-dropdown{ padding:0 4px 22px 44px; }
+  .issue-dropdown{ margin-top:14px; padding-top:14px; border-top:1px solid var(--line); }
 
   .dispute-item{
     display:flex; align-items:center; justify-content:space-between;
@@ -510,6 +540,7 @@
         <div class="hero-live-row"><span class="live-dot"></span><span>실시간 판정 진행중</span></div>
         <div class="hero-live-number" id="heroRegionCount">·</div>
         <div class="hero-live-caption">폴리스 동시 접전</div>
+        <div class="hero-feed" id="heroFeed"></div>
       </div>
     </section>
 
@@ -525,6 +556,10 @@
         <div class="map-overlay-eyebrow">
           <div class="map-eyebrow">전황 개요</div>
           <span class="section-title" id="mapStatusHeadline">실시간 폴리스 지배 현황</span>
+          <div class="map-search-wrap">
+            <input type="text" id="mapSearchInput" list="mapRegionList" placeholder="지역 이름으로 검색" autocomplete="off">
+            <datalist id="mapRegionList"></datalist>
+          </div>
         </div>
         <button class="cta-gold map-thread-btn" id="mapThreadBtn">+ 논제 등록</button>
         <div class="map-legend">
@@ -539,7 +574,7 @@
       <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
         <span class="section-title" style="font-size:16px;">주요 논쟁 · Hot Issue</span>
         <div class="hot-issue-sort-tabs" id="hotIssueSortTabs">
-          <button type="button" class="hot-issue-sort-tab active" data-sort="active">활성화순</button>
+          <button type="button" class="hot-issue-sort-tab active" data-sort="active">인기순</button>
           <button type="button" class="hot-issue-sort-tab" data-sort="recent">최신순</button>
           <button type="button" class="hot-issue-sort-tab" data-sort="mine">내 지역</button>
         </div>
@@ -782,10 +817,39 @@
       showView('regionPage');
       renderRegionPage(initialRegionId);
     }
+    // ?thread=<id>로 직접 들어온 경우(검색엔진/공유 링크) 그 논제 모달을 바로 연다.
+    const initialThreadId = new URLSearchParams(location.search).get('thread');
+    if (initialThreadId) openThreadModal(initialThreadId);
   });
 
   renderHotIssues();
   renderHallOfFame();
+  renderHeroFeed();
+  setInterval(renderHeroFeed, 25000); // 새로고침 없이도 실제 최근 활동으로 계속 갱신
+
+  function timeAgo(isoString) {
+    const diffSec = Math.max(0, Math.floor((Date.now() - new Date(isoString.replace(' ', 'T') + 'Z').getTime()) / 1000));
+    if (diffSec < 60) return '방금 전';
+    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}분 전`;
+    if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}시간 전`;
+    return `${Math.floor(diffSec / 86400)}일 전`;
+  }
+
+  // 히어로의 "실시간 활동" — 실제 최근 논제 등록/투표만 보여준다(가짜 이벤트 없이).
+  async function renderHeroFeed() {
+    const el = document.getElementById('heroFeed');
+    try {
+      const events = await apiRequest('/activity/recent');
+      el.innerHTML = events.length
+        ? events.map(e => `
+          <div class="hero-feed-item">
+            ${e.type === 'thread_voted'
+              ? `<b>${e.actor_nickname}</b>님이 "${e.thread_title}" 논제에 투표 · <span class="hero-feed-time">${timeAgo(e.created_at)}</span>`
+              : `<b>${e.actor_nickname}</b>님이 "${e.thread_title}" 논제 등록 · <span class="hero-feed-time">${timeAgo(e.created_at)}</span>`}
+          </div>`).join('')
+        : '';
+    } catch (err) { /* 실패해도 히어로 자체는 그대로 둔다 */ }
+  }
 
   /* ---------------- 상단 네비게이션 (대시보드 / 상점 / 인벤토리 / 관리자페이지) ---------------- */
 
@@ -1145,10 +1209,30 @@
       regionsById[r.id] = r;
       const statusLabel = r.status === 'dominant' ? '지배 확정' : (r.status === 'contested' ? '판정 진행중' : '분쟁 지역');
       const marker = L.marker([r.lat, r.lng], { icon: markerIcon(r) })
-        .bindTooltip(`${r.name} · ${statusLabel}`, { permanent:false, direction:'top' }) // V2: 호버 시 상태까지 미리보기
+        .bindTooltip(`${r.name} · ${statusLabel}`, { permanent:false, direction:'top', className:'region-preview-tooltip' })
         .on('click', () => openRegionModal(r.id))
         .addTo(map);
+      // 호버할 때 이미 받아둔 Hot Issue 데이터(hotIssuesCache)에서 그 지역 1위 논제를 찾아
+      // 제목/참여자수까지 보여주는 미리보기 카드로 내용을 바꿔치기한다 — 없으면 상태만.
+      marker.on('mouseover', () => {
+        const regionThreads = hotIssuesCache.filter(t => t.region_id === r.id);
+        const top = regionThreads.sort((a, b) => b.participant_count - a.participant_count)[0];
+        const content = top
+          ? `<div class="rp-title">${r.name} · ${statusLabel}</div><div class="rp-meta">"${top.title}" · 참여 ${top.participant_count}명</div>`
+          : `<div class="rp-title">${r.name} · ${statusLabel}</div><div class="rp-meta">등록된 Hot 논제 없음</div>`;
+        marker.setTooltipContent(content);
+      });
       markersById[r.id] = marker;
+    });
+
+    // 지역 검색 — 실제로 지도를 그 지역 위치로 이동시키는 기능(장식용 아님)
+    const regionListEl = document.getElementById('mapRegionList');
+    regionListEl.innerHTML = regions.map(r => `<option value="${r.name}">`).join('');
+    document.getElementById('mapSearchInput').addEventListener('change', (e) => {
+      const match = regions.find(r => r.name === e.target.value.trim());
+      if (!match) return;
+      map.flyTo([match.lat, match.lng], 6);
+      openRegionModal(match.id);
     });
 
     if (typeof io !== 'undefined') {
@@ -1434,7 +1518,8 @@
     }
   }
 
-  // V2: 정렬 탭(활성화순/최신순/내 지역) — 서버 재요청 없이 이미 받아온 hotIssuesCache를 클라이언트에서
+  // V2: 정렬 탭(인기순/최신순/내 지역) — 서버 재요청 없이 이미 받아온 hotIssuesCache를 클라이언트에서
+  // "마감임박순"은 논제에 마감 시각 개념 자체가 없어 넣지 않았다(가짜 데이터로 채우지 않기 위함).
   // 재정렬/필터링만 한다(hot-agenda가 이미 상위 30건을 다 내려주므로 충분).
   function renderHotIssueGrid() {
     const el = document.getElementById('hotIssueList');
@@ -1456,8 +1541,9 @@
       return;
     }
 
-    // 카드가 아니라 한 줄 리스트 — 핵심 정보(제목/지역/참여/추천)만 보이고, 클릭하면 드롭다운으로
-    // 상세 설명 + 반응 + 다른 의견(댓글)까지 펼쳐진다(어제 만든 논제 상세 모달의 구성 요소를 그대로 재사용).
+    // 2열 카드 — 핵심 정보(제목/지역/참여/추천)와 참여도 바를 보여주고, 클릭하면 카드 안에서
+    // 드롭다운으로 상세 설명 + 반응 + 다른 의견(댓글)까지 펼쳐진다(광장 모달의 구성 요소를 그대로 재사용).
+    const maxParticipants = Math.max(...list.map(t => t.participant_count), 1);
     el.innerHTML = list.map((t, i) => `
       <div class="issue-list-item">
         <div class="issue-row" data-toggle-issue="${t.id}">
@@ -1465,6 +1551,7 @@
           <div class="issue-row-body">
             <div class="issue-row-title">"${t.title}"</div>
             <div class="issue-row-meta">${t.region_name} · 참여 ${t.participant_count}명 · 추천 ${t.total_upvotes}</div>
+            <div class="issue-bar"><div class="issue-bar-fill" style="width:${Math.round(t.participant_count / maxParticipants * 100)}%"></div></div>
           </div>
           <svg class="issue-row-caret" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
@@ -1545,9 +1632,12 @@
       <div class="dispute-item region-link" data-open-region="${r.id}">
         <div class="dispute-item-top">
           <span class="dispute-region">${r.name}</span>
-          <span class="dispute-flag">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="currentColor" stroke-width="1.6"/></svg>
-            ${r.status === 'contested' ? '판정 진행중' : '분쟁 지역'}
+          <span style="display:flex; align-items:center;">
+            <span class="dispute-flag">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="currentColor" stroke-width="1.6"/></svg>
+              ${r.status === 'contested' ? '판정 진행중' : '분쟁 지역'}
+            </span>
+            ${r.is_trending ? '<span class="trending-badge">지금 뜨는 지역</span>' : ''}
           </span>
         </div>
         <div class="dispute-stats" id="disputeStats-${r.id}">
@@ -1983,8 +2073,28 @@
   /* ---------------- 논제 상세 모달 (입장하기) — 논증 목록 + 추천/비추천/바보 ---------------- */
 
   const threadModal = document.getElementById('threadModal');
-  document.getElementById('threadModalClose').addEventListener('click', () => { threadModal.style.display = 'none'; });
-  threadModal.addEventListener('click', (e) => { if (e.target === threadModal) threadModal.style.display = 'none'; });
+  const DEFAULT_TITLE = document.title;
+  const DEFAULT_DESCRIPTION = document.querySelector('meta[name="description"]').content;
+
+  // 논제 하나하나가 검색엔진에 개별 결과로 잡히도록 ?thread=<id>를 실제 URL로 남기고,
+  // 그 논제의 제목/설명으로 <title>/description을 그때그때 바꿔준다(지역 페이지의 ?region= 관행과 동일).
+  function setThreadSeoMeta(thread) {
+    document.title = `${thread.title} - AGORA`;
+    document.querySelector('meta[name="description"]').setAttribute('content', (thread.body || thread.title).slice(0, 150));
+    document.getElementById('canonicalLink').setAttribute('href', `https://myagora.xyz/?thread=${thread.id}`);
+  }
+  function resetSeoMeta() {
+    document.title = DEFAULT_TITLE;
+    document.querySelector('meta[name="description"]').setAttribute('content', DEFAULT_DESCRIPTION);
+    document.getElementById('canonicalLink').setAttribute('href', 'https://myagora.xyz/');
+  }
+  function closeThreadModal() {
+    threadModal.style.display = 'none';
+    resetSeoMeta();
+    if (new URLSearchParams(location.search).get('thread')) history.pushState({}, '', location.pathname);
+  }
+  document.getElementById('threadModalClose').addEventListener('click', closeThreadModal);
+  threadModal.addEventListener('click', (e) => { if (e.target === threadModal) closeThreadModal(); });
 
   // targetType: 'thread' | 'argument' | 'reply' 공용 — Hot Issue 카드/논증/대댓글 세 군데서 재사용한다.
   // 신규 계정은 서버 집계 가중치가 1 미만(voteWeight.js 참고)이라 합산값이 소수로 내려올 수 있는데,
@@ -2122,6 +2232,11 @@
         apiRequest(`/threads/${threadId}/arguments`),
       ]);
 
+      if (new URLSearchParams(location.search).get('thread') !== threadId) {
+        history.pushState({}, '', `?thread=${threadId}`);
+      }
+      setThreadSeoMeta(thread);
+
       const STANCE_LABEL = { pro: '찬성', con: '반대', other: '기타' };
 
       // 무대(stage) 말풍선 내용 — 기본은 논제 자체, 사이드에서 의견을 클릭하면 그 사람 것으로 바뀐다.
@@ -2220,7 +2335,7 @@
       content.querySelectorAll('[data-open-conv-quick]').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          threadModal.style.display = 'none';
+          closeThreadModal();
           document.getElementById('messagesCard').scrollIntoView({ behavior: 'smooth' });
           openConversation(btn.dataset.openConvQuick, btn.dataset.nickname);
         });
@@ -2321,6 +2436,7 @@
             <div class="region-hero">
               <span class="section-title" style="font-size:20px;">${region.name} 폴리스</span>
               <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>
+              ${region.is_trending ? '<span class="trending-badge">지금 뜨는 지역</span>' : ''}
             </div>
             <div class="region-widget-stats">소속인원: ${region.population}명 &nbsp; 전쟁현황: ${activeWars.length ? `전쟁 중(${activeWars.length})` : '평시'}</div>
             <div class="region-widget-stats">지배정당: ${ruler && ruler.party_name ? ruler.party_name : '없음'} &nbsp; 국교: ${ruler && ruler.religion_name ? ruler.religion_name : '없음'}</div>
@@ -2387,7 +2503,7 @@
 
       const statusKey = region.status === 'dominant' ? 'dominant' : (region.status === 'contested' ? 'contested' : 'dispute');
       document.getElementById('regionPageTitle').innerHTML =
-        `${region.name} 폴리스 <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>`;
+        `${region.name} 폴리스 <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>${region.is_trending ? ' <span class="trending-badge">지금 뜨는 지역</span>' : ''}`;
 
       const ruler = dominance.ruler;
       document.getElementById('regionPageStats').innerHTML = `
@@ -2424,8 +2540,11 @@
 
   window.addEventListener('popstate', () => {
     const rid = new URLSearchParams(location.search).get('region');
-    if (rid) { showView('regionPage'); renderRegionPage(rid); }
-    else showView('dashboard');
+    const tid = new URLSearchParams(location.search).get('thread');
+    if (rid) { showView('regionPage'); renderRegionPage(rid); return; }
+    if (tid) { openThreadModal(tid); return; }
+    showView('dashboard');
+    closeThreadModal();
   });
 
   tryRestoreSession();
