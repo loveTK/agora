@@ -287,6 +287,9 @@
     border-bottom:1px solid var(--gray-4);
   }
   .dispute-item:last-child{ border-bottom:none; }
+  /* 주요 분쟁 지역만 2열로 — .dispute-item 자체는 명예의 전당 등 다른 1열 목록도 같이 쓰므로 건드리지 않음 */
+  #disputeList{ display:grid; grid-template-columns:1fr; column-gap:32px; }
+  @media (min-width:640px){ #disputeList{ grid-template-columns:1fr 1fr; } }
   .dispute-region{ font-size:13.5px; }
   .dispute-flag{
     display:flex; align-items:center; gap:6px;
@@ -1074,11 +1077,11 @@
     const map = L.map('map', {
       zoomControl:false, attributionControl:false,
       maxBounds: worldBounds, maxBoundsViscosity: 1.0, // 확대해서 옆으로 끌어도 지도 밖 회색 영역으로는 안 나가게 고정
-    }).setView([25, 20], 2);
+    }).setView([25, 20], 5);
     // V2: 실제로 조작 가능한 줌 버튼 노출 — 좌상단(전황 개요 오버레이)/우상단(논제 등록 버튼)과
     // 안 겹치게 우하단에 배치.
     L.control.zoom({ position: 'bottomright' }).addTo(map);
-    map.setMinZoom(2);
+    map.setMinZoom(5); // 두세 국가가 보이는 정도까지만 — 이보다 더 축소 못 하게 고정
     // CartoDB 무료 타일이 API 키를 요구하도록 바뀌어서(워터마크 노출) OSM 표준 타일로 교체 — 흑백 필터는 #map CSS에서 그대로 처리
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, subdomains:'abc' }).addTo(map);
 
