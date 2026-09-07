@@ -1077,11 +1077,11 @@
     const map = L.map('map', {
       zoomControl:false, attributionControl:false,
       maxBounds: worldBounds, maxBoundsViscosity: 1.0, // 확대해서 옆으로 끌어도 지도 밖 회색 영역으로는 안 나가게 고정
-    }).setView([25, 20], 5);
+    }).setView([25, 20], 3);
     // V2: 실제로 조작 가능한 줌 버튼 노출 — 좌상단(전황 개요 오버레이)/우상단(논제 등록 버튼)과
     // 안 겹치게 우하단에 배치.
     L.control.zoom({ position: 'bottomright' }).addTo(map);
-    map.setMinZoom(5); // 두세 국가가 보이는 정도까지만 — 이보다 더 축소 못 하게 고정
+    map.setMinZoom(3); // 대륙 하나가 보이는 정도까지만 — 이보다 더 축소 못 하게 고정
     // CartoDB 무료 타일이 API 키를 요구하도록 바뀌어서(워터마크 노출) OSM 표준 타일로 교체 — 흑백 필터는 #map CSS에서 그대로 처리
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, subdomains:'abc' }).addTo(map);
 
