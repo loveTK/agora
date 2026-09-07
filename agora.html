@@ -172,6 +172,11 @@
   .hero-live-number{ font-family:'Archivo', sans-serif; font-size:clamp(36px,4.4vw,52px); font-weight:800; line-height:1; }
   .hero-live-caption{ font-size:12.5px; color:var(--gray-2); margin-top:4px; }
   .map-wrap{ position:relative; }
+  .map-touch-hint{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:8;
+    background:rgba(17,17,16,0.75); color:var(--ink); font-size:12.5px;
+    padding:10px 18px; border:1px solid var(--line); pointer-events:none; white-space:nowrap;
+  }
   .map-thread-btn{ position:absolute; top:24px; right:24px; z-index:10; border:none; padding:12px 20px; font-size:13px; cursor:pointer; font-family:'Archivo',sans-serif; }
 
   /* V2: 전황 개요 라벨을 지도 위 오버레이로 — 목업의 "지도 위에 정보 얹기" 방향 */
@@ -254,32 +259,24 @@
   }
   .issue-meta{ font-size:11.5px; color:var(--gray-2); margin-top:3px; }
 
-  /* ---------- hot issue 카드: 발의자 아바타 / 논제 본문 / 입장 CTA ---------- */
-  /* V2: 1열 목록 → 2열 그리드 + 정렬 탭 + 참여도 바 */
-  .hot-issue-grid{ display:grid; grid-template-columns:1fr; gap:16px; }
-  @media (min-width:860px){ .hot-issue-grid{ grid-template-columns:1fr 1fr; } }
+  /* ---------- hot issue: 카드 아님 — 한 줄 리스트 + 클릭 시 드롭다운으로 상세/의견 ---------- */
+  .hot-issue-card{ display:flex; align-items:center; gap:20px; border:1px solid var(--line); padding:18px 20px; } /* 관리자 신고 목록도 재사용 중 */
   .hot-issue-sort-tabs{ display:flex; gap:8px; }
   .hot-issue-sort-tab{
     border:1px solid var(--line); color:var(--gray-1); background:none; padding:9px 16px;
     font-size:12.5px; cursor:pointer; font-family:'Archivo',sans-serif;
   }
   .hot-issue-sort-tab.active{ background:var(--gold); color:var(--on-gold); border-color:var(--gold); }
-  .hot-issue-engagement{ height:4px; background:var(--gray-4); margin-top:2px; }
-  .hot-issue-engagement-fill{ height:100%; background:var(--gold); }
-  .hot-issue-card{ display:flex; align-items:center; gap:20px; border:1px solid var(--line); padding:18px 20px; }
-  .hot-issue-left{ display:flex; flex-direction:column; align-items:center; gap:8px; flex-shrink:0; }
-  .hot-issue-avatar{ width:76px; height:76px; border:1px solid var(--black); display:flex; align-items:center; justify-content:center; }
-  .hot-issue-author{ font-size:11px; color:var(--gray-2); text-align:center; max-width:76px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .hot-issue-body{ flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; }
-  .hot-issue-index{ font-family:'Archivo', sans-serif; font-weight:700; font-size:13px; color:var(--gray-2); margin-right:8px; }
-  .hot-issue-quote{ font-size:16px; font-weight:600; color:var(--ink); line-height:1.4; }
-  .hot-issue-stance{
-    width:60px; height:60px; border-radius:50%; border:1px solid var(--black);
-    display:flex; align-items:center; justify-content:center; text-align:center;
-    font-size:11px; color:var(--black); line-height:1.3; flex-shrink:0; background:none; cursor:pointer;
-    font-family:'Archivo',sans-serif; text-decoration:none;
-  }
-  .hot-issue-stance:hover{ background:var(--black); color:var(--white); }
+
+  .issue-list-item{ border-bottom:1px solid var(--line); }
+  .issue-list-item:last-child{ border-bottom:none; }
+  .issue-row{ display:grid; grid-template-columns:30px 1fr auto 16px; align-items:center; gap:14px; padding:16px 4px; cursor:pointer; }
+  .issue-row-index{ font-weight:700; font-size:13px; color:var(--gray-2); }
+  .issue-row-title{ font-size:15px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .issue-row-meta{ font-size:12px; color:var(--gray-2); white-space:nowrap; }
+  .issue-row-caret{ transition:transform 0.15s; flex-shrink:0; }
+  .issue-row.expanded .issue-row-caret{ transform:rotate(180deg); }
+  .issue-dropdown{ padding:0 4px 22px 44px; }
 
   .dispute-item{
     display:flex; align-items:center; justify-content:space-between;
@@ -287,9 +284,14 @@
     border-bottom:1px solid var(--gray-4);
   }
   .dispute-item:last-child{ border-bottom:none; }
-  /* 주요 분쟁 지역만 2열로 — .dispute-item 자체는 명예의 전당 등 다른 1열 목록도 같이 쓰므로 건드리지 않음 */
-  #disputeList{ display:grid; grid-template-columns:1fr; column-gap:32px; }
+  /* 주요 분쟁 지역만 2열 카드로 — .dispute-item 자체는 명예의 전당 등 다른 1열 목록도 같이 쓰므로
+     기본 스타일은 안 건드리고 #disputeList 안에서만 ID 우선순위로 덮어쓴다. */
+  #disputeList{ display:grid; grid-template-columns:1fr; gap:12px 20px; }
   @media (min-width:640px){ #disputeList{ grid-template-columns:1fr 1fr; } }
+  #disputeList .dispute-item{
+    border:1px solid var(--line); border-bottom:1px solid var(--line);
+    padding:16px 18px; margin:0;
+  }
   .dispute-region{ font-size:13.5px; }
   .dispute-flag{
     display:flex; align-items:center; gap:6px;
@@ -396,12 +398,6 @@
   .reply-meta{ color:var(--gray-2); font-size:11px; margin-bottom:3px; }
   .reply-form-mini{ display:flex; gap:6px; margin-top:10px; }
   .reply-form-mini input{ flex:1; border:1px solid var(--line); background:var(--white); color:var(--ink); padding:6px 8px; font-size:12px; font-family:'Archivo',sans-serif; }
-
-  /* ---------- Hot Issue 카드: hover/press + 아코디언 반응 패널 ---------- */
-  .hot-issue-card{ cursor:pointer; transition:transform 0.15s; }
-  .hot-issue-card:active{ transform:scale(0.98); }
-  .hot-issue-reactions{ max-height:0; overflow:hidden; transition:max-height 0.25s ease; }
-  .hot-issue-reactions.expanded{ max-height:120px; margin-top:6px; }
 
   /* ---------- 실시간 토스트 ---------- */
   #toast{
@@ -535,7 +531,7 @@
           <button type="button" class="hot-issue-sort-tab" data-sort="mine">내 지역</button>
         </div>
       </div>
-      <div class="hot-issue-grid" id="hotIssueList"><div class="loading-text">불러오는 중...</div></div>
+      <div id="hotIssueList"><div class="loading-text">불러오는 중...</div></div>
     </section>
 
     <section class="section" id="threadFormCard">
@@ -1073,15 +1069,27 @@
       console.warn('Leaflet을 불러오지 못해 지도를 표시할 수 없습니다.');
       return;
     }
+    // 터치 기기는 지도가 화면을 꽉 채우면 위아래로 스와이프해서 페이지를 내리려 해도 지도가
+    // 드래그로 먹어버려 답답하다 — 처음엔 지도 드래그를 꺼서 스와이프가 그대로 페이지 스크롤이 되게
+    // 하고, 지도를 한 번 탭하면 그때부터 드래그(패닝)를 켜준다.
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const worldBounds = [[-90, -180], [90, 180]];
     const map = L.map('map', {
-      zoomControl:false, attributionControl:false,
+      zoomControl:false, attributionControl:false, dragging: !isTouchDevice,
       maxBounds: worldBounds, maxBoundsViscosity: 1.0, // 확대해서 옆으로 끌어도 지도 밖 회색 영역으로는 안 나가게 고정
     }).setView([25, 20], 3);
     // V2: 실제로 조작 가능한 줌 버튼 노출 — 좌상단(전황 개요 오버레이)/우상단(논제 등록 버튼)과
     // 안 겹치게 우하단에 배치.
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     map.setMinZoom(3); // 대륙 하나가 보이는 정도까지만 — 이보다 더 축소 못 하게 고정
+
+    if (isTouchDevice) {
+      const hint = document.createElement('div');
+      hint.className = 'map-touch-hint';
+      hint.textContent = '지도를 탭하면 움직일 수 있어요';
+      document.querySelector('.map-wrap').appendChild(hint);
+      map.once('click', () => { map.dragging.enable(); hint.remove(); });
+    }
     // CartoDB 무료 타일이 API 키를 요구하도록 바뀌어서(워터마크 노출) OSM 표준 타일로 교체 — 흑백 필터는 #map CSS에서 그대로 처리
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, subdomains:'abc' }).addTo(map);
 
@@ -1364,46 +1372,71 @@
       return;
     }
 
-    const maxParticipants = Math.max(...list.map(t => t.participant_count), 1);
+    // 카드가 아니라 한 줄 리스트 — 핵심 정보(제목/지역/참여/추천)만 보이고, 클릭하면 드롭다운으로
+    // 상세 설명 + 반응 + 다른 의견(댓글)까지 펼쳐진다(어제 만든 논제 상세 모달의 구성 요소를 그대로 재사용).
     el.innerHTML = list.map((t, i) => `
-      <div class="hot-issue-card" data-toggle-card>
-        <div class="hot-issue-left">
-          <div class="hot-issue-avatar">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="4.3" r="2.3" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M8 8.8 Q12 6.3 16 8.8 M9.2 8.8 L6.5 14.2 M14.8 8.8 L17.5 14.2 M12 8.6 L12 15 M12 15 L8.3 22 M12 15 L15.7 22" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
-            </svg>
-          </div>
-          <div class="hot-issue-author">${t.author_nickname}</div>
-          ${currentUser && currentUser.id !== t.author_id ? `<button class="logout-link" data-open-conv-quick="${t.author_id}" data-nickname="${t.author_nickname}" style="font-size:10px;">쪽지</button>` : ''}
+      <div class="issue-list-item">
+        <div class="issue-row" data-toggle-issue="${t.id}">
+          <span class="issue-row-index">${String(i + 1).padStart(2, '0')}</span>
+          <span class="issue-row-title">"${t.title}"</span>
+          <span class="issue-row-meta">${t.region_name} · 참여 ${t.participant_count}명 · 추천 ${t.total_upvotes}</span>
+          <svg class="issue-row-caret" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <div class="hot-issue-body">
-          <div class="hot-issue-quote"><span class="hot-issue-index">${String(i + 1).padStart(2, '0')}</span>"${t.title}"</div>
-          <div class="issue-meta">${t.region_name} 폴리스 / 참여 <span class="count-up" data-target="${t.participant_count}">0</span>명 / <span class="badge badge-gold" style="padding:1px 7px; font-size:10.5px;">추천 ${t.total_upvotes}</span></div>
-          <div class="hot-issue-engagement"><div class="hot-issue-engagement-fill" style="width:${Math.round(t.participant_count / maxParticipants * 100)}%;"></div></div>
-          ${currentUser && currentUser.id !== t.author_id ? `<div class="hot-issue-reactions">${reactionButtonsHtml('thread', t.id, t.thread_upvotes, t.thread_downvotes, t.thread_laugh_count)}</div>` : ''}
-        </div>
-        <button class="hot-issue-stance" data-open-thread="${t.id}">입장 →</button>
+        <div class="issue-dropdown" id="issueDropdown-${t.id}" hidden></div>
       </div>`).join('');
 
-    el.querySelectorAll('[data-toggle-card]').forEach(card => {
-      card.addEventListener('click', () => {
-        const panel = card.querySelector('.hot-issue-reactions');
-        if (panel) panel.classList.toggle('expanded');
-      });
+    el.querySelectorAll('[data-toggle-issue]').forEach(row => {
+      row.addEventListener('click', () => toggleIssueDropdown(row, row.dataset.toggleIssue));
     });
-    el.querySelectorAll('[data-open-thread]').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.stopPropagation(); openThreadModal(btn.dataset.openThread); });
-    });
-    el.querySelectorAll('[data-open-conv-quick]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+  }
+
+  // 논제 하나의 드롭다운을 열고(처음 열 때만 서버에서 불러옴)/닫는다.
+  async function toggleIssueDropdown(row, threadId) {
+    const dropdown = document.getElementById(`issueDropdown-${threadId}`);
+    if (!dropdown.hidden) {
+      dropdown.hidden = true;
+      row.classList.remove('expanded');
+      return;
+    }
+    dropdown.hidden = false;
+    row.classList.add('expanded');
+    if (dropdown.dataset.loaded) return;
+    dropdown.dataset.loaded = '1';
+    dropdown.innerHTML = '<div class="loading-text">불러오는 중...</div>';
+
+    try {
+      const [thread, args] = await Promise.all([
+        apiRequest(`/threads/${threadId}`),
+        apiRequest(`/threads/${threadId}/arguments`),
+      ]);
+      const stanceLabel = { pro: '찬성', con: '반대', other: '기타' };
+      const sortedArgs = [...args].sort((a, b) =>
+        (b.upvotes + b.downvotes + (b.laugh_count || 0)) - (a.upvotes + a.downvotes + (a.laugh_count || 0))
+      );
+      const argsHtml = sortedArgs.length
+        ? sortedArgs.map(a => `
+          <div class="arg-item">
+            <div class="arg-meta"><span>${a.author_nickname}${tickerBadgesHtml(a.tickers_csv)} · ${stanceLabel[a.stance] || a.stance}</span></div>
+            ${argContentHtml(a.title, a.body)}
+            ${currentUser && currentUser.id !== a.author_id ? reactionButtonsHtml('argument', a.id, a.upvotes, a.downvotes, a.laugh_count) : ''}
+          </div>`).join('')
+        : '<div class="issue-meta">아직 등록된 의견이 없습니다.</div>';
+
+      dropdown.innerHTML = `
+        ${thread.body ? `<div class="issue-meta" style="margin-bottom:12px;">${thread.body}</div>` : ''}
+        ${currentUser && currentUser.id !== thread.author_id ? reactionButtonsHtml('thread', thread.id, thread.thread_upvotes, thread.thread_downvotes, thread.thread_laugh_count) : ''}
+        <div class="thread-side-title" style="margin-top:16px;">다른 의견들</div>
+        ${argsHtml}
+        <button type="button" class="mini-btn" style="margin-top:14px;" data-open-thread-full="${threadId}">전체 보기 →</button>
+      `;
+      dropdown.querySelector('[data-open-thread-full]').addEventListener('click', (e) => {
         e.stopPropagation();
-        document.getElementById('messagesCard').scrollIntoView({ behavior: 'smooth' });
-        openConversation(btn.dataset.openConvQuick, btn.dataset.nickname);
+        openThreadModal(threadId);
       });
-    });
-    attachReactionHandlers(el);
-    el.querySelectorAll('.count-up').forEach(span => countUp(span, Number(span.dataset.target)));
+      attachReactionHandlers(dropdown);
+    } catch (err) {
+      dropdown.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
   }
 
   document.getElementById('hotIssueSortTabs').addEventListener('click', (e) => {
