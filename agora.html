@@ -547,6 +547,11 @@
 <main>
   <div class="shell" id="dashboardView">
 
+    <!-- 캐릭터 현황 (로그인 상태에 따라 JS가 내용을 채움) — 로그인 상태면 히어로보다 위에 뜬다 -->
+    <section class="section gold-top" id="charCard">
+      <div class="loading-text">불러오는 중...</div>
+    </section>
+
     <!-- 목업(Agora Broadsheet)의 비대칭 히어로 — 헤드라인 + 실시간 접전 현황 -->
     <section class="hero-band">
       <h1 class="hero-headline">19개 폴리스가<br>매일 <em>여론으로</em> 겨룬다</h1>
@@ -559,10 +564,6 @@
       </div>
     </section>
 
-    <!-- 캐릭터 현황 (로그인 상태에 따라 JS가 내용을 채움) -->
-    <section class="section gold-top" id="charCard">
-      <div class="loading-text">불러오는 중...</div>
-    </section>
     <div class="meander-divider"></div>
 
     <section class="section" style="padding-bottom:0;">
@@ -745,26 +746,37 @@
     background: { x: 12, y: 12, scale: 1.5, behind: true },
     cloak:      { x: 12, y: 13, scale: 0.85, behind: true },
     hat:        { x: 12, y: 2.2, scale: 0.5 },
-    face:       { x: 12, y: 5.2, scale: 0.4 },
+    face:       { x: 12, y: 7.3, scale: 0.28 }, // 머리 원 아래 턱선쯤 — 너무 크면 머리 전체를 덮어버림
     glasses:    { x: 12, y: 4.2, scale: 0.32 },
     jewelry:    { x: 12, y: 8.4, scale: 0.28 },
     top:        { x: 12, y: 11.5, scale: 0.5 },
     shield:     { x: 6, y: 12.5, scale: 0.4 },
     weapon:     { x: 18, y: 12.5, scale: 0.4 },
     pants:      { x: 12, y: 18, scale: 0.42 },
-    shoes:      { x: 12, y: 22, scale: 0.38 },
+    // 신발은 한 짝만 가운데 두면 어색해서 양발 위치(다리 끝점)에 각각 하나씩 그린다.
+    shoes:      [{ x: 8.3, y: 22, scale: 0.3 }, { x: 15.7, y: 22, scale: 0.3 }],
   };
 
+  // 면(선으로 둘러싸인 덩어리)으로 그려진 아이템은 투명하면 캐릭터 선과 겹쳐 안 보이니 흰색으로 채운다.
+  // 안경/장신구/이펙트/배경처럼 얇은 선 장식인 아이템은 그대로 투명하게 둔다.
+  const FILLED_ITEM_IDS = new Set([
+    'shop_face_beard', 'shop_top_chiton', 'shop_pants_greaves', 'shop_shoes_sandal', 'shop_shield_hoplon',
+  ]);
+
   // SHOP_ICON_SVG 문자열(완결된 <svg>...</svg>)에서 안쪽 도형만 뽑아, 캐릭터 실루엣 SVG 안에
-  // <g transform>으로 겹쳐 그릴 수 있게 만든다.
+  // <g transform>으로 겹쳐 그릴 수 있게 만든다. 슬롯 하나가 여러 자리(신발=양발)를 가질 수도 있다.
   function placedItemIconHtml(item) {
     const placement = CHARACTER_ITEM_PLACEMENT[item.slot_type];
     const svg = SHOP_ICON_SVG[item.item_id];
     if (!placement || !svg) return '';
     const inner = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
-    const tx = placement.x - 12 * placement.scale;
-    const ty = placement.y - 12 * placement.scale;
-    return `<g transform="translate(${tx},${ty}) scale(${placement.scale})">${inner}</g>`;
+    const fillAttr = FILLED_ITEM_IDS.has(item.item_id) ? ' fill="#fff"' : '';
+    const points = Array.isArray(placement) ? placement : [placement];
+    return points.map(p => {
+      const tx = p.x - 12 * p.scale;
+      const ty = p.y - 12 * p.scale;
+      return `<g transform="translate(${tx},${ty}) scale(${p.scale})"${fillAttr}>${inner}</g>`;
+    }).join('');
   }
 
   // 캐릭터 아이콘에 착용 아이템을 실제로 겹쳐 그린다 — 새 전신 실루엣이 머리/팔/다리 위치가
@@ -906,13 +918,14 @@
 
   document.getElementById('logoHome').addEventListener('click', () => showView('dashboard'));
 
-  // 지도 위 "+ 논제 등록" 버튼 — 아래에 이미 있는 논제 등록 폼으로 스크롤 + 포커스(로그인 안 했으면 안내만).
-  document.getElementById('mapThreadBtn').addEventListener('click', () => {
+  // 논제 등록 폼으로 스크롤 + 포커스(로그인 안 했으면 스크롤만) — 지도 위 버튼과 로그인 후 섹션 버튼이 공유.
+  function scrollToThreadForm() {
     document.getElementById('threadFormCard').scrollIntoView({ behavior: 'smooth' });
     if (!currentUser) return;
     const titleInput = document.querySelector('#threadFormContent input[name="title"]');
     if (titleInput) setTimeout(() => titleInput.focus(), 400);
-  });
+  }
+  document.getElementById('mapThreadBtn').addEventListener('click', scrollToThreadForm);
 
   let shopItemsCache = [];
   let shopFilter = 'all';
@@ -1403,6 +1416,7 @@
             ${characterAvatarInnerHtml(equippedItems, 34)}
           </div>
           <button class="mini-btn" id="inventoryBtn">인벤토리</button>
+          <button class="cta-gold" id="charCardThreadBtn" style="margin-top:6px;">논제 등록</button>
         </div>
         <div class="profile-info">
           <div class="char-name-row">
@@ -1429,6 +1443,7 @@
       showView('inventory');
       renderInventoryView();
     });
+    document.getElementById('charCardThreadBtn').addEventListener('click', scrollToThreadForm);
     document.getElementById('logoutBtn').addEventListener('click', () => {
       clearSession();
       location.reload(); // 세력/전쟁 카드까지 한 번에 로그아웃 상태로 되돌리는 가장 간단한 방법
