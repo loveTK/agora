@@ -55,10 +55,12 @@ router.post("/", requireAuth, (req, res) => {
     return res.status(400).json({ error: "강령은 필수입니다." });
   }
 
+  // 지배자 보상: 현재 어느 지역이든 지배자 재위 중이면 팔로워 조건 없이 창설 가능
+  const isRuler = !!db.prepare("SELECT id FROM dominance WHERE user_id = ?").get(req.userId);
   const followers = followerCount(req.userId);
-  if (followers < PARTY_CREATE_FOLLOWER_THRESHOLD) {
+  if (!isRuler && followers < PARTY_CREATE_FOLLOWER_THRESHOLD) {
     return res.status(403).json({
-      error: `정당 창설은 팔로워 ${PARTY_CREATE_FOLLOWER_THRESHOLD}명 이상부터 가능합니다. (현재 ${followers}명)`,
+      error: `정당 창설은 팔로워 ${PARTY_CREATE_FOLLOWER_THRESHOLD}명 이상부터 가능합니다. (현재 ${followers}명 · 지배자는 조건 없이 창설 가능)`,
     });
   }
 

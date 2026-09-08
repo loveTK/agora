@@ -53,9 +53,11 @@ router.post("/", requireAuth, (req, res) => {
   }
 
   const founder = db.prepare("SELECT * FROM users WHERE id = ?").get(req.userId);
-  if (founder.reputation < RELIGION_CREATE_REPUTATION_THRESHOLD) {
+  // 지배자 보상: 현재 어느 지역이든 지배자 재위 중이면 명성 조건 없이 창설 가능
+  const isRuler = !!db.prepare("SELECT id FROM dominance WHERE user_id = ?").get(req.userId);
+  if (!isRuler && founder.reputation < RELIGION_CREATE_REPUTATION_THRESHOLD) {
     return res.status(403).json({
-      error: `종교 창설은 명성 ${RELIGION_CREATE_REPUTATION_THRESHOLD} 이상부터 가능합니다. (현재 ${founder.reputation})`,
+      error: `종교 창설은 명성 ${RELIGION_CREATE_REPUTATION_THRESHOLD} 이상부터 가능합니다. (현재 ${founder.reputation} · 지배자는 조건 없이 창설 가능)`,
     });
   }
 

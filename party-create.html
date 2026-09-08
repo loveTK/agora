@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>정당 창설 — AGORA</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://myagora.xyz/party-create.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111110'/%3E%3Ctext x='32' y='46' font-family='Arial, sans-serif' font-weight='900' font-size='38' fill='%23BA7517' text-anchor='middle'%3E%CE%91%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#111110; --ink:#1c1c1a; --gray-1:#4a4a46; --gray-2:#8a8a84;
+    --gray-3:#c9c9c2; --gray-4:#e6e6e0; --white:#ffffff;
+    --line:rgba(17,17,16,0.14); --gold:#BA7517; --on-gold:#111110;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--white); color:var(--ink); font-family:'Archivo',sans-serif; line-height:1.6; }
+  .shell{ max-width:640px; margin:0 auto; padding:0 24px; }
+  header{ border-bottom:1px solid var(--line); padding:22px 0; }
+  header .shell{ display:flex; align-items:baseline; justify-content:space-between; max-width:1440px; }
+  .wordmark{ font-weight:800; letter-spacing:0.14em; font-size:20px; text-decoration:none; color:var(--ink); }
+  .wordmark span{ font-weight:500; color:var(--gray-2); font-size:13px; margin-left:10px; }
+  header a.cta{ color:var(--gray-1); text-decoration:none; font-size:13px; }
+  header a.cta:hover{ color:var(--ink); }
+
+  main{ padding:56px 0 96px; }
+  .eyebrow{ font-size:11.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
+  h1{ font-weight:900; font-size:clamp(26px,4.5vw,36px); line-height:1.16; letter-spacing:-0.015em; margin-bottom:14px; text-wrap:balance; }
+  .lede{ font-size:15px; color:var(--gray-1); margin-bottom:36px; max-width:56ch; }
+
+  .status-box{ border:1px solid var(--line); padding:16px 18px; margin-bottom:28px; font-size:13.5px; }
+  .status-box.ok{ border-color:var(--gold); background:rgba(186,117,23,0.06); }
+  .status-box.blocked{ border-color:var(--gray-3); color:var(--gray-1); }
+  .status-box b{ color:var(--ink); }
+
+  form{ display:flex; flex-direction:column; gap:16px; }
+  label{ font-size:12.5px; font-weight:700; letter-spacing:0.02em; text-transform:uppercase; color:var(--gray-1); display:block; margin-bottom:6px; }
+  input, textarea{
+    width:100%; border:1px solid var(--line); background:var(--white); color:var(--ink);
+    font-family:'Archivo',sans-serif; font-size:14.5px; padding:12px 14px;
+  }
+  input:focus, textarea:focus{ outline:none; border-color:var(--gold); }
+  textarea{ min-height:110px; resize:vertical; }
+  .submit-btn{
+    background:var(--black); color:var(--white); border:none; padding:14px 20px;
+    font-family:'Archivo',sans-serif; font-weight:700; font-size:14px; letter-spacing:0.02em; cursor:pointer;
+  }
+  .submit-btn:hover{ background:var(--gold); color:var(--on-gold); }
+  .submit-btn:disabled{ background:var(--gray-3); color:var(--gray-1); cursor:not-allowed; }
+  .form-error{ color:#B23A3A; font-size:13px; display:none; }
+
+  .charter{ border:2px solid var(--black); padding:36px 30px; position:relative; margin-top:8px; }
+  .charter::before, .charter::after{ content:''; position:absolute; width:14px; height:14px; border:2px solid var(--gold); }
+  .charter::before{ top:-2px; left:-2px; border-right:none; border-bottom:none; }
+  .charter::after{ bottom:-2px; right:-2px; border-left:none; border-top:none; }
+  .charter-eyebrow{ text-align:center; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--gold); margin-bottom:10px; }
+  .charter-name{ text-align:center; font-weight:900; font-size:26px; margin-bottom:20px; letter-spacing:-0.01em; }
+  .charter-row{ display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid var(--line); font-size:13.5px; }
+  .charter-row:first-of-type{ border-top:none; }
+  .charter-row span:first-child{ color:var(--gray-2); }
+  .charter-platform{ margin-top:18px; padding-top:18px; border-top:1px solid var(--line); font-size:14px; color:var(--ink); white-space:pre-wrap; }
+  .charter-cta{ display:block; text-align:center; margin-top:28px; background:var(--gold); color:var(--on-gold); text-decoration:none; padding:13px; font-weight:700; font-size:14px; }
+
+  #loadingState, #signedOutState{ display:none; text-align:center; padding:40px 0; color:var(--gray-1); }
+  #signedOutState a{ color:var(--gold); font-weight:700; }
+  [hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="shell">
+    <a class="wordmark" href="https://myagora.xyz/">ΑΓΟΡΑ<span>agora</span></a>
+    <a class="cta" href="https://myagora.xyz/">← 사이트로 돌아가기</a>
+  </div>
+</header>
+
+<main>
+  <div class="shell">
+    <div id="loadingState">불러오는 중...</div>
+
+    <div id="signedOutState">
+      <p>정당 창설은 로그인 후 이용할 수 있습니다.</p>
+      <p style="margin-top:8px;"><a href="https://myagora.xyz/">AGORA로 이동해 로그인하기 →</a></p>
+    </div>
+
+    <div id="formState" hidden>
+      <div class="eyebrow">정당 창설 헌장</div>
+      <h1>새로운 정치 세력을<br>창당합니다</h1>
+      <p class="lede">정당은 같은 강령을 지지하는 시민들이 모이는 세력입니다. 창당하면 자동으로 초대 당원(창설자)이 되며, 이후 당원들에게 뱃지를 발급할 수 있습니다.</p>
+
+      <div class="status-box" id="statusBox"></div>
+
+      <form id="partyForm">
+        <div>
+          <label for="partyName">정당명</label>
+          <input id="partyName" name="name" maxlength="40" placeholder="예: 광장개혁당" required>
+        </div>
+        <div>
+          <label for="partyPlatform">강령</label>
+          <textarea id="partyPlatform" name="platform" placeholder="이 정당이 추구하는 정책 방향을 적어주세요" required></textarea>
+        </div>
+        <div class="form-error" id="formError"></div>
+        <button type="submit" class="submit-btn" id="submitBtn">정당 창당하기</button>
+      </form>
+    </div>
+
+    <div id="resultState" hidden>
+      <div class="eyebrow">창당 확정</div>
+      <h1>정당이 창설되었습니다</h1>
+      <div class="charter">
+        <div class="charter-eyebrow">AGORA · 정당 창당 확정서</div>
+        <div class="charter-name" id="resultName"></div>
+        <div class="charter-row"><span>창설자</span><span id="resultFounder"></span></div>
+        <div class="charter-row"><span>창설일</span><span id="resultDate"></span></div>
+        <div class="charter-platform" id="resultPlatform"></div>
+      </div>
+      <a class="charter-cta" href="https://myagora.xyz/">AGORA로 돌아가기</a>
+    </div>
+  </div>
+</main>
+
+<script>
+  const API_BASE = 'https://api.myagora.xyz';
+  const PARTY_CREATE_FOLLOWER_THRESHOLD = 100;
+  const authToken = localStorage.getItem('agora_token');
+
+  const loadingState = document.getElementById('loadingState');
+  const signedOutState = document.getElementById('signedOutState');
+  const formState = document.getElementById('formState');
+  const resultState = document.getElementById('resultState');
+  const statusBox = document.getElementById('statusBox');
+
+  async function apiRequest(path, options = {}) {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...(options.headers || {}),
+      },
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || '요청에 실패했습니다.');
+    return body;
+  }
+
+  async function init() {
+    if (!authToken) {
+      loadingState.hidden = true;
+      signedOutState.style.display = 'block';
+      return;
+    }
+    loadingState.style.display = 'block';
+    try {
+      const me = await apiRequest('/users/me');
+      const profile = await apiRequest(`/users/${me.id}/profile`);
+      const isRuler = profile.dominance_regions && profile.dominance_regions.length > 0;
+
+      if (isRuler) {
+        statusBox.className = 'status-box ok';
+        statusBox.innerHTML = `<b>현재 지배자</b>이므로 팔로워 조건 없이 창당할 수 있습니다.`;
+      } else if (profile.follower_count >= PARTY_CREATE_FOLLOWER_THRESHOLD) {
+        statusBox.className = 'status-box ok';
+        statusBox.innerHTML = `팔로워 <b>${profile.follower_count}명</b> — 창당 조건(${PARTY_CREATE_FOLLOWER_THRESHOLD}명 이상)을 충족했습니다.`;
+      } else {
+        statusBox.className = 'status-box blocked';
+        statusBox.innerHTML = `팔로워 <b>${profile.follower_count}명</b> / 창당에는 ${PARTY_CREATE_FOLLOWER_THRESHOLD}명 이상 필요합니다. (또는 현재 지배자라면 조건 없이 창당 가능)`;
+      }
+
+      loadingState.style.display = 'none';
+      formState.hidden = false;
+    } catch (err) {
+      loadingState.textContent = `불러오지 못했습니다: ${err.message}`;
+    }
+  }
+  init();
+
+  document.getElementById('partyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorBox = document.getElementById('formError');
+    errorBox.style.display = 'none';
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '창당 중...';
+
+    const form = new FormData(e.target);
+    const name = form.get('name').trim();
+    const platform = form.get('platform').trim();
+
+    try {
+      const party = await apiRequest('/parties', { method: 'POST', body: JSON.stringify({ name, platform }) });
+      const me = await apiRequest('/users/me');
+      document.getElementById('resultName').textContent = party.name;
+      document.getElementById('resultFounder').textContent = me.nickname;
+      document.getElementById('resultDate').textContent = new Date().toLocaleDateString('ko-KR');
+      document.getElementById('resultPlatform').textContent = party.platform;
+      formState.hidden = true;
+      resultState.hidden = false;
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = '정당 창당하기';
+    }
+  });
+</script>
+
+</body>
+</html>

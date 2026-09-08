@@ -3,6 +3,7 @@ const { randomUUID } = require("crypto");
 const { db } = require("../db");
 const { requireAuth } = require("../middleware/authMiddleware");
 const { regionMilitaryPower } = require("../services/military");
+const { attemptFollowerConquest } = require("../services/conquest");
 
 const router = express.Router();
 
@@ -67,7 +68,7 @@ router.get("/:id/threads", (req, res) => {
   // 참여자 수·반응 집계까지 이 목록 응답에 같이 실어 보낸다(위젯에서 논제 하나씩 추가 요청 안 해도 되게).
   const threads = db
     .prepare(
-      `SELECT t.id, t.title, t.status, t.created_at, u.nickname AS author_nickname,
+      `SELECT t.id, t.title, t.status, t.created_at, t.author_id, u.nickname AS author_nickname,
               ur.name AS author_region_name,
               (SELECT COUNT(*) FROM arguments a WHERE a.thread_id = t.id) AS argument_count,
               COALESCE((SELECT SUM(CASE WHEN vote_type = 'up' THEN weight ELSE 0 END) FROM thread_votes WHERE thread_id = t.id), 0) AS thread_upvotes,
@@ -159,6 +160,17 @@ router.post("/:id/dominance/cloak", requireAuth, (req, res) => {
   );
 
   res.status(201).json({ id, slot_type: "cloak" });
+});
+
+// POST /regions/:id/conquer
+// 정책: 본인 소속 지역이고, 팔로워 수가 그 지역 소속 인원보다 많으면 스트릭 없이 즉시 지배자가 된다.
+router.post("/:id/conquer", requireAuth, (req, res) => {
+  const region = db.prepare("SELECT id FROM regions WHERE id = ?").get(req.params.id);
+  if (!region) return res.status(404).json({ error: "지역을 찾을 수 없습니다." });
+
+  const result = attemptFollowerConquest(req.params.id, req.userId);
+  if (result.error) return res.status(result.status).json({ error: result.error });
+  res.status(200).json(result);
 });
 
 // GET /regions/:id/military-power

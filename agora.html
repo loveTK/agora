@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="pageTitle">AGORA — 실시간 정치 토론 · 지역 대항전 커뮤니티</title>
-<meta name="description" id="metaDescription" content="19개 폴리스가 매일 여론으로 겨루는 실시간 정치 토론 광장. 논제에 투표하고 논증을 펼쳐 폴리스의 지배권을 다투세요.">
+<meta name="description" id="metaDescription" content="19개 국가가 매일 여론으로 겨루는 실시간 정치 토론 광장. 논제에 투표하고 논증을 펼쳐 국가의 지배권을 다투세요.">
 <link rel="canonical" href="https://myagora.xyz/" id="canonicalLink">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111110'/%3E%3Ctext x='32' y='46' font-family='Arial, sans-serif' font-weight='900' font-size='38' fill='%23BA7517' text-anchor='middle'%3E%CE%91%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AGORA">
 <meta property="og:title" id="ogTitle" content="AGORA — 실시간 정치 토론 · 지역 대항전 커뮤니티">
-<meta property="og:description" id="ogDescription" content="19개 폴리스가 매일 여론으로 겨루는 실시간 정치 토론 광장. 논제에 투표하고 논증을 펼쳐 폴리스의 지배권을 다투세요.">
+<meta property="og:description" id="ogDescription" content="19개 국가가 매일 여론으로 겨루는 실시간 정치 토론 광장. 논제에 투표하고 논증을 펼쳐 국가의 지배권을 다투세요.">
 <meta property="og:image" content="https://myagora.xyz/og-image.png">
 <meta property="og:url" id="ogUrl" content="https://myagora.xyz/">
 <meta name="twitter:card" content="summary_large_image">
@@ -218,7 +219,7 @@
   .map-wrap{ position:relative; }
   .map-touch-hint{
     position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:8;
-    background:rgba(17,17,16,0.75); color:var(--ink); font-size:12.5px;
+    background:rgba(17,17,16,0.75); color:#fff; font-size:12.5px;
     padding:10px 18px; border:1px solid var(--line); pointer-events:none; white-space:nowrap;
   }
   .map-thread-btn{ position:absolute; top:24px; right:24px; z-index:10; border:none; padding:12px 20px; font-size:13px; cursor:pointer; font-family:'Archivo',sans-serif; }
@@ -261,7 +262,7 @@
   /* 흑백 필터는 타일(배경 지도)에만 걸고 마커는 그대로 둔다 — 지배/판정/분쟁 상태색을 보여줘야 하므로 */
   #map .leaflet-tile-pane{ filter:grayscale(1) contrast(1.08) brightness(1.02); }
   /* Leaflet 기본 줌 컨트롤을 검정+골드 톤으로 맞춤 — V2: 실제로 조작 가능한 줌 버튼 노출 */
-  #map .leaflet-control-zoom a{ background:rgba(17,17,16,0.82); color:var(--ink); border-color:var(--line) !important; }
+  #map .leaflet-control-zoom a{ background:rgba(17,17,16,0.82); color:#fff; border-color:var(--line) !important; }
   #map .leaflet-control-zoom a:hover{ background:var(--gold); color:var(--on-gold); }
 
   /* V2: 범례를 지도 위 하단 오버레이 카드로 — 기존엔 지도 아래 평범한 한 줄이었음 */
@@ -323,6 +324,9 @@
     gap:22px;
   }
   .issue-meta{ font-size:11.5px; color:var(--gray-2); margin-top:3px; }
+  /* 논제 본문 설명(무대 일러스트/카드 아래) — issue-meta(자잘한 상태 캡션용)를 재사용했더니 너무 작고
+     흐려서 정작 읽어야 할 본문까지 안 읽혔다. 본문 전용 스타일을 따로 둔다. */
+  .thread-body-text{ font-size:14.5px; color:var(--ink); line-height:1.65; margin-top:8px; }
 
   /* ---------- hot issue: 2열 카드, 클릭 시 카드 안에서 드롭다운으로 상세/의견 ---------- */
   .hot-issue-card{ display:flex; align-items:center; gap:20px; border:1px solid var(--line); padding:18px 20px; } /* 관리자 신고 목록도 재사용 중 */
@@ -417,6 +421,18 @@
   #threadModal .modal-box{ max-width:1400px; width:min(1400px, 92vw); min-height:66vh; }
   #threadModal .thread-side-list{ max-height:60vh; }
   .modal-close{ position:absolute; top:18px; right:20px; background:none; border:none; font-size:18px; cursor:pointer; color:var(--gray-1); font-family:'Archivo',sans-serif; }
+  /* 캐릭터/닉네임을 클릭하면 뜨는 프로필 카드 모달 */
+  #profileModal .modal-box{ width:400px; max-width:92vw; }
+  .profile-card-top{ display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+  .profile-card-stats .charter-row{ display:flex; justify-content:space-between; padding:9px 0; border-top:1px solid var(--line); font-size:13.5px; }
+  .profile-card-stats .charter-row:first-child{ border-top:none; }
+  .profile-card-stats .charter-row span:first-child{ color:var(--gray-2); }
+  /* 논제/카드 곳곳의 닉네임·캐릭터 아이콘 — 클릭하면 프로필 모달이 열린다는 걸 은근히 알려주는 밑줄 */
+  .profile-link{ cursor:pointer; text-decoration-line:underline; text-decoration-style:dotted; text-decoration-color:var(--gray-3); text-underline-offset:2px; }
+  .profile-link:hover{ color:var(--gold); }
+  .avatar-link{ cursor:pointer; display:inline-flex; }
+  .issue-dropdown-author{ display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:13.5px; font-weight:600; }
+  .conquer-box{ border:1px solid var(--gold); background:rgba(186,117,23,0.06); padding:14px 16px; margin-top:14px; }
   .arg-item{ border-bottom:1px solid var(--gray-4); padding:14px 0 14px 12px; cursor:pointer; border-left:2px solid transparent; }
   .arg-item.selected{ background:rgba(186,117,23,0.12); border-left-color:var(--gold); }
 
@@ -579,15 +595,21 @@
 
     <!-- 목업(Agora Broadsheet)의 비대칭 히어로 — 헤드라인 + 실시간 접전 현황 -->
     <section class="hero-band">
-      <h1 class="hero-headline">19개 폴리스가<br>매일 <em>여론으로</em> 겨룬다</h1>
+      <h1 class="hero-headline">19개 국가가<br>매일 <em>여론으로</em> 겨룬다</h1>
       <p class="hero-tagline">실시간 정치 토론 · 지역 대항전 커뮤니티</p>
       <p class="hero-lede">추천 · 비추천 · 국회 승인투표로 갈리는 지배권. 판정은 사람이 아니라 논증의 총합이 내린다.</p>
       <div class="hero-live">
         <div class="hero-live-row"><span class="live-dot"></span><span>실시간 판정 진행중</span></div>
         <div class="hero-live-number" id="heroRegionCount">·</div>
-        <div class="hero-live-caption">폴리스 동시 접전</div>
+        <div class="hero-live-caption">국가 동시 접전</div>
         <div class="hero-feed" id="heroFeed"></div>
       </div>
+    </section>
+
+    <!-- 오늘의 Top 논객 — 오늘 가장 활동(논제등록/추천·비추천·바보)이 많은 유저를 프로필과 함께 노출 -->
+    <section class="section gold-top" id="topDebaterCard" style="display:none;">
+      <span class="section-title" style="font-size:16px;">오늘의 Top 논객</span>
+      <div id="topDebaterContent" style="margin-top:14px;"></div>
     </section>
 
     <div class="meander-divider"></div>
@@ -597,7 +619,7 @@
         <div id="map"></div>
         <div class="map-overlay-eyebrow">
           <div class="map-eyebrow">전황 개요</div>
-          <span class="section-title" id="mapStatusHeadline">실시간 폴리스 지배 현황</span>
+          <span class="section-title" id="mapStatusHeadline">실시간 국가 지배 현황</span>
           <div class="map-search-wrap">
             <input type="text" id="mapSearchInput" list="mapRegionList" placeholder="지역 이름으로 검색" autocomplete="off">
             <datalist id="mapRegionList"></datalist>
@@ -686,6 +708,7 @@
     <section class="section gold-top">
       <span class="section-title" style="font-size:22px;" id="regionPageTitle">불러오는 중...</span>
       <div class="region-stat-grid" id="regionPageStats"></div>
+      <div id="regionPageConquerSlot"></div>
     </section>
     <section class="section">
       <span class="section-title" style="font-size:16px;">지도</span>
@@ -725,6 +748,14 @@
   <div class="modal-box">
     <button class="modal-close" id="authModalClose">×</button>
     <div id="authModalContent"></div>
+  </div>
+</div>
+
+<!-- 캐릭터/닉네임 클릭 시 여는 공개 프로필 모달 — [data-open-profile] 위임 클릭으로 어디서든 열 수 있음 -->
+<div class="modal-backdrop" id="profileModal" style="display:none;">
+  <div class="modal-box">
+    <button class="modal-close" id="profileModalClose">×</button>
+    <div id="profileModalContent"><div class="loading-text">불러오는 중...</div></div>
   </div>
 </div>
 
@@ -907,7 +938,43 @@
   renderHotIssues();
   renderHallOfFame();
   renderHeroFeed();
+  renderTopDebater();
   setInterval(renderHeroFeed, 25000); // 새로고침 없이도 실제 최근 활동으로 계속 갱신
+
+  // 오늘의 Top 논객 — 오늘(UTC 기준) 가장 활동량이 많은 유저 1명을 프로필과 함께 보여준다.
+  async function renderTopDebater() {
+    const card = document.getElementById('topDebaterCard');
+    const el = document.getElementById('topDebaterContent');
+    try {
+      const top = await apiRequest('/activity/today-top');
+      if (!top) { card.style.display = 'none'; return; }
+
+      let inventory = [];
+      try { inventory = await apiRequest(`/users/${top.id}/inventory`); } catch (err) { /* 기본 아이콘으로 대체 */ }
+      const equippedItems = inventory.filter(it => it.equipped);
+      const isRuler = top.dominance_regions && top.dominance_regions.length > 0;
+
+      el.innerHTML = `
+        <div class="profile-card-top">
+          <span class="profile-avatar avatar-link" data-open-profile="${top.id}" style="width:56px; height:56px;">${characterAvatarInnerHtml(equippedItems, 46)}</span>
+          <div>
+            <div class="char-name" style="font-size:19px;"><span class="profile-link" data-open-profile="${top.id}">${top.nickname}</span></div>
+            <div class="profile-stats-line" style="margin-top:6px;">
+              ${isRuler ? `<span class="badge">지배자</span>` : ''}
+              <span class="badge">오늘 활동 ${top.activity_count}회</span>
+            </div>
+          </div>
+        </div>
+        <div class="profile-card-stats">
+          <div class="charter-row"><span>소속 국가</span><span>${top.region_name || '-'}</span></div>
+          <div class="charter-row"><span>정당</span><span>${top.party ? top.party.name : '없음'}</span></div>
+          <div class="charter-row"><span>종교</span><span>${top.religion ? top.religion.name : '없음'}</span></div>
+          ${isRuler ? `<div class="charter-row"><span>지배 지역</span><span>${top.dominance_regions.map(r => r.name).join(', ')}</span></div>` : ''}
+        </div>
+      `;
+      card.style.display = '';
+    } catch (err) { card.style.display = 'none'; }
+  }
 
   function timeAgo(isoString) {
     const diffSec = Math.max(0, Math.floor((Date.now() - new Date(isoString.replace(' ', 'T') + 'Z').getTime()) / 1000));
@@ -926,8 +993,8 @@
         ? events.map(e => `
           <div class="hero-feed-item">
             ${e.type === 'thread_voted'
-              ? `<b>${e.actor_nickname}</b>님이 "${e.thread_title}" 논제에 투표 · <span class="hero-feed-time">${timeAgo(e.created_at)}</span>`
-              : `<b>${e.actor_nickname}</b>님이 "${e.thread_title}" 논제 등록 · <span class="hero-feed-time">${timeAgo(e.created_at)}</span>`}
+              ? `<b class="profile-link" data-open-profile="${e.actor_id}">${e.actor_nickname}</b>님이 "${e.thread_title}" 논제에 투표 · <span class="hero-feed-time">${timeAgo(e.created_at)}</span>`
+              : `<b class="profile-link" data-open-profile="${e.actor_id}">${e.actor_nickname}</b>님이 "${e.thread_title}" 논제 등록 · <span class="hero-feed-time">${timeAgo(e.created_at)}</span>`}
           </div>`).join('')
         : '';
     } catch (err) { /* 실패해도 히어로 자체는 그대로 둔다 */ }
@@ -1468,7 +1535,7 @@
           <div class="char-name-row">
             <span>
               <span class="char-name">${currentUser.nickname}</span>
-              / ${regionName(currentUser.region_id)} 폴리스 /
+              / ${regionName(currentUser.region_id)} 국가 /
               ${dominanceBadge}<span class="badge">${rankLabel}</span>
             </span>
             <div class="char-name-actions">
@@ -1515,7 +1582,7 @@
     const authModalContent = document.getElementById('authModalContent');
     authModalContent.innerHTML = `
       ${isGoogleProfile
-        ? `<div class="section-title" style="margin-bottom:14px;">구글 로그인 완료 — 시작할 폴리스만 골라주세요</div>`
+        ? `<div class="section-title" style="margin-bottom:14px;">구글 로그인 완료 — 시작할 국가만 골라주세요</div>`
         : `
           <div class="auth-tabs">
             <button type="button" class="auth-tab ${isLogin ? 'active' : ''}" data-mode="login">로그인</button>
@@ -1528,10 +1595,10 @@
           <input type="text" name="nickname" required maxlength="20" value="${googleProfile?.suggestedNickname || ''}" />
         </div>
         <div class="auth-field">
-          <label>소속 폴리스 — 지도에서 찍거나 목록에서 선택하세요</label>
+          <label>소속 국가 — 지도에서 찍거나 목록에서 선택하세요</label>
           <div id="signupMap" style="height:220px; border:1px solid var(--line);"></div>
           <select name="region_id" required style="margin-top:8px;">${regionOptions}</select>
-          <div class="picked-region-badge" id="signupMapPicked">${regionsData[0] ? '선택한 폴리스 · ' + regionsData[0].name : '지역 정보를 불러오는 중...'}</div>
+          <div class="picked-region-badge" id="signupMapPicked">${regionsData[0] ? '선택한 국가 · ' + regionsData[0].name : '지역 정보를 불러오는 중...'}</div>
         </div>` : ''}
         ${!isGoogleProfile ? `
         <div class="auth-field">
@@ -1573,7 +1640,7 @@
       function pickRegion(regionId, panMap) {
         regionSelect.value = regionId;
         const region = regionsData.find(r => r.id === regionId);
-        pickedLabel.textContent = '선택한 폴리스 · ' + region.name;
+        pickedLabel.textContent = '선택한 국가 · ' + region.name;
         if (panMap) signupMapInstance.setView([region.lat, region.lng], 4);
       }
       function nearestRegion(lat, lng) {
@@ -1747,6 +1814,12 @@
         apiRequest(`/threads/${threadId}`),
         apiRequest(`/threads/${threadId}/arguments`),
       ]);
+      // 발제자(논제 등록자)의 실제 장착 아이템을 반영한 캐릭터 아이콘 — 못 불러와도 드롭다운 자체는 그려야 하므로 무시.
+      let authorEquipped = [];
+      try {
+        const authorInventory = await apiRequest(`/users/${thread.author_id}/inventory`);
+        authorEquipped = authorInventory.filter(it => it.equipped);
+      } catch (err) { /* ignore */ }
       const stanceLabel = { pro: '찬성', con: '반대', other: '기타' };
       const sortedArgs = [...args].sort((a, b) =>
         (b.upvotes + b.downvotes + (b.laugh_count || 0)) - (a.upvotes + a.downvotes + (a.laugh_count || 0))
@@ -1754,14 +1827,18 @@
       const argsHtml = sortedArgs.length
         ? sortedArgs.map(a => `
           <div class="arg-item">
-            <div class="arg-meta"><span>${a.author_nickname}${tickerBadgesHtml(a.tickers_csv)} · ${stanceLabel[a.stance] || a.stance}</span></div>
+            <div class="arg-meta"><span><span class="profile-link" data-open-profile="${a.author_id}">${a.author_nickname}</span>${tickerBadgesHtml(a.tickers_csv)} · ${stanceLabel[a.stance] || a.stance}</span></div>
             ${argContentHtml(a.title, a.body)}
             ${currentUser && currentUser.id !== a.author_id ? reactionButtonsHtml('argument', a.id, a.upvotes, a.downvotes, a.laugh_count) : ''}
           </div>`).join('')
         : '<div class="issue-meta">아직 등록된 의견이 없습니다.</div>';
 
       dropdown.innerHTML = `
-        ${thread.body ? `<div class="issue-meta" style="margin-bottom:12px;">${thread.body}</div>` : ''}
+        <div class="issue-dropdown-author">
+          <span class="avatar-link" data-open-profile="${thread.author_id}">${characterAvatarInnerHtml(authorEquipped, 26)}</span>
+          <span class="profile-link" data-open-profile="${thread.author_id}">${thread.author_nickname}</span>
+        </div>
+        ${thread.body ? `<div class="thread-body-text" style="margin-bottom:12px;">${thread.body}</div>` : ''}
         ${currentUser && currentUser.id !== thread.author_id ? reactionButtonsHtml('thread', thread.id, thread.thread_upvotes, thread.thread_downvotes, thread.thread_laugh_count) : ''}
         <div class="thread-side-title" style="margin-top:16px;">다른 의견들</div>
         ${argsHtml}
@@ -1893,10 +1970,10 @@
         : '<div class="issue-meta">아직 창당된 정당이 없습니다.</div>';
 
       el.innerHTML = `
-        <div class="section-sub" style="margin-bottom:8px;">종교: 명성 500 이상 · 정당: 팔로워 100명 이상부터 창설 가능</div>
+        <div class="section-sub" style="margin-bottom:8px;">종교: 명성 500 이상 · 정당: 팔로워 100명 이상부터 창설 가능 (지배자는 조건 없이 창설 가능)</div>
         <div style="display:flex; gap:8px; margin-bottom:10px;">
-          <button class="mini-btn" id="createReligionBtn">종교 창설</button>
-          <button class="mini-btn" id="createPartyBtn">정당 창당</button>
+          <a class="mini-btn" href="/religion-create.html" style="text-decoration:none; display:inline-block;">종교 창설</a>
+          <a class="mini-btn" href="/party-create.html" style="text-decoration:none; display:inline-block;">정당 창당</a>
         </div>
         <div class="section-sub">종교</div>
         ${religionItems}
@@ -1913,31 +1990,6 @@
             renderFactions();
           } catch (err) { alert(err.message); }
         });
-      });
-
-      document.getElementById('createReligionBtn').addEventListener('click', async () => {
-        const name = prompt('종교 이름을 입력하세요 (명성 500 이상 필요)');
-        if (!name) return;
-        const idsRaw = prompt('교리로 지정할 본인 논제 ID 3~5개를 콤마(,)로 구분해 입력하세요');
-        if (!idsRaw) return;
-        const tenet_thread_ids = idsRaw.split(',').map(s => s.trim()).filter(Boolean);
-        try {
-          await apiRequest('/religions', { method: 'POST', body: JSON.stringify({ name, tenet_thread_ids }) });
-          alert('종교가 창설되었습니다.');
-          renderFactions();
-        } catch (err) { alert(err.message); }
-      });
-
-      document.getElementById('createPartyBtn').addEventListener('click', async () => {
-        const name = prompt('정당 이름을 입력하세요 (팔로워 100명 이상 필요)');
-        if (!name) return;
-        const platform = prompt('강령(정책 방향)을 입력하세요');
-        if (!platform) return;
-        try {
-          await apiRequest('/parties', { method: 'POST', body: JSON.stringify({ name, platform }) });
-          alert('정당이 창당되었습니다.');
-          renderFactions();
-        } catch (err) { alert(err.message); }
       });
     } catch (err) {
       el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
@@ -2460,7 +2512,7 @@
       // 무대(stage) 말풍선 내용 — 기본은 논제 자체, 사이드에서 의견을 클릭하면 그 사람 것으로 바뀐다.
       function stageBubbleHtml(label, tickersCsv, title, body, targetType, targetId, upvotes, downvotes, laughCount, authorId) {
         return `
-          <div class="thread-stage-label">${label}${tickerBadgesHtml(tickersCsv)}</div>
+          <div class="thread-stage-label"><span class="profile-link" data-open-profile="${authorId}">${label}</span>${tickerBadgesHtml(tickersCsv)}</div>
           ${argContentHtml(title, body)}
           ${currentUser && currentUser.id !== authorId ? reactionButtonsHtml(targetType, targetId, upvotes, downvotes, laughCount) : ''}
         `;
@@ -2472,6 +2524,7 @@
       async function updateStageAvatar(userId) {
         const stageAvatarEl = content.querySelector('#threadStageAvatar');
         if (!stageAvatarEl) return;
+        stageAvatarEl.dataset.openProfile = userId;
         try {
           if (!stageInventoryCache[userId]) {
             stageInventoryCache[userId] = await apiRequest(`/users/${userId}/inventory`);
@@ -2490,7 +2543,7 @@
         ? sortedArgs.map(a => `
           <div class="arg-item" data-arg-id="${a.id}">
             <div class="arg-meta">
-              <span>${a.author_nickname}${tickerBadgesHtml(a.tickers_csv)} · ${STANCE_LABEL[a.stance] || a.stance}
+              <span><span class="profile-link" data-open-profile="${a.author_id}">${a.author_nickname}</span>${tickerBadgesHtml(a.tickers_csv)} · ${STANCE_LABEL[a.stance] || a.stance}
                 ${currentUser && currentUser.id !== a.author_id ? `<button class="logout-link" data-open-conv-quick="${a.author_id}" data-nickname="${a.author_nickname}">쪽지</button>` : ''}
               </span>
             </div>
@@ -2515,7 +2568,7 @@
                 <path d="M-40 186 Q300 36 640 186" fill="none" stroke="currentColor" stroke-width="1"/>
                 <path d="M-40 164 Q300 24 640 164" fill="none" stroke="currentColor" stroke-width="1"/>
               </svg>
-              <div class="thread-stage-avatar" id="threadStageAvatar">
+              <div class="thread-stage-avatar avatar-link" id="threadStageAvatar" data-open-profile="${thread.author_id}">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
                   <circle cx="12" cy="4.3" r="2.3" stroke="currentColor" stroke-width="1.4"/>
                   <path d="M8 8.8 Q12 6.3 16 8.8 M9.2 8.8 L6.5 14.2 M14.8 8.8 L17.5 14.2 M12 8.6 L12 15 M12 15 L8.3 22 M12 15 L15.7 22" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
@@ -2533,7 +2586,7 @@
                 <span>참여 ${thread.participant_count ?? 0}명</span>
               </div>
             </div>
-            ${thread.body ? `<div class="issue-meta" id="threadStageDesc" style="margin-top:8px;">${thread.body}</div>` : ''}
+            ${thread.body ? `<div class="thread-body-text" id="threadStageDesc">${thread.body}</div>` : ''}
             ${currentUser ? `
               <form class="thread-form" id="argForm" style="margin-top:14px;">
                 <select name="stance"><option value="pro">찬성</option><option value="con">반대</option><option value="other">기타</option></select>
@@ -2626,6 +2679,72 @@
   document.getElementById('regionModalClose').addEventListener('click', closeRegionModal);
   regionModal.addEventListener('click', (e) => { if (e.target === regionModal) closeRegionModal(); });
 
+  /* ---------------- 공개 프로필 모달 — 캐릭터/닉네임을 클릭하면 어디서든 열림 ---------------- */
+  const profileModal = document.getElementById('profileModal');
+  const profileModalContent = document.getElementById('profileModalContent');
+  function closeProfileModal() { profileModal.style.display = 'none'; }
+  document.getElementById('profileModalClose').addEventListener('click', closeProfileModal);
+  profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeProfileModal(); });
+
+  async function openUserProfileModal(userId) {
+    if (!userId) return;
+    profileModal.style.display = 'flex';
+    profileModalContent.innerHTML = '<div class="loading-text">불러오는 중...</div>';
+    try {
+      const [profile, inventory] = await Promise.all([
+        apiRequest(`/users/${userId}/profile`),
+        apiRequest(`/users/${userId}/inventory`),
+      ]);
+      const equippedItems = inventory.filter(it => it.equipped);
+      const rankLabel = RANK_LABEL[profile.rank] || profile.rank;
+      const isRuler = profile.dominance_regions && profile.dominance_regions.length > 0;
+      const canFollow = currentUser && currentUser.id !== userId;
+
+      profileModalContent.innerHTML = `
+        <div class="profile-card-top">
+          <div class="profile-avatar" style="width:56px; height:56px;">${characterAvatarInnerHtml(equippedItems, 46)}</div>
+          <div>
+            <div class="char-name" style="font-size:19px;">${profile.nickname}</div>
+            <div class="profile-stats-line" style="margin-top:6px;">
+              <span class="badge">${rankLabel}</span>
+              ${isRuler ? `<span class="badge">지배자</span>` : ''}
+            </div>
+          </div>
+        </div>
+        <div class="profile-card-stats">
+          <div class="charter-row"><span>소속 국가</span><span>${profile.region_name || '-'}</span></div>
+          <div class="charter-row"><span>명성치</span><span>${profile.reputation}</span></div>
+          <div class="charter-row"><span>팔로워</span><span>${profile.follower_count}명</span></div>
+          <div class="charter-row"><span>정당</span><span>${profile.party ? profile.party.name : '없음'}</span></div>
+          <div class="charter-row"><span>종교</span><span>${profile.religion ? profile.religion.name : '없음'}</span></div>
+          ${isRuler ? `<div class="charter-row"><span>지배 지역</span><span>${profile.dominance_regions.map(r => r.name).join(', ')}</span></div>` : ''}
+        </div>
+        ${canFollow ? `<button class="mini-btn" id="profileFollowBtn" style="margin-top:14px;">팔로우</button>` : ''}
+      `;
+
+      const followBtn = document.getElementById('profileFollowBtn');
+      if (followBtn) {
+        followBtn.addEventListener('click', async () => {
+          try {
+            await apiRequest(`/users/${userId}/follow`, { method: 'POST' });
+            followBtn.textContent = '팔로우 완료';
+            followBtn.disabled = true;
+          } catch (err) { alert(err.message); }
+        });
+      }
+    } catch (err) {
+      profileModalContent.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
+  }
+
+  // 전역 위임 클릭 — [data-open-profile="유저ID"]가 붙은 요소는 어디서든 이 한 리스너로 프로필을 연다.
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('[data-open-profile]');
+    if (!trigger) return;
+    e.stopPropagation();
+    openUserProfileModal(trigger.dataset.openProfile);
+  });
+
   const REGION_STATUS_LABEL = { dominant: '지배 확정', contested: '판정 진행중' };
 
   // 지도지역위젯(700x500 참고 목업) — 지역 개요 + Hot 논제 몇 개만 훑고, 더 보려면 입장하기로 전체 페이지 이동.
@@ -2673,7 +2792,7 @@
         ? sortedThreads.slice(0, 4).map(t => `
           <div class="region-hot-item" data-open-thread="${t.id}">
             <div class="region-hot-title">"${t.title}"</div>
-            <div class="issue-meta">${t.author_nickname}${t.author_region_name ? ' · ' + t.author_region_name : ''} / 참여 ${t.participant_count}명 / 추천 ${Math.round(t.thread_upvotes)} 비추천 ${Math.round(t.thread_downvotes)} 바보 ${Math.round(t.thread_laugh_count)}</div>
+            <div class="issue-meta"><span class="profile-link" data-open-profile="${t.author_id}">${t.author_nickname}</span>${t.author_region_name ? ' · ' + t.author_region_name : ''} / 참여 ${t.participant_count}명 / 추천 ${Math.round(t.thread_upvotes)} 비추천 ${Math.round(t.thread_downvotes)} 바보 ${Math.round(t.thread_laugh_count)}</div>
           </div>`).join('')
         : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
 
@@ -2681,7 +2800,7 @@
         <div class="region-widget-top">
           <div class="region-widget-left">
             <div class="region-hero">
-              <span class="section-title" style="font-size:20px;">${region.name} 폴리스</span>
+              <span class="section-title" style="font-size:20px;">${region.name} 국가</span>
               <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>
               ${region.is_trending ? '<span class="trending-badge">지금 뜨는 지역</span>' : ''}
             </div>
@@ -2750,7 +2869,7 @@
 
       const statusKey = region.status === 'dominant' ? 'dominant' : (region.status === 'contested' ? 'contested' : 'dispute');
       document.getElementById('regionPageTitle').innerHTML =
-        `${region.name} 폴리스 <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>${region.is_trending ? ' <span class="trending-badge">지금 뜨는 지역</span>' : ''}`;
+        `${region.name} 국가 <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>${region.is_trending ? ' <span class="trending-badge">지금 뜨는 지역</span>' : ''}`;
 
       const ruler = dominance.ruler;
       document.getElementById('regionPageStats').innerHTML = `
@@ -2760,6 +2879,29 @@
         <div class="region-stat"><span class="region-stat-label">국교</span><span class="region-stat-value" style="font-size:15px;">${ruler && ruler.religion_name ? ruler.religion_name : '없음'}</span></div>
       `;
 
+      // 팔로워 기반 점령 — 본인 소속 지역이고, 아직 그 지역 지배자가 본인이 아니면 노출.
+      // 실제 팔로워/인구 비교는 서버가 최종 판정하고, 여기 문구는 안내용(currentUser.follower_count가
+      // 로그인 시점 캐시라 약간 오래됐을 수 있음)이다.
+      const conquerSlot = document.getElementById('regionPageConquerSlot');
+      const isRulerHere = ruler && currentUser && ruler.user_id === currentUser.id;
+      if (currentUser && currentUser.region_id === regionId && !isRulerHere) {
+        conquerSlot.innerHTML = `
+          <div class="conquer-box">
+            <div class="issue-meta">팔로워 수가 이 지역 소속 인원(${region.population}명)보다 많으면 스트릭 없이 즉시 지배자가 될 수 있습니다. (현재 내 팔로워 ${currentUser.follower_count ?? 0}명)</div>
+            <button class="cta-gold" id="conquerBtn" style="margin-top:8px;">이 지역 점령하기</button>
+          </div>`;
+        document.getElementById('conquerBtn').addEventListener('click', async () => {
+          try {
+            await apiRequest(`/regions/${regionId}/conquer`, { method: 'POST' });
+            alert('지역을 점령했습니다! 당신이 새로운 지배자입니다.');
+            renderRegionPage(regionId);
+            renderCharCard();
+          } catch (err) { alert(err.message); }
+        });
+      } else {
+        conquerSlot.innerHTML = '';
+      }
+
       const sortedThreads = [...threads].sort((a, b) =>
         (b.thread_upvotes + b.thread_downvotes + b.thread_laugh_count) - (a.thread_upvotes + a.thread_downvotes + a.thread_laugh_count)
       );
@@ -2767,7 +2909,7 @@
         ? sortedThreads.map(t => `
           <div class="region-hot-item" data-open-thread="${t.id}">
             <div class="region-hot-title">"${t.title}"</div>
-            <div class="issue-meta">${t.author_nickname}${t.author_region_name ? ' · ' + t.author_region_name : ''} / 참여 ${t.participant_count}명 / 추천 ${Math.round(t.thread_upvotes)} 비추천 ${Math.round(t.thread_downvotes)} 바보 ${Math.round(t.thread_laugh_count)}</div>
+            <div class="issue-meta"><span class="profile-link" data-open-profile="${t.author_id}">${t.author_nickname}</span>${t.author_region_name ? ' · ' + t.author_region_name : ''} / 참여 ${t.participant_count}명 / 추천 ${Math.round(t.thread_upvotes)} 비추천 ${Math.round(t.thread_downvotes)} 바보 ${Math.round(t.thread_laugh_count)}</div>
           </div>`).join('')
         : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
       document.getElementById('regionPageHotList').querySelectorAll('[data-open-thread]').forEach(item => {

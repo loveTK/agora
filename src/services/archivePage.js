@@ -61,8 +61,9 @@ function buildArchiveHtml() {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>논제 아카이브 — AGORA</title>
-<meta name="description" content="AGORA에 등록된 모든 논제를 지역별·참여도 순으로 모아봅니다. 총 ${totalCount}건의 논제가 19개 폴리스에서 진행 중입니다.">
+<meta name="description" content="AGORA에 등록된 모든 논제를 지역별·참여도 순으로 모아봅니다. 총 ${totalCount}건의 논제가 19개 국가에서 진행 중입니다.">
 <link rel="canonical" href="${SITE_ORIGIN}/archive.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111110'/%3E%3Ctext x='32' y='46' font-family='Arial, sans-serif' font-weight='900' font-size='38' fill='%23BA7517' text-anchor='middle'%3E%CE%91%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AGORA">
 <meta property="og:title" content="논제 아카이브 — AGORA">

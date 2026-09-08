@@ -94,6 +94,20 @@ router.post("/", requireAuth, (req, res) => {
   res.status(201).json(toPublicThread(thread));
 });
 
+// GET /threads/mine
+// 종교 창설 시 교리로 지정할 논제를 고르는 화면 등, 본인이 작성한 논제 목록이 필요한 곳에서 쓴다.
+router.get("/mine", requireAuth, (req, res) => {
+  const threads = db
+    .prepare(
+      `SELECT t.id, t.title, t.region_id, t.created_at, r.name AS region_name
+       FROM threads t JOIN regions r ON r.id = t.region_id
+       WHERE t.author_id = ? AND t.hidden = 0
+       ORDER BY t.created_at DESC`
+    )
+    .all(req.userId);
+  res.json(threads);
+});
+
 // GET /threads/:id
 router.get("/:id", (req, res) => {
   const thread = db

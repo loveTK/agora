@@ -6,6 +6,7 @@ const { recalcRegionRanks } = require("../services/rank");
 const { belligerenceTier } = require("../services/belligerence");
 const { checkFollowBrigading } = require("../services/abuseDetection");
 const { INFLUENCE_THRESHOLD } = require("../services/influence");
+const { getUserProfileSummary } = require("../services/userProfile");
 
 const router = express.Router();
 const REGION_COOLDOWN_DAYS = 7;
@@ -40,6 +41,14 @@ router.get("/:id", (req, res) => {
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.params.id);
   if (!user) return res.status(404).json({ error: "유저를 찾을 수 없습니다." });
   res.json(toPublicUser(user));
+});
+
+// GET /users/:id/profile
+// 캐릭터/닉네임 클릭 시 여는 프로필 카드용 — 소속 지역·정당·종교·지배 지역까지 한 번에 묶어서 반환한다.
+router.get("/:id/profile", (req, res) => {
+  const summary = getUserProfileSummary(req.params.id);
+  if (!summary) return res.status(404).json({ error: "유저를 찾을 수 없습니다." });
+  res.json(summary);
 });
 
 // PATCH /users/me/region
