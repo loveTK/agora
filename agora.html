@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="pageTitle">AGORA — 실시간 정치 토론 · 지역 대항전 커뮤니티</title>
-<meta name="description" id="metaDescription" content="19개 국가가 매일 여론으로 겨루는 실시간 정치 토론 광장. 논제에 투표하고 논증을 펼쳐 국가의 지배권을 다투세요.">
+<title id="pageTitle">AGORA — 당신의 개소리를 증명하라 · 실시간 정치 토론 광장</title>
+<meta name="description" id="metaDescription" content="황당해도 좋다, 논리만 있다면. 19개 국가가 매일 여론으로 겨루는 실시간 정치 토론 광장에서 당신의 개소리를 증명하세요.">
 <link rel="canonical" href="https://myagora.xyz/" id="canonicalLink">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111110'/%3E%3Ctext x='32' y='46' font-family='Arial, sans-serif' font-weight='900' font-size='38' fill='%23BA7517' text-anchor='middle'%3E%CE%91%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AGORA">
-<meta property="og:title" id="ogTitle" content="AGORA — 실시간 정치 토론 · 지역 대항전 커뮤니티">
-<meta property="og:description" id="ogDescription" content="19개 국가가 매일 여론으로 겨루는 실시간 정치 토론 광장. 논제에 투표하고 논증을 펼쳐 국가의 지배권을 다투세요.">
+<meta property="og:title" id="ogTitle" content="AGORA — 당신의 개소리를 증명하라 · 실시간 정치 토론 광장">
+<meta property="og:description" id="ogDescription" content="황당해도 좋다, 논리만 있다면. 19개 국가가 매일 여론으로 겨루는 실시간 정치 토론 광장에서 당신의 개소리를 증명하세요.">
 <meta property="og:image" content="https://myagora.xyz/og-image.png">
 <meta property="og:url" id="ogUrl" content="https://myagora.xyz/">
 <meta name="twitter:card" content="summary_large_image">
@@ -230,6 +230,17 @@
   .hero-live-row span:last-child{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray-2); }
   .hero-live-number{ font-family:'Archivo', sans-serif; font-size:clamp(36px,4.4vw,52px); font-weight:800; line-height:1; }
   .hero-live-caption{ font-size:12.5px; color:var(--gray-2); margin-top:4px; }
+  /* 실시간 공개 채팅 */
+  .chat-box{ display:flex; flex-direction:column; margin-top:14px; border:1px solid var(--line); }
+  .chat-messages{ height:260px; overflow-y:auto; padding:12px 16px; display:flex; flex-direction:column; gap:9px; }
+  .chat-msg{ font-size:13px; line-height:1.5; }
+  .chat-msg .chat-nickname{ font-weight:700; color:var(--ink); }
+  .chat-msg .chat-body{ color:var(--ink); margin-left:6px; }
+  .chat-msg .chat-time{ font-size:10.5px; color:var(--gray-2); margin-left:6px; }
+  .chat-input-row{ display:flex; gap:8px; border-top:1px solid var(--line); padding:10px 14px; }
+  .chat-input-row input{ flex:1; border:1px solid var(--line); padding:9px 12px; font-family:'Archivo',sans-serif; font-size:13.5px; }
+  .chat-input-row input:focus{ outline:none; border-color:var(--gold); }
+  .chat-signed-out{ padding:14px 16px; font-size:13px; color:var(--gray-2); border-top:1px solid var(--line); }
   .hero-feed{ margin-top:16px; padding-top:14px; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:9px; }
   .hero-feed-item{ font-size:12px; color:var(--gray-1); line-height:1.5; }
   .hero-feed-item b{ color:var(--ink); font-weight:600; }
@@ -613,14 +624,23 @@
 
     <!-- 목업(Agora Broadsheet)의 비대칭 히어로 — 헤드라인 + 실시간 접전 현황 -->
     <section class="hero-band">
-      <h1 class="hero-headline">19개 국가가<br>매일 <em>여론으로</em> 겨룬다</h1>
-      <p class="hero-tagline">실시간 정치 토론 · 지역 대항전 커뮤니티</p>
+      <h1 class="hero-headline">당신의 <em>개소리</em>를 증명하라</h1>
+      <p class="hero-tagline">황당해도 좋다. 논리만 있다면.</p>
       <p class="hero-lede">추천 · 비추천 · 국회 승인투표로 갈리는 지배권. 판정은 사람이 아니라 논증의 총합이 내린다.</p>
       <div class="hero-live">
         <div class="hero-live-row"><span class="live-dot"></span><span>실시간 판정 진행중</span></div>
         <div class="hero-live-number" id="heroRegionCount">·</div>
         <div class="hero-live-caption">국가 동시 접전</div>
         <div class="hero-feed" id="heroFeed"></div>
+      </div>
+    </section>
+
+    <!-- 실시간 공개 채팅 — 히어로의 "실시간 활동" 피드 바로 아래. Socket.io로 즉시 브로드캐스트된다. -->
+    <section class="section" id="liveChatCard">
+      <span class="section-title" style="font-size:16px;">실시간 채팅</span>
+      <div class="chat-box">
+        <div class="chat-messages" id="chatMessages"><div class="loading-text">불러오는 중...</div></div>
+        <div id="chatInputArea"></div>
       </div>
     </section>
 
@@ -957,6 +977,7 @@
   renderHallOfFame();
   renderHeroFeed();
   renderTopDebater();
+  initChat();
   setInterval(renderHeroFeed, 25000); // 새로고침 없이도 실제 최근 활동으로 계속 갱신
 
   // 오늘의 Top 논객 — 오늘(UTC 기준) 가장 활동량이 많은 유저 1명을 프로필과 함께 보여준다.
@@ -992,6 +1013,67 @@
       `;
       card.style.display = '';
     } catch (err) { card.style.display = 'none'; }
+  }
+
+  /* ---------------- 실시간 공개 채팅 ---------------- */
+  const chatMessageIds = new Set(); // 소켓 브로드캐스트가 중복 도착해도 한 번만 그리기 위한 방어
+  let chatSocket = null;
+
+  async function initChat() {
+    const list = document.getElementById('chatMessages');
+    try {
+      const messages = await apiRequest('/chat/recent');
+      list.innerHTML = '';
+      messages.forEach(appendChatMessage);
+    } catch (err) {
+      list.innerHTML = '<div class="issue-meta">채팅을 불러오지 못했습니다.</div>';
+    }
+
+    if (typeof io !== 'undefined') {
+      // 지도 초기화(initMap)와는 별개의 연결 — 지도가 못 떠도(Leaflet CDN 실패 등) 채팅은 그대로 동작해야 하므로.
+      chatSocket = io(API_BASE);
+      chatSocket.on('chat:message', appendChatMessage);
+    }
+  }
+
+  function appendChatMessage(msg) {
+    if (chatMessageIds.has(msg.id)) return;
+    chatMessageIds.add(msg.id);
+    const list = document.getElementById('chatMessages');
+    if (list.querySelector('.loading-text, .issue-meta')) list.innerHTML = '';
+    const el = document.createElement('div');
+    el.className = 'chat-msg';
+    el.innerHTML = `<span class="chat-nickname profile-link" data-open-profile="${msg.user_id}">${msg.nickname}</span><span class="chat-body">${msg.body}</span><span class="chat-time">${timeAgo(msg.created_at)}</span>`;
+    list.appendChild(el);
+    list.scrollTop = list.scrollHeight; // 새 메시지가 오면 항상 아래로 자동 스크롤
+  }
+
+  function renderChatInputArea() {
+    const area = document.getElementById('chatInputArea');
+    if (!area) return; // 채팅 섹션이 아직 DOM에 없는 시점(방어적으로만)
+    if (!currentUser) {
+      area.innerHTML = '<div class="chat-signed-out">로그인하면 채팅에 참여할 수 있습니다.</div>';
+      return;
+    }
+    area.innerHTML = `
+      <form class="chat-input-row" id="chatForm">
+        <input type="text" id="chatInput" maxlength="200" placeholder="메시지를 입력하세요" autocomplete="off" required>
+        <button type="submit" class="mini-btn">전송</button>
+      </form>
+    `;
+    document.getElementById('chatForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const body = input.value.trim();
+      if (!body) return;
+      input.disabled = true;
+      try {
+        await apiRequest('/chat', { method: 'POST', body: JSON.stringify({ body }) });
+        input.value = '';
+      } catch (err) { alert(err.message); }
+      input.disabled = false;
+      input.focus();
+    });
   }
 
   function timeAgo(isoString) {
@@ -1525,6 +1607,7 @@
 
   function renderCharCard() {
     renderNavAuthSlot();
+    renderChatInputArea(); // 로그인 상태가 바뀔 때마다 채팅 입력창/안내 문구도 같이 갱신
     if (currentUser) { charCard.style.display = ''; return renderLoggedIn(); }
     if (regionsData.length === 0 && !authToken) {
       charCard.style.display = '';

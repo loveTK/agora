@@ -21,6 +21,9 @@ function targetExists(targetType, targetId) {
   if (targetType === "message") {
     return !!db.prepare("SELECT id FROM messages WHERE id = ?").get(targetId);
   }
+  if (targetType === "chat_message") {
+    return !!db.prepare("SELECT id FROM chat_messages WHERE id = ?").get(targetId);
+  }
   return false;
 }
 
@@ -36,7 +39,11 @@ function autoHideIfThresholdReached(targetType, targetId) {
 
   if (pendingCount < AUTO_HIDE_REPORT_THRESHOLD) return;
 
-  const table = targetType === "thread" ? "threads" : targetType === "argument" ? "arguments" : "messages";
+  const table =
+    targetType === "thread" ? "threads"
+    : targetType === "argument" ? "arguments"
+    : targetType === "chat_message" ? "chat_messages"
+    : "messages";
   const alreadyHidden = db.prepare(`SELECT hidden FROM ${table} WHERE id = ?`).get(targetId);
   if (alreadyHidden && alreadyHidden.hidden) return; // 이미 숨김 처리됨
 
@@ -51,8 +58,10 @@ function autoHideIfThresholdReached(targetType, targetId) {
 router.post("/", requireAuth, (req, res) => {
   const { target_type, target_id, reason } = req.body || {};
 
-  if (!target_type || !["thread", "argument", "user", "message"].includes(target_type)) {
-    return res.status(400).json({ error: "target_type은 'thread', 'argument', 'user', 'message' 중 하나여야 합니다." });
+  if (!target_type || !["thread", "argument", "user", "message", "chat_message"].includes(target_type)) {
+    return res
+      .status(400)
+      .json({ error: "target_type은 'thread', 'argument', 'user', 'message', 'chat_message' 중 하나여야 합니다." });
   }
   if (!target_id || !reason || !reason.trim()) {
     return res.status(400).json({ error: "target_id, reason은 필수입니다." });

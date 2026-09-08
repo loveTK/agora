@@ -26,6 +26,7 @@ const messageRoutes = require("./routes/messages");
 const adminRoutes = require("./routes/admin");
 const replyRoutes = require("./routes/replies");
 const activityRoutes = require("./routes/activity");
+const chatRoutes = require("./routes/chat");
 const { requireAdmin } = require("./middleware/adminAuth");
 
 runMigrations();
@@ -66,6 +67,7 @@ app.use("/messages", messageRoutes);
 app.use("/admin", adminRoutes);
 app.use("/replies", replyRoutes);
 app.use("/activity", activityRoutes);
+app.use("/chat", chatRoutes);
 app.use("/internal", requireAdmin, internalRoutes);
 
 app.use((req, res) => res.status(404).json({ error: "존재하지 않는 경로입니다." }));
