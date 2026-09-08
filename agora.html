@@ -15,6 +15,11 @@
 <meta name="twitter:card" content="summary_large_image">
 <!-- 애드센스 사이트 소유 확인용 — 승인되면 이 스크립트 자체가 자동광고도 같이 켤 수 있어서 그대로 둠 -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1044528124208901" crossorigin="anonymous"></script>
+<!-- GA4 — 측정 ID(G-XXXXXXXXXX)를 받으면 여기에 아래 두 줄을 넣는다:
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
+본문 곳곳의 gaEvent(...) 호출은 이미 다 심어둬서, 이 스니펫만 넣으면 바로 이벤트가 잡히기 시작한다. -->
+
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -1114,6 +1119,7 @@
     document.getElementById('inventoryEquipBtn').addEventListener('click', async () => {
       try {
         await apiRequest(`/users/${currentUser.id}/inventory/${selected.item_id}/equip`, { method: 'POST' });
+        gaEvent('item_equip', { event_category: 'engagement', item_id: selected.item_id, slot_type: selected.slot_type });
         const fresh = await apiRequest(`/users/${currentUser.id}/inventory`);
         renderInventoryLayout(el, fresh);
       } catch (err) { alert(err.message); }
@@ -1311,6 +1317,7 @@
     document.getElementById('mapSearchInput').addEventListener('change', (e) => {
       const match = regions.find(r => r.name === e.target.value.trim());
       if (!match) return;
+      gaEvent('search', { search_term: match.name });
       map.flyTo([match.lat, match.lng], 6);
       openRegionModal(match.id);
     });
@@ -1349,6 +1356,11 @@
   function regionName(regionId){
     const r = regionsData.find(r => r.id === regionId);
     return r ? r.name : '알 수 없음';
+  }
+
+  // GA4 이벤트 전송 — 스크립트가 아직 안 붙어있으면(측정 ID 미설정) 조용히 아무것도 안 함.
+  function gaEvent(name, params) {
+    if (typeof gtag === 'function') gtag('event', name, params || {});
   }
 
   async function apiRequest(path, options = {}) {
@@ -1614,6 +1626,7 @@
         }
         setSession(result.token, result.user);
         currentUser = await apiRequest('/users/me'); // follower_count 등 로그인 응답에 없는 필드까지 채우기 위해 재조회
+        gaEvent(isGoogleProfile || !isLogin ? 'sign_up' : 'login', { method: isGoogleProfile ? 'google' : 'email' });
         renderCharCard();
         centerMapOnUser();
         closeAuthModal();
@@ -1648,6 +1661,7 @@
       }
       setSession(result.token, result.user);
       currentUser = await apiRequest('/users/me');
+      gaEvent('login', { method: 'google' });
       renderCharCard();
       centerMapOnUser();
       closeAuthModal();
@@ -2153,6 +2167,7 @@
           }),
         });
         alert('논제가 등록되었습니다.');
+        gaEvent('thread_create', { event_category: 'engagement' });
         e.target.reset();
         renderHotIssues();
         if (targetElId !== 'threadFormContent') renderRegionPage(presetRegionId);
@@ -2364,6 +2379,7 @@
           const result = await apiRequest(reactionPath(targetType, targetId, 'vote'), { method: 'POST', body: JSON.stringify({ vote_type: voteType }) });
           if (result.result === 'cast') {
             bumpCount(btn, 1);
+            gaEvent('reaction', { event_category: targetType, event_label: voteType, reaction_type: 'vote' });
           } else if (result.result === 'cancelled') {
             bumpCount(btn, -1);
           } else if (result.result === 'changed') {
@@ -2382,6 +2398,7 @@
         try {
           const result = await apiRequest(reactionPath(targetType, targetId, 'laugh'), { method: 'POST' });
           bumpCount(btn, result.result === 'cancelled' ? -1 : 1);
+          if (result.result !== 'cancelled') gaEvent('reaction', { event_category: targetType, reaction_type: 'laugh' });
         } catch (err) { alert(err.message); }
       });
     });
@@ -2438,6 +2455,7 @@
         history.pushState({}, '', `?thread=${threadId}`);
       }
       setThreadSeoMeta(thread);
+      gaEvent('thread_view', { event_category: 'engagement', thread_id: thread.id });
 
       const STANCE_LABEL = { pro: '찬성', con: '반대', other: '기타' };
 
@@ -2586,6 +2604,7 @@
               method: 'POST',
               body: JSON.stringify({ stance: form.get('stance'), title: form.get('title'), body: form.get('body') }),
             });
+            gaEvent('argument_create', { event_category: 'engagement', stance: form.get('stance') });
             openThreadModal(threadId);
           } catch (err) { alert(err.message); }
         });
@@ -2644,6 +2663,7 @@
         apiRequest(`/regions/${regionId}/threads`),
       ]);
 
+      gaEvent('region_view', { event_category: 'engagement', region_id: regionId, region_name: region.name });
       const statusKey = region.status === 'dominant' ? 'dominant' : (region.status === 'contested' ? 'contested' : 'dispute');
       const activeWars = wars.filter(w => w.status === 'voting' || w.status === 'accepted');
       const ruler = dominance.ruler;
