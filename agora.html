@@ -1552,6 +1552,7 @@
             <span>›</span>
             <div class="chip-row">${tickerChips}</div>
           </div>
+          ${dominanceStatus ? `<button class="mini-btn" id="registerCloakBtn" style="margin-top:10px;">지배자 보상 — 망토 디자인 등록</button>` : ''}
         </div>
       </div>
     `;
@@ -1560,6 +1561,19 @@
       renderInventoryView();
     });
     document.getElementById('charCardThreadBtn').addEventListener('click', scrollToThreadForm);
+    const registerCloakBtn = document.getElementById('registerCloakBtn');
+    if (registerCloakBtn) {
+      registerCloakBtn.addEventListener('click', async () => {
+        const url = prompt('망토로 쓸 이미지 URL을 입력하세요 (본인이 만들어 이미 호스팅해둔 이미지 주소)');
+        if (!url) return;
+        try {
+          await apiRequest(`/regions/${currentUser.region_id}/dominance/cloak`, {
+            method: 'POST', body: JSON.stringify({ design_asset_url: url }),
+          });
+          alert('망토가 등록되어 인벤토리에 추가되었습니다. 인벤토리에서 착용해보세요.');
+        } catch (err) { alert(err.message); }
+      });
+    }
     document.getElementById('logoutBtn').addEventListener('click', () => {
       clearSession();
       location.reload(); // 세력/전쟁 카드까지 한 번에 로그아웃 상태로 되돌리는 가장 간단한 방법
