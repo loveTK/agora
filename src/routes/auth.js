@@ -6,6 +6,7 @@ const { OAuth2Client } = require("google-auth-library");
 const { db } = require("../db");
 const { JWT_SECRET } = require("../middleware/authMiddleware");
 const { belligerenceTier } = require("../services/belligerence");
+const { levelProgress } = require("../services/experience");
 
 const router = express.Router();
 
@@ -19,6 +20,7 @@ function issueToken(userId) {
 }
 
 function toAuthUser(user) {
+  const progress = levelProgress(user.xp || 0);
   return {
     id: user.id,
     email: user.email,
@@ -28,6 +30,11 @@ function toAuthUser(user) {
     reputation: user.reputation,
     belligerence: user.belligerence,
     belligerence_tier: belligerenceTier(user.belligerence),
+    xp: progress.xp,
+    level: progress.level,
+    xp_current_level: progress.current_level_xp,
+    xp_next_level: progress.next_level_xp,
+    xp_to_next: progress.xp_to_next,
   };
 }
 
@@ -81,10 +88,8 @@ router.post("/signup", (req, res) => {
   }
 
   const token = issueToken(id);
-  res.status(201).json({
-    token,
-    user: { id, email, nickname, region_id, rank: "citizen", reputation: 0, belligerence: 0, belligerence_tier: "citizen" },
-  });
+  const created = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
+  res.status(201).json({ token, user: toAuthUser(created) });
 });
 
 // POST /auth/login

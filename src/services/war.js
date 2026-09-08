@@ -3,7 +3,7 @@ const { db } = require("../db");
 const { regionMilitaryPower } = require("./military");
 
 // 수치는 전부 기획 문서상 "예시"로 제시됐던 값이며, 정식 수치는 아직 미확정 상태다(문서 6.1/6.6절 참고).
-const VOTE_QUORUM = 30;                 // 수락 투표 최소 참여 인원 (판정 시스템과 동일 기준 재사용)
+const VOTE_QUORUM = 5;                  // 수락 투표 최소 참여 인원 (판정 시스템과 동일 기준 재사용, V1 재조정)
 const APPROVAL_RATIO = 0.5;             // 과반
 const VOTE_WINDOW_HOURS = 24;           // 수락 투표 제한 시간
 const DECLARE_COOLDOWN_DAYS = 7;        // 지배자당 선포 쿨다운 (주 1회)

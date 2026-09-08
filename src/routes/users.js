@@ -7,6 +7,7 @@ const { belligerenceTier } = require("../services/belligerence");
 const { checkFollowBrigading } = require("../services/abuseDetection");
 const { INFLUENCE_THRESHOLD } = require("../services/influence");
 const { getUserProfileSummary } = require("../services/userProfile");
+const { levelProgress } = require("../services/experience");
 
 const router = express.Router();
 const REGION_COOLDOWN_DAYS = 7;
@@ -16,6 +17,7 @@ function followerCount(userId) {
 }
 
 function toPublicUser(u) {
+  const progress = levelProgress(u.xp || 0);
   return {
     id: u.id,
     nickname: u.nickname,
@@ -25,6 +27,11 @@ function toPublicUser(u) {
     belligerence: u.belligerence,
     belligerence_tier: belligerenceTier(u.belligerence),
     follower_count: followerCount(u.id),
+    xp: progress.xp,
+    level: progress.level,
+    xp_current_level: progress.current_level_xp,
+    xp_next_level: progress.next_level_xp,
+    xp_to_next: progress.xp_to_next,
     created_at: u.created_at,
   };
 }

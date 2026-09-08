@@ -138,6 +138,24 @@
     border:1px solid var(--black);
     border-radius:999px;
   }
+  /* XP 진행바 — 캐릭터 카드에 상시 노출. xp_gain을 받을 때마다 폭(width)이 애니메이션으로 채워지고,
+     "+N XP" 텍스트가 팝업으로 떠올랐다 사라진다. */
+  .xp-bar-wrap{ position:relative; }
+  .xp-bar-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; }
+  .xp-level-badge{ font-size:12.5px; font-weight:700; color:var(--gold); }
+  .xp-bar-label{ font-size:11px; color:var(--gray-2); }
+  .xp-bar-track{ height:6px; background:var(--gray-4); overflow:hidden; }
+  .xp-bar-fill{ height:100%; background:var(--gold); width:0%; transition:width 0.6s ease; }
+  .xp-popup{
+    position:absolute; top:-4px; right:0; font-size:13px; font-weight:800; color:var(--gold);
+    pointer-events:none; animation:xp-pop-float 1.1s ease-out forwards;
+  }
+  @keyframes xp-pop-float{
+    0%{ opacity:0; transform:translateY(4px); }
+    15%{ opacity:1; transform:translateY(0); }
+    75%{ opacity:1; transform:translateY(-14px); }
+    100%{ opacity:0; transform:translateY(-22px); }
+  }
   .profile-stats-line{ display:flex; gap:22px; flex-wrap:wrap; font-size:13px; }
   .stat-label{ color:var(--gray-2); }
   .stat-value{ color:var(--ink); font-weight:500; }
@@ -788,7 +806,7 @@
   const SLOT_LABEL = {
     accessory: '악세사리', badge: '뱃지', cloak: '망토', weapon: '무기',
     hat: '모자', face: '얼굴', top: '상의', pants: '바지', shoes: '신발',
-    shield: '방패', jewelry: '장신구', glasses: '안경', effect: '이펙트', background: '배경',
+    shield: '방패', jewelry: '장신구', glasses: '안경', effect: '이펙트', background: '배경', title: '칭호',
   };
   // 19장 티커 도감 — 현재는 자동 발급되는 두 종류만 존재(둘 다 참여도 임계값 기반).
   const TICKER_LABELS = { ingenious: '이그지니어스', sphinx: '스핑크스' };
@@ -1439,7 +1457,47 @@
     });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(body.error || '요청에 실패했습니다.');
+    if (body && body.xp_gain) handleXpGain(body.xp_gain); // 서버가 xp_gain을 실어준 응답이면 어디서 호출됐든 공통으로 처리
     return body;
+  }
+
+  // XP 진행바(캐릭터 카드)를 실시간으로 갱신 + "+N XP" 팝업 애니메이션을 띄운다.
+  // apiRequest가 xp_gain을 받을 때마다 자동으로 호출되므로, 논제/논증 등록·투표·전쟁 참여 등
+  // XP가 걸린 액션마다 따로 연결할 필요 없이 이 한 곳만 관리하면 된다.
+  function handleXpGain(xpGain) {
+    if (!xpGain || !xpGain.amount || !currentUser) return;
+    currentUser.xp = xpGain.xp;
+    currentUser.level = xpGain.level_after;
+    currentUser.xp_current_level = xpGain.xp_current_level;
+    currentUser.xp_next_level = xpGain.xp_next_level;
+    currentUser.xp_to_next = xpGain.xp_to_next;
+
+    updateXpBar();
+    popXpGain(xpGain.amount);
+    if (xpGain.leveled_up) showToast(`레벨 업! Lv.${xpGain.level_after}`);
+  }
+
+  function updateXpBar() {
+    const fill = document.getElementById('xpBarFill');
+    if (!fill || !currentUser) return;
+    const cur = currentUser.xp_current_level ?? 0;
+    const next = currentUser.xp_next_level;
+    const pct = next == null ? 100 : Math.min(100, Math.max(0, Math.round((currentUser.xp - cur) / (next - cur) * 100)));
+    fill.style.width = pct + '%';
+    const label = document.getElementById('xpBarLabel');
+    if (label) label.textContent = next == null ? `MAX · ${currentUser.xp} XP` : `${currentUser.xp} / ${next} XP`;
+    const levelBadge = document.getElementById('xpLevelBadge');
+    if (levelBadge) levelBadge.textContent = `Lv.${currentUser.level}`;
+  }
+
+  function popXpGain(amount) {
+    const host = document.getElementById('xpBarWrap');
+    if (!host) return;
+    const el = document.createElement('div');
+    el.className = 'xp-popup';
+    el.textContent = `+${amount} XP`;
+    host.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
   }
 
   function setSession(token, user) {
@@ -1523,6 +1581,14 @@
       ? tickers.map(t => `<span class="badge">${TICKER_LABELS[t.ticker] || t.ticker}</span>`).join('')
       : '<span class="stat-label">없음</span>';
 
+    // XP 진행바 — 레벨업 시 자동으로 갱신되는 칭호(title 슬롯)가 있으면 레벨 옆에 같이 보여준다.
+    const equippedTitle = equippedItems.find(it => it.slot_type === 'title');
+    const xpLevel = currentUser.level ?? 1;
+    const xpCur = currentUser.xp_current_level ?? 0;
+    const xpNext = currentUser.xp_next_level ?? null;
+    const xpPct = xpNext == null ? 100 : Math.min(100, Math.max(0, Math.round(((currentUser.xp ?? 0) - xpCur) / (xpNext - xpCur) * 100)));
+    const xpLabel = xpNext == null ? `MAX · ${currentUser.xp ?? 0} XP` : `${currentUser.xp ?? 0} / ${xpNext} XP`;
+
     charCard.innerHTML = `
       <div class="char-top">
         <div class="profile-avatar-col">
@@ -1542,6 +1608,13 @@
               <button class="cta-gold char-thread-btn" id="charCardThreadBtn">+ 논제 등록</button>
               <button class="logout-link" id="logoutBtn">로그아웃</button>
             </div>
+          </div>
+          <div class="xp-bar-wrap" id="xpBarWrap">
+            <div class="xp-bar-top">
+              <span class="xp-level-badge" id="xpLevelBadge">Lv.${xpLevel}${equippedTitle ? ' · ' + equippedTitle.name : ''}</span>
+              <span class="xp-bar-label" id="xpBarLabel">${xpLabel}</span>
+            </div>
+            <div class="xp-bar-track"><div class="xp-bar-fill" id="xpBarFill" style="width:${xpPct}%;"></div></div>
           </div>
           <div class="profile-stats-line">
             <span><span class="stat-label">명성치</span> <span class="stat-value">${currentUser.reputation ?? 0}</span></span>

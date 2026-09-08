@@ -2,7 +2,7 @@ const { randomUUID } = require("crypto");
 const { db } = require("../db");
 const { QUORUM } = require("./judgment");
 
-const RULER_STREAK_REQUIRED = 7; // 7일 연속 무패 시 지배자 등극 (기획 합의사항)
+const RULER_STREAK_REQUIRED = 3; // 3일 연속 무패 시 지배자 등극 (V1: 활성 100명 규모 재조정)
 
 // 하루 1회(cron) 호출을 전제로 한 배치 함수. 같은 날 여러 번 불러도 중복 반영되지 않는다
 // (dominance_candidates.last_counted_date로 날짜별 1회만 반영되도록 막아둠).

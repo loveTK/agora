@@ -12,6 +12,7 @@ const { toggleThreadVote, getThreadVoteTally } = require("../services/threadVote
 const { checkAndGrantSphinxTicker } = require("../services/sphinxTicker");
 const { regenerateSitemap } = require("../services/sitemap");
 const { regenerateArchive } = require("../services/archivePage");
+const { grantXp, XP_THREAD_CREATE, XP_ARGUMENT_CREATE } = require("../services/experience");
 
 const DAILY_JUDGMENT_VOTE_LIMIT = 20; // 어뷰징 방지: 하루 20개 논제까지만 판정투표 가능
 
@@ -89,9 +90,10 @@ router.post("/", requireAuth, (req, res) => {
   grantWeaponIfEligible(req.userId); // 논전사 티어(100) 이상이면 무기 슬롯 자동 지급
   regenerateSitemap(); // 새 논제도 재배포를 안 기다리고 바로 sitemap.xml에 잡히게
   regenerateArchive(); // 논제 아카이브 목록도 같이 갱신
+  const xpGain = grantXp(req.userId, XP_THREAD_CREATE, "thread_create"); // 논제 발의 +5
 
   const thread = db.prepare("SELECT * FROM threads WHERE id = ?").get(id);
-  res.status(201).json(toPublicThread(thread));
+  res.status(201).json({ ...toPublicThread(thread), xp_gain: xpGain });
 });
 
 // GET /threads/mine
@@ -193,9 +195,10 @@ router.post("/:id/arguments", requireAuth, (req, res) => {
   );
   grantWeaponIfEligible(req.userId); // 논전사 티어(100) 이상이면 무기 슬롯 자동 지급
   checkAndGrantSphinxTicker(req.params.id); // 이 논제의 참여자 수가 임계값을 넘으면 발의자에게 티커 발급
+  const xpGain = grantXp(req.userId, XP_ARGUMENT_CREATE, "argument_create"); // 논증 작성 +2
 
   const arg = db.prepare("SELECT * FROM arguments WHERE id = ?").get(id);
-  res.status(201).json(arg);
+  res.status(201).json({ ...arg, xp_gain: xpGain });
 });
 
 // GET /threads/:id/arguments

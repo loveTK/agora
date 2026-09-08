@@ -10,6 +10,7 @@ const { isReputationGainBlocked } = require("../services/war");
 const { applyInfluenceDelta } = require("../services/influence");
 const { toggleLaugh } = require("../services/laughReaction");
 const { containsBannedWord } = require("../services/contentFilter");
+const { grantXp, XP_VOTE_ACTION, XP_RECEIVE_UPVOTE } = require("../services/experience");
 
 const router = express.Router();
 const DAILY_VOTE_LIMIT = 100; // 어뷰징 방지: 하루 추천/비추천 총 횟수 상한
@@ -127,8 +128,19 @@ router.post("/:id/vote", requireAuth, (req, res) => {
   if (req.userId !== arg.author_id) recalcRank(req.userId); // 투표자 본인의 명성도 바뀌었으므로 재계산
   refreshTyrantStatus(arg.author_id); // 작성자가 현재 지배자라면 폭군 전환 여부 재판정
   if (result === "cast") checkVoteBrigading(req.params.id, req.ip); // 신규 투표일 때만 몰표 패턴 탐지
+
+  // XP: 새로 캐스팅된 투표(취소/전환은 제외)에 대해서만 행위자 본인 +1,
+  // "추천(up)"이 새로 생기는 경우(신규 up 캐스팅, 또는 down->up 전환)엔 작성자에게도 +1.
+  let xpGain = null;
+  if (result === "cast") {
+    xpGain = grantXp(req.userId, XP_VOTE_ACTION, "argument_vote_cast");
+    if (vote_type === "up") grantXp(arg.author_id, XP_RECEIVE_UPVOTE, "argument_upvote_received");
+  } else if (result === "changed" && vote_type === "up") {
+    grantXp(arg.author_id, XP_RECEIVE_UPVOTE, "argument_upvote_received");
+  }
+
   const updated = db.prepare("SELECT * FROM arguments WHERE id = ?").get(req.params.id);
-  res.json({ result, weight, upvotes: updated.upvotes, downvotes: updated.downvotes });
+  res.json({ result, weight, upvotes: updated.upvotes, downvotes: updated.downvotes, xp_gain: xpGain });
 });
 
 // POST /arguments/:id/laugh

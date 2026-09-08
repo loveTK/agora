@@ -2,6 +2,7 @@ const { randomUUID } = require("crypto");
 const { db } = require("../db");
 const { getVoteWeight } = require("./voteWeight");
 const { checkAndGrantIngeniousTicker } = require("./ingeniousTicker");
+const { grantXp, XP_VOTE_ACTION } = require("./experience");
 
 // votes.js의 DAILY_VOTE_LIMIT과 동일한 취지 — 반복 토글로 우회하지 못하게 하루 총 횟수로 제한한다.
 const DAILY_LAUGH_LIMIT = 100;
@@ -59,11 +60,14 @@ function toggleLaugh(userId, targetType, targetId) {
   // 티커 도감은 논제/논증에만 존재한다(21장 관리자 페이지 몫인 수동 티커와 별개) — 대댓글은 대상에서 제외.
   if (result === "cast" && targetType !== "reply") checkAndGrantIngeniousTicker(targetType, targetId);
 
+  // XP: "웃기다"도 투표성 행위이므로 새로 캐스팅될 때(취소는 제외) 행위자 본인에게 +1.
+  const xpGain = result === "cast" ? grantXp(userId, XP_VOTE_ACTION, "laugh_cast") : null;
+
   const totalWeight = db
     .prepare("SELECT COALESCE(SUM(weight), 0) AS total FROM laugh_reactions WHERE target_type = ? AND target_id = ?")
     .get(targetType, targetId).total;
 
-  return { result, laugh_count: totalWeight };
+  return { result, laugh_count: totalWeight, xp_gain: xpGain };
 }
 
 module.exports = { toggleLaugh, DAILY_LAUGH_LIMIT };

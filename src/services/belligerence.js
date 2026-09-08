@@ -3,8 +3,8 @@
 const THREAD_BELLIGERENCE_POINTS = 2; // 논제(아젠다) 발의 1건당
 const ARGUMENT_BELLIGERENCE_POINTS = 1; // 논증(답글) 등록 1건당
 
-const WARRIOR_THRESHOLD = 100; // 논전사 — 무기 슬롯 언락
-const ELITE_WARRIOR_THRESHOLD = 300; // 정예 논전사
+const WARRIOR_THRESHOLD = 50; // 논전사 — 무기 슬롯 언락 (V1: 활성 100명 규모 재조정)
+const ELITE_WARRIOR_THRESHOLD = 150; // 정예 논전사 (V1: 활성 100명 규모 재조정)
 
 function belligerenceTier(value) {
   if (value >= ELITE_WARRIOR_THRESHOLD) return "elite_warrior";

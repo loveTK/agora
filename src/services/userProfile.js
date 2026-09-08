@@ -1,5 +1,6 @@
 const { db } = require("../db");
 const { belligerenceTier } = require("./belligerence");
+const { levelProgress } = require("./experience");
 
 function followerCount(userId) {
   return db.prepare("SELECT COUNT(*) AS count FROM follows WHERE followee_id = ?").get(userId).count;
@@ -26,6 +27,8 @@ function getUserProfileSummary(userId) {
     .prepare(`SELECT r.id, r.name FROM dominance d JOIN regions r ON r.id = d.region_id WHERE d.user_id = ?`)
     .all(userId);
 
+  const progress = levelProgress(user.xp || 0);
+
   return {
     id: user.id,
     nickname: user.nickname,
@@ -35,6 +38,11 @@ function getUserProfileSummary(userId) {
     reputation: user.reputation,
     belligerence_tier: belligerenceTier(user.belligerence),
     follower_count: followerCount(userId),
+    xp: progress.xp,
+    level: progress.level,
+    xp_current_level: progress.current_level_xp,
+    xp_next_level: progress.next_level_xp,
+    xp_to_next: progress.xp_to_next,
     party: party || null,
     religion: religion || null,
     dominance_regions: dominanceRegions,

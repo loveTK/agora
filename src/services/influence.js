@@ -2,7 +2,7 @@ const { randomUUID } = require("crypto");
 const { db } = require("../db");
 
 const INFLUENCE_THRESHOLD = 50;  // 이 이상이면 그 지역이 "사상 영향권"으로 인정됨
-const CULTURE_ROUTE_THRESHOLD = 5; // 사상 영향권 지역 5곳 도달 시 문화 승리
+const CULTURE_ROUTE_THRESHOLD = 3; // 사상 영향권 지역 3곳 도달 시 문화 승리 (V1: 활성 100명 규모 재조정)
 
 // 타 지역에서의 활동(추천/비추천)을 영향력으로 반영한다. 본인 소속 지역은 대상 아님
 // (자국 활동은 이미 명성/호전성으로 보상되므로 영향력은 순수하게 "타지 진출"만 측정).

@@ -5,6 +5,7 @@ const { requireAuth } = require("../middleware/authMiddleware");
 const { getWarTally, resolveWarIfReady, VOTE_QUORUM, APPROVAL_RATIO } = require("../services/war");
 const { requestWarDeclaration } = require("../services/congress");
 const { createBattle, getBattleTally, isWarParticipant, resolveBattle } = require("../services/warBattle");
+const { grantXp, XP_WAR_PARTICIPATION } = require("../services/experience");
 
 const router = express.Router();
 
@@ -192,7 +193,10 @@ router.post("/:id/battle/arguments", requireAuth, (req, res) => {
     "INSERT INTO war_battle_arguments (id, battle_id, author_id, side, body) VALUES (?, ?, ?, ?, ?)"
   ).run(id, battle.id, req.userId, choice.side, body.trim());
 
-  res.status(201).json({ id, side: choice.side });
+  // 전쟁 참여 XP: 진영 선택(이 라우트에 도달하려면 이미 선택돼 있어야 함) + 논증 등록이 모두 끝난 시점에 1회 지급.
+  const xpGain = grantXp(req.userId, XP_WAR_PARTICIPATION, "war_participation");
+
+  res.status(201).json({ id, side: choice.side, xp_gain: xpGain });
 });
 
 // POST /wars/:id/battle/arguments/:argId/vote

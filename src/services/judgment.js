@@ -2,7 +2,7 @@ const { randomUUID } = require("crypto");
 const { db } = require("../db");
 const { executeIfRuler } = require("./execution");
 
-const QUORUM = 30;              // 최소 참여 인원
+const QUORUM = 5;               // 최소 참여 인원 (V1: 활성 100명 규모 재조정)
 const COLLAPSE_THRESHOLD = 0.6; // 붕괴 확정 비율
 
 function getTally(threadId) {

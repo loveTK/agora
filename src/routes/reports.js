@@ -6,7 +6,7 @@ const { requireAuth } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // 신고 누적 시 즉시 숨김 처리하는 임계값 (그림자 제한 — 최종 판단은 관리자가 이어서 함)
-const AUTO_HIDE_REPORT_THRESHOLD = 5;
+const AUTO_HIDE_REPORT_THRESHOLD = 3; // V1: 활성 100명 규모 재조정
 
 function targetExists(targetType, targetId) {
   if (targetType === "thread") {

@@ -3,7 +3,7 @@ const { db } = require("../db");
 // 계급 임계값 (기획 합의사항: 시민 -> 지지자(supporter) -> 선지자, 선지자는 지역당 슬롯 제한)
 // 계급명 "지지자"의 DB 내부 키는 팔로우 기능(follower)과 구분하기 위해 'supporter'로 둔다.
 const SUPPORTER_THRESHOLD = 50;
-const PROPHET_THRESHOLD = 200;
+const PROPHET_THRESHOLD = 100; // V1: 활성 100명 규모 재조정
 const PROPHET_SLOTS_PER_REGION = 3;
 
 // 한 지역의 계급을 통째로 다시 계산한다. 명성이 바뀔 때마다 지역 단위로 호출한다.

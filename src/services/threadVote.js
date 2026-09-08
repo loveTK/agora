@@ -1,6 +1,7 @@
 const { randomUUID } = require("crypto");
 const { db } = require("../db");
 const { getVoteWeight } = require("./voteWeight");
+const { grantXp, XP_VOTE_ACTION, XP_RECEIVE_UPVOTE } = require("./experience");
 
 // Hot Issue 카드에서 바로 누르는 논제 단위 추천/비추천 — 순수 참여도 집계용(명성/계급에 영향 없음).
 // 개별 논증 추천/비추천(votes 테이블, POST /arguments/:id/vote)과는 별개 트랙이다.
@@ -64,7 +65,17 @@ function toggleThreadVote(userId, threadId, voteType) {
   });
   const result = tx();
 
-  return { result, ...getThreadVoteTally(threadId) };
+  // XP: 새로 캐스팅된 투표(취소/전환은 제외)에 대해서만 지급 — 행위자 본인 +1,
+  // "추천(up)"이 새로 생기는 경우(신규 up 캐스팅, 또는 down->up 전환)엔 작성자에게도 +1.
+  let xpGain = null;
+  if (result === "cast") {
+    xpGain = grantXp(userId, XP_VOTE_ACTION, "thread_vote_cast");
+    if (voteType === "up") grantXp(thread.author_id, XP_RECEIVE_UPVOTE, "thread_upvote_received");
+  } else if (result === "changed" && voteType === "up") {
+    grantXp(thread.author_id, XP_RECEIVE_UPVOTE, "thread_upvote_received");
+  }
+
+  return { result, ...getThreadVoteTally(threadId), xp_gain: xpGain };
 }
 
 module.exports = { toggleThreadVote, getThreadVoteTally, DAILY_THREAD_VOTE_LIMIT };
