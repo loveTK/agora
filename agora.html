@@ -3,9 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AGORA — 전황 개요</title>
-<meta name="description" content="19개 폴리스가 매일 여론으로 겨루는 실시간 정치 토론 광장. 논제에 투표하고 논증을 펼쳐 폴리스의 지배권을 다투세요.">
+<title id="pageTitle">AGORA — 실시간 정치 토론 · 지역 대항전 커뮤니티</title>
+<meta name="description" id="metaDescription" content="19개 폴리스가 매일 여론으로 겨루는 실시간 정치 토론 광장. 논제에 투표하고 논증을 펼쳐 폴리스의 지배권을 다투세요.">
 <link rel="canonical" href="https://myagora.xyz/" id="canonicalLink">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AGORA">
+<meta property="og:title" id="ogTitle" content="AGORA — 실시간 정치 토론 · 지역 대항전 커뮤니티">
+<meta property="og:description" id="ogDescription" content="19개 폴리스가 매일 여론으로 겨루는 실시간 정치 토론 광장. 논제에 투표하고 논증을 펼쳐 폴리스의 지배권을 다투세요.">
+<meta property="og:image" content="https://myagora.xyz/og-image.png">
+<meta property="og:url" id="ogUrl" content="https://myagora.xyz/">
+<meta name="twitter:card" content="summary_large_image">
 <!-- 애드센스 사이트 소유 확인용 — 승인되면 이 스크립트 자체가 자동광고도 같이 켤 수 있어서 그대로 둠 -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1044528124208901" crossorigin="anonymous"></script>
 
@@ -192,6 +199,7 @@
     margin:0 0 14px;
   }
   .hero-headline em{ font-style:normal; color:var(--gold); }
+  .hero-tagline{ font-size:12.5px; font-weight:700; letter-spacing:0.04em; color:var(--gold); margin:10px 0 14px; }
   .hero-lede{ font-size:14.5px; color:var(--gray-1); max-width:52ch; line-height:1.6; margin:0; }
   .hero-live{ border-left:1px solid var(--line); padding-left:20px; }
   .hero-live-row{ display:flex; align-items:center; gap:9px; margin-bottom:10px; }
@@ -569,6 +577,7 @@
     <!-- 목업(Agora Broadsheet)의 비대칭 히어로 — 헤드라인 + 실시간 접전 현황 -->
     <section class="hero-band">
       <h1 class="hero-headline">19개 폴리스가<br>매일 <em>여론으로</em> 겨룬다</h1>
+      <p class="hero-tagline">실시간 정치 토론 · 지역 대항전 커뮤니티</p>
       <p class="hero-lede">추천 · 비추천 · 국회 승인투표로 갈리는 지배권. 판정은 사람이 아니라 논증의 총합이 내린다.</p>
       <div class="hero-live">
         <div class="hero-live-row"><span class="live-dot"></span><span>실시간 판정 진행중</span></div>
@@ -2218,19 +2227,68 @@
 
   const threadModal = document.getElementById('threadModal');
   const DEFAULT_TITLE = document.title;
-  const DEFAULT_DESCRIPTION = document.querySelector('meta[name="description"]').content;
+  const DEFAULT_DESCRIPTION = document.getElementById('metaDescription').content;
+  const DEFAULT_OG_TITLE = document.getElementById('ogTitle').content;
+  const DEFAULT_OG_DESCRIPTION = document.getElementById('ogDescription').content;
+
+  // 설명이 너무 짧으면(50자 미만) 검색결과에서 어색하게 잘려 보이니 고정 문구를 이어붙여 채운다.
+  const MIN_DESCRIPTION_LENGTH = 50;
+  function padDescription(text) {
+    let desc = (text || '').slice(0, 150);
+    if (desc.length < MIN_DESCRIPTION_LENGTH) {
+      desc = `${desc} AGORA에서 이 논제에 찬성 또는 반대 논증을 남기고 투표에 참여해보세요. 다양한 시각의 의견을 확인해보세요.`.slice(0, 155);
+    }
+    return desc;
+  }
 
   // 논제 하나하나가 검색엔진에 개별 결과로 잡히도록 ?thread=<id>를 실제 URL로 남기고,
-  // 그 논제의 제목/설명으로 <title>/description을 그때그때 바꿔준다(지역 페이지의 ?region= 관행과 동일).
+  // 그 논제의 제목/설명으로 <title>/description/OG태그/구조화 데이터를 그때그때 바꿔준다
+  // (지역 페이지의 ?region= 관행과 동일).
   function setThreadSeoMeta(thread) {
-    document.title = `${thread.title} - AGORA`;
-    document.querySelector('meta[name="description"]').setAttribute('content', (thread.body || thread.title).slice(0, 150));
-    document.getElementById('canonicalLink').setAttribute('href', `https://myagora.xyz/?thread=${thread.id}`);
+    const title = `${thread.title} - AGORA`;
+    const description = padDescription(thread.body || thread.title);
+    const url = `https://myagora.xyz/?thread=${thread.id}`;
+    document.title = title;
+    document.getElementById('metaDescription').setAttribute('content', description);
+    document.getElementById('canonicalLink').setAttribute('href', url);
+    document.getElementById('ogTitle').setAttribute('content', title);
+    document.getElementById('ogDescription').setAttribute('content', description);
+    document.getElementById('ogUrl').setAttribute('content', url);
+    setThreadJsonLd(thread);
   }
+
+  // 논제 상세 = 포럼 게시글 하나 — schema.org DiscussionForumPosting으로 구조화 데이터 제공.
+  function setThreadJsonLd(thread) {
+    let script = document.getElementById('threadJsonLd');
+    if (!script) {
+      script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.id = 'threadJsonLd';
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'DiscussionForumPosting',
+      headline: thread.title,
+      text: thread.body || '',
+      datePublished: `${(thread.created_at || '').replace(' ', 'T')}Z`,
+      author: { '@type': 'Person', name: thread.author_nickname || '익명' },
+      interactionStatistic: [
+        { '@type': 'InteractionCounter', interactionType: 'https://schema.org/CommentAction', userInteractionCount: thread.participant_count ?? 0 },
+        { '@type': 'InteractionCounter', interactionType: 'https://schema.org/LikeAction', userInteractionCount: Math.round(thread.thread_upvotes ?? 0) },
+      ],
+    });
+  }
+
   function resetSeoMeta() {
     document.title = DEFAULT_TITLE;
-    document.querySelector('meta[name="description"]').setAttribute('content', DEFAULT_DESCRIPTION);
+    document.getElementById('metaDescription').setAttribute('content', DEFAULT_DESCRIPTION);
     document.getElementById('canonicalLink').setAttribute('href', 'https://myagora.xyz/');
+    document.getElementById('ogTitle').setAttribute('content', DEFAULT_OG_TITLE);
+    document.getElementById('ogDescription').setAttribute('content', DEFAULT_OG_DESCRIPTION);
+    document.getElementById('ogUrl').setAttribute('content', 'https://myagora.xyz/');
+    const script = document.getElementById('threadJsonLd');
+    if (script) script.remove();
   }
   function closeThreadModal() {
     threadModal.style.display = 'none';

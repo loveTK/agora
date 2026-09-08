@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const { runMigrations } = require("./db");
 const { seedIfEmpty } = require("./seed");
 const { regenerateSitemap } = require("./services/sitemap");
+const { regenerateArchive } = require("./services/archivePage");
 
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
@@ -30,6 +31,7 @@ const { requireAdmin } = require("./middleware/adminAuth");
 runMigrations();
 seedIfEmpty(); // Shell 접근이 안 되는 환경(Render 무료 티어 등)에서도 초기 데이터가 자동으로 채워지게 함
 regenerateSitemap(); // 배포/재시작 시점 기준으로 sitemap.xml을 최신 지역/논제 목록으로 다시 씀
+regenerateArchive(); // 논제 아카이브 페이지도 같은 시점에 최신 목록으로 다시 씀
 
 const app = express();
 app.use(cors());

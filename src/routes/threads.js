@@ -11,6 +11,7 @@ const { toggleLaugh } = require("../services/laughReaction");
 const { toggleThreadVote, getThreadVoteTally } = require("../services/threadVote");
 const { checkAndGrantSphinxTicker } = require("../services/sphinxTicker");
 const { regenerateSitemap } = require("../services/sitemap");
+const { regenerateArchive } = require("../services/archivePage");
 
 const DAILY_JUDGMENT_VOTE_LIMIT = 20; // 어뷰징 방지: 하루 20개 논제까지만 판정투표 가능
 
@@ -87,6 +88,7 @@ router.post("/", requireAuth, (req, res) => {
   );
   grantWeaponIfEligible(req.userId); // 논전사 티어(100) 이상이면 무기 슬롯 자동 지급
   regenerateSitemap(); // 새 논제도 재배포를 안 기다리고 바로 sitemap.xml에 잡히게
+  regenerateArchive(); // 논제 아카이브 목록도 같이 갱신
 
   const thread = db.prepare("SELECT * FROM threads WHERE id = ?").get(id);
   res.status(201).json(toPublicThread(thread));
@@ -94,7 +96,12 @@ router.post("/", requireAuth, (req, res) => {
 
 // GET /threads/:id
 router.get("/:id", (req, res) => {
-  const thread = db.prepare("SELECT * FROM threads WHERE id = ?").get(req.params.id);
+  const thread = db
+    .prepare(
+      `SELECT t.*, u.nickname AS author_nickname FROM threads t
+       JOIN users u ON u.id = t.author_id WHERE t.id = ?`
+    )
+    .get(req.params.id);
   if (!thread || thread.hidden) return res.status(404).json({ error: "논제를 찾을 수 없습니다." });
 
   const argCount = db
@@ -121,6 +128,7 @@ router.get("/:id", (req, res) => {
 
   res.json({
     ...toPublicThread(thread),
+    author_nickname: thread.author_nickname,
     argument_count: argCount,
     thread_upvotes: voteTally.upvotes,
     thread_downvotes: voteTally.downvotes,
