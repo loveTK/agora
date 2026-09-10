@@ -5,6 +5,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const { runMigrations } = require("./db");
 const { seedIfEmpty } = require("./seed");
+const { seedNeighborhoodsIfEmpty } = require("./seedNeighborhoods");
 const { regenerateSitemap } = require("./services/sitemap");
 const { regenerateArchive } = require("./services/archivePage");
 
@@ -27,10 +28,12 @@ const adminRoutes = require("./routes/admin");
 const replyRoutes = require("./routes/replies");
 const activityRoutes = require("./routes/activity");
 const chatRoutes = require("./routes/chat");
+const neighborhoodRoutes = require("./routes/neighborhoods"); // V3(동단위 정복) — 기존 V2 라우트와 완전히 별개
 const { requireAdmin } = require("./middleware/adminAuth");
 
 runMigrations();
 seedIfEmpty(); // Shell 접근이 안 되는 환경(Render 무료 티어 등)에서도 초기 데이터가 자동으로 채워지게 함
+seedNeighborhoodsIfEmpty(); // V3(동단위 정복) 시드 — 이미 있으면 건너뜀, 기존 seedIfEmpty와 완전히 별개
 regenerateSitemap(); // 배포/재시작 시점 기준으로 sitemap.xml을 최신 지역/논제 목록으로 다시 씀
 regenerateArchive(); // 논제 아카이브 페이지도 같은 시점에 최신 목록으로 다시 씀
 
@@ -68,6 +71,7 @@ app.use("/admin", adminRoutes);
 app.use("/replies", replyRoutes);
 app.use("/activity", activityRoutes);
 app.use("/chat", chatRoutes);
+app.use("/neighborhoods", neighborhoodRoutes);
 app.use("/internal", requireAdmin, internalRoutes);
 
 app.use((req, res) => res.status(404).json({ error: "존재하지 않는 경로입니다." }));

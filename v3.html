@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AGORA V3 — 동단위 정복 (MVP)</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111110'/%3E%3Ctext x='32' y='46' font-family='Arial, sans-serif' font-weight='900' font-size='38' fill='%23BA7517' text-anchor='middle'%3E%CE%91%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#111110; --ink:#1c1c1a; --gray-1:#4a4a46; --gray-2:#8a8a84; --gray-3:#c9c9c2;
+    --white:#ffffff; --line:rgba(17,17,16,0.14); --gold:#BA7517; --on-gold:#111110;
+    --npc:#8a8a84; --taken:#B23A3A; --mine:#2F7D4F;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; overflow:hidden; }
+  body{ font-family:'Archivo',sans-serif; color:var(--ink); background:var(--black); }
+
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:20; height:48px;
+    display:flex; align-items:center; justify-content:space-between; padding:0 16px;
+    background:rgba(17,17,16,0.88); color:var(--white); backdrop-filter:blur(4px);
+  }
+  .wordmark{ font-weight:800; letter-spacing:0.14em; font-size:15px; color:var(--white); text-decoration:none; }
+  .v3-badge{ font-size:11px; color:var(--gold); font-weight:700; letter-spacing:0.04em; }
+  .v3-back{ font-size:12px; color:var(--gray-3); text-decoration:none; }
+  .v3-back:hover{ color:var(--white); }
+
+  #map{ position:fixed; inset:0; top:48px; z-index:1; }
+  #map .leaflet-tile-pane{ filter:grayscale(1) contrast(1.05) brightness(0.75); }
+
+  .overlay{
+    position:fixed; z-index:15; background:rgba(17,17,16,0.88); color:var(--white);
+    padding:12px 16px; font-size:12.5px; line-height:1.5;
+  }
+  .overlay-season{ top:60px; left:16px; min-width:180px; }
+  .overlay-season .days{ font-size:22px; font-weight:800; color:var(--gold); }
+  .overlay-mine{ top:60px; right:16px; min-width:220px; max-width:280px; max-height:40vh; overflow-y:auto; }
+  .overlay-mine h3{ font-size:12px; color:var(--gold); margin-bottom:8px; letter-spacing:0.04em; }
+  .overlay-mine .mine-row{ display:flex; justify-content:space-between; gap:8px; padding:5px 0; border-top:1px solid rgba(255,255,255,0.12); }
+  .overlay-mine .mine-row:first-of-type{ border-top:none; }
+  .overlay-legend{
+    bottom:16px; left:16px; display:flex; gap:14px; align-items:center; font-size:11px;
+  }
+  .overlay-legend .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; }
+  .dot.npc{ background:var(--npc); } .dot.taken{ background:var(--taken); } .dot.mine{ background:var(--mine); }
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(17,17,16,0.6); z-index:30;
+    display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .modal-box{
+    background:var(--white); width:420px; max-width:100%; max-height:86vh; overflow-y:auto;
+    padding:24px; position:relative;
+  }
+  .modal-close{ position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--gray-1); }
+  .modal-box h2{ font-size:19px; font-weight:800; margin-bottom:4px; }
+  .modal-sub{ font-size:12px; color:var(--gray-2); margin-bottom:16px; }
+  .status-pill{ display:inline-block; font-size:10.5px; padding:2px 9px; border-radius:999px; border:1px solid var(--black); margin-right:6px; }
+  .status-pill.npc{ background:var(--gray-3); }
+  .status-pill.contested{ background:rgba(186,117,23,0.18); border-color:var(--gold); }
+  .stat-row{ display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid var(--line); font-size:13.5px; }
+  .stat-row:first-of-type{ border-top:none; }
+  .stat-row span:first-child{ color:var(--gray-2); }
+  .section-label{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--gray-2); margin:16px 0 8px; }
+  .contrib-row{ display:flex; justify-content:space-between; font-size:13px; padding:4px 0; }
+  .adj-row{ display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid var(--line); gap:8px; }
+  .adj-row:first-of-type{ border-top:none; }
+  .adj-name{ font-size:13px; }
+  .adj-status{ font-size:11px; color:var(--gray-2); }
+  button.act{ background:var(--black); color:var(--white); border:none; padding:9px 14px; font-family:'Archivo',sans-serif; font-weight:700; font-size:12.5px; cursor:pointer; }
+  button.act:hover{ background:var(--gold); color:var(--on-gold); }
+  button.act:disabled{ background:var(--gray-3); color:var(--gray-1); cursor:not-allowed; }
+  button.act-gold{ background:var(--gold); color:var(--on-gold); }
+  .contribute-btn{ width:100%; margin-top:14px; padding:12px; }
+  .insurrection-box{ margin-top:14px; padding:12px; border:1px solid var(--gold); background:rgba(186,117,23,0.08); font-size:12.5px; }
+  .result-box{ margin-top:14px; padding:12px; font-size:13px; border:1px solid var(--line); }
+  .result-box.win{ border-color:var(--mine); background:rgba(47,125,79,0.08); }
+  .result-box.lose{ border-color:var(--taken); background:rgba(178,58,58,0.08); }
+  .signed-out-note{ font-size:12px; color:var(--gray-2); }
+  .signed-out-note a{ color:var(--gold); font-weight:700; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="wordmark" href="https://myagora.xyz/">ΑΓΟΡΑ</a>
+  <span class="v3-badge">V3 · 동단위 정복 (MVP)</span>
+  <a class="v3-back" href="https://myagora.xyz/">← 메인으로</a>
+</header>
+
+<div id="map"></div>
+
+<div class="overlay overlay-season" id="seasonOverlay">시즌 정보를 불러오는 중...</div>
+<div class="overlay overlay-mine" id="mineOverlay"></div>
+<div class="overlay overlay-legend">
+  <span><i class="dot npc"></i>NPC</span>
+  <span><i class="dot taken"></i>점령됨</span>
+  <span><i class="dot mine"></i>내 지배</span>
+</div>
+
+<div class="modal-backdrop" id="detailModal" style="display:none;">
+  <div class="modal-box">
+    <button class="modal-close" id="detailClose">×</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const API_BASE = 'https://api.myagora.xyz';
+  const authToken = localStorage.getItem('agora_token'); // V2와 같은 origin/키를 공유 — 로그인 상태 그대로 이어받음
+  let currentUserId = null;
+  let neighborhoods = [];
+  const markersById = {};
+
+  async function apiRequest(path, options = {}) {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...(options.headers || {}),
+      },
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || '요청에 실패했습니다.');
+    return body;
+  }
+
+  function markerColor(n) {
+    if (n.status === 'npc') return getComputedStyle(document.documentElement).getPropertyValue('--npc').trim();
+    if (currentUserId && n.dominant_user_id === currentUserId) return getComputedStyle(document.documentElement).getPropertyValue('--mine').trim();
+    return getComputedStyle(document.documentElement).getPropertyValue('--taken').trim();
+  }
+
+  function neighborhoodIcon(n) {
+    const fill = markerColor(n);
+    return L.divIcon({
+      html: `<div style="width:14px;height:14px;border-radius:50%;background:${fill};border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,0.4);"></div>`,
+      className: '', iconSize: [14, 14], iconAnchor: [7, 7],
+    });
+  }
+
+  // 지도(Leaflet CDN)를 못 불러와도 나머지 기능(시즌/내 동 요약/기여/공격)은 그대로 동작해야 하므로,
+  // 지도 초기화는 별도로 감싸고 실패하면 클릭 가능한 목록으로 대체한다.
+  const mapAvailable = typeof L !== 'undefined';
+  let map = null;
+  if (mapAvailable) {
+    map = L.map('map', { zoomControl: true, attributionControl: false }).setView([30, 20], 2.4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, subdomains: 'abc' }).addTo(map);
+  } else {
+    console.warn('Leaflet을 불러오지 못해 지도 대신 목록으로 표시합니다.');
+    document.getElementById('map').innerHTML = '<div id="mapFallbackList" style="position:absolute; inset:0; overflow-y:auto; padding:150px 16px 60px; color:#fff;"></div>';
+  }
+
+  async function loadEverything() {
+    if (authToken) {
+      try { currentUserId = (await apiRequest('/users/me')).id; } catch (err) { /* 토큰 만료 등 — 비로그인처럼 진행 */ }
+    }
+    await Promise.all([loadNeighborhoods(), loadSeason()]);
+  }
+
+  async function loadNeighborhoods() {
+    neighborhoods = await apiRequest('/neighborhoods');
+
+    if (mapAvailable) {
+      neighborhoods.forEach((n) => {
+        if (n.lat == null || n.lng == null) return;
+        if (markersById[n.id]) { markersById[n.id].setIcon(neighborhoodIcon(n)); return; }
+        const marker = L.marker([n.lat, n.lng], { icon: neighborhoodIcon(n) }).addTo(map);
+        marker.on('click', () => openDetail(n.id));
+        markersById[n.id] = marker;
+      });
+    } else {
+      const list = document.getElementById('mapFallbackList');
+      list.innerHTML = neighborhoods.map((n) => `
+        <div data-open="${n.id}" style="padding:12px 14px; border:1px solid rgba(255,255,255,0.15); margin-bottom:8px; cursor:pointer;">
+          <b>${n.region_name} · ${n.name}</b> — ${n.status === 'npc' ? 'NPC' : (n.dominant_nickname || '점령됨')} · ${n.total_points}pt
+        </div>`).join('');
+      list.querySelectorAll('[data-open]').forEach((el) => el.addEventListener('click', () => openDetail(el.dataset.open)));
+    }
+
+    renderMineOverlay();
+  }
+
+  function renderMineOverlay() {
+    const el = document.getElementById('mineOverlay');
+    if (!authToken) {
+      el.innerHTML = '<div class="signed-out-note">로그인하면 내 동 요약이 여기 뜹니다.<br><a href="https://myagora.xyz/">로그인하러 가기 →</a></div>';
+      return;
+    }
+    const mine = neighborhoods.filter((n) => n.dominant_user_id === currentUserId);
+    const resisting = neighborhoods.filter((n) => (n.my_resistance_points || 0) > 0);
+    el.innerHTML = `
+      <h3>내 동 요약</h3>
+      <div class="mine-row"><span>지배 중인 동</span><span>${mine.length}개</span></div>
+      ${mine.slice(0, 5).map((n) => `<div class="mine-row"><span>${n.region_name} · ${n.name}</span><span>${n.total_points}pt</span></div>`).join('')}
+      ${resisting.length ? `<h3 style="margin-top:12px;">저항 진행 중</h3>` + resisting.slice(0, 3).map((n) => `<div class="mine-row"><span>${n.region_name} · ${n.name}</span><span>${n.my_resistance_points}pt</span></div>`).join('') : ''}
+    `;
+  }
+
+  async function loadSeason() {
+    const s = await apiRequest('/neighborhoods/season/current');
+    document.getElementById('seasonOverlay').innerHTML = `
+      <div>시즌 ${s.season_weeks}주 주기</div>
+      <div class="days">D-${s.days_remaining}</div>
+      <div style="color:var(--gray-3); font-size:11px;">종료 시 전체 npc로 초기화</div>
+    `;
+  }
+
+  const detailModal = document.getElementById('detailModal');
+  const detailContent = document.getElementById('detailContent');
+  function closeDetail() { detailModal.style.display = 'none'; }
+  document.getElementById('detailClose').addEventListener('click', closeDetail);
+  detailModal.addEventListener('click', (e) => { if (e.target === detailModal) closeDetail(); });
+
+  async function openDetail(id) {
+    detailModal.style.display = 'flex';
+    detailContent.innerHTML = '<div>불러오는 중...</div>';
+    try {
+      const n = await apiRequest(`/neighborhoods/${id}`);
+      renderDetail(n);
+    } catch (err) {
+      detailContent.innerHTML = `<div>불러오지 못했습니다: ${err.message}</div>`;
+    }
+  }
+
+  function renderDetail(n) {
+    const statusLabel = { npc: 'NPC', contested: '점령됨', dominant: '점령됨' }[n.status] || n.status;
+    const canInsurrect = n.my_resistance_points != null && n.my_resistance_points >= n.resistance_threshold;
+
+    const adjacentHtml = n.adjacent_neighborhoods.map((adj) => {
+      const iDominateAdj = currentUserId && adj.dominant_user_id === currentUserId;
+      const alreadyMine = currentUserId && n.dominant_user_id === currentUserId;
+      const canAttackFromHere = iDominateAdj && n.status !== 'npc' && !alreadyMine;
+      return `
+        <div class="adj-row">
+          <div><div class="adj-name">${adj.name}</div><div class="adj-status">${adj.status === 'npc' ? 'NPC' : '점령됨'}</div></div>
+          ${canAttackFromHere
+            ? `<button class="act" data-attack-from="${adj.id}">여기서 공격</button>`
+            : `<span class="adj-status">${iDominateAdj && n.status === 'npc' ? '기여로만 해방 가능' : ''}</span>`}
+        </div>`;
+    }).join('') || '<div class="adj-status">등록된 인접 동이 없습니다.</div>';
+
+    detailContent.innerHTML = `
+      <h2>${n.name}</h2>
+      <div class="modal-sub">${n.region_name} 소속</div>
+      <span class="status-pill ${n.status}">${statusLabel}</span>
+      ${n.status === 'npc' ? `<span class="status-pill npc">난이도 ${n.npc_difficulty}</span>` : ''}
+
+      <div class="stat-row"><span>지배자</span><span>${n.dominant_nickname || '없음(NPC)'}</span></div>
+      <div class="stat-row"><span>누적 기여 포인트</span><span>${n.total_points}${n.status === 'npc' ? ` / ${n.npc_difficulty}` : ''}</span></div>
+      ${n.my_resistance_points != null ? `<div class="stat-row"><span>내 저항 포인트</span><span>${n.my_resistance_points} / ${n.resistance_threshold}</span></div>` : ''}
+
+      <div class="section-label">기여 상위</div>
+      ${n.top_contributors.length ? n.top_contributors.map((c) => `<div class="contrib-row"><span>${c.nickname}</span><span>${c.total_points}pt</span></div>`).join('') : '<div class="adj-status">아직 기여 기록이 없습니다.</div>'}
+
+      ${authToken ? `<button class="act act-gold contribute-btn" id="contributeBtn">이 동에 기여하기 (+포인트)</button>` : `<div class="signed-out-note" style="margin-top:14px;"><a href="https://myagora.xyz/">로그인하면 기여/공격에 참여할 수 있어요 →</a></div>`}
+
+      ${canInsurrect ? `<div class="insurrection-box">저항 포인트가 임계치를 넘었습니다 — 인접 조건 없이 즉시 재탈환을 시도할 수 있습니다.<br><button class="act act-gold" id="insurrectBtn" style="margin-top:8px;">반란 공격 (재탈환 시도)</button></div>` : ''}
+
+      <div class="section-label">인접 동</div>
+      ${adjacentHtml}
+
+      <div id="actionResult"></div>
+    `;
+
+    const contributeBtn = document.getElementById('contributeBtn');
+    if (contributeBtn) {
+      contributeBtn.addEventListener('click', async () => {
+        contributeBtn.disabled = true;
+        try {
+          const result = await apiRequest(`/neighborhoods/${n.id}/contribute`, { method: 'POST' });
+          const box = document.getElementById('actionResult');
+          box.innerHTML = `<div class="result-box win">+${result.points_awarded}pt 기여! 누적 ${result.total_points}pt` +
+            (result.liberation ? `<br><b>해방되었습니다!</b> 새 지배자: ${result.liberation.dominant_nickname}` : '') + `</div>`;
+          await loadNeighborhoods();
+          openDetail(n.id);
+        } catch (err) {
+          document.getElementById('actionResult').innerHTML = `<div class="result-box lose">${err.message}</div>`;
+          contributeBtn.disabled = false;
+        }
+      });
+    }
+
+    document.querySelectorAll('[data-attack-from]').forEach((btn) => {
+      btn.addEventListener('click', () => runAttack(n.id, btn.dataset.attackFrom));
+    });
+    const insurrectBtn = document.getElementById('insurrectBtn');
+    if (insurrectBtn) insurrectBtn.addEventListener('click', () => runAttack(n.id, null));
+  }
+
+  async function runAttack(targetId, fromId) {
+    const box = document.getElementById('actionResult');
+    box.innerHTML = '<div>공격 중...</div>';
+    try {
+      const result = await apiRequest(`/neighborhoods/${targetId}/attack`, {
+        method: 'POST',
+        body: JSON.stringify({ from_neighborhood_id: fromId }),
+      });
+      box.innerHTML = `<div class="result-box ${result.attacker_wins ? 'win' : 'lose'}">
+        ${result.attacker_wins ? '승리! 지배자가 교체되었습니다.' : '패배했습니다.'}<br>
+        내 공격력 ${result.attacker_power} vs 방어력 ${result.defense_power}${result.insurrection ? ' (반란 공격)' : ''}
+      </div>`;
+      await loadNeighborhoods();
+      openDetail(targetId);
+    } catch (err) {
+      box.innerHTML = `<div class="result-box lose">${err.message}</div>`;
+    }
+  }
+
+  loadEverything();
+</script>
+
+</body>
+</html>

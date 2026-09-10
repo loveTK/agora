@@ -7,6 +7,8 @@ const { db } = require("../db");
 const VOTE_BRIGADE_THRESHOLD = 3;   // 같은 논증에 같은 IP로 24h 내 3계정 이상 투표
 const FOLLOW_BRIGADE_THRESHOLD = 5; // 같은 대상에 같은 IP로 24h 내 5계정 이상 팔로우
 const JOIN_BRIGADE_THRESHOLD = 5;   // 같은 종교/정당에 같은 IP로 24h 내 5계정 이상 가입
+// V3(동단위 정복): 같은 동에 같은 IP로 24h 내 여러 계정이 기여를 몰아주는 매크로 도배 패턴 탐지.
+const NEIGHBORHOOD_CONTRIBUTION_BRIGADE_THRESHOLD = 5;
 
 // 같은 (type, detail) 조합은 1시간 내 재플래그하지 않는다 — 로그 도배 방지.
 function flagOnce(type, detail) {
@@ -61,11 +63,29 @@ function checkJoinBrigading(table, idColumn, targetId, ip) {
   }
 }
 
+function checkNeighborhoodContributionBrigading(neighborhoodId, ip) {
+  if (!ip) return;
+  const count = db
+    .prepare(
+      `SELECT COUNT(DISTINCT user_id) AS count FROM neighborhood_contributions
+       WHERE neighborhood_id = ? AND ip = ? AND created_at >= datetime('now', '-1 day')`
+    )
+    .get(neighborhoodId, ip).count;
+  if (count >= NEIGHBORHOOD_CONTRIBUTION_BRIGADE_THRESHOLD) {
+    flagOnce(
+      "neighborhood_contribution_brigading",
+      `neighborhood:${neighborhoodId} ip:${ip} — 동일 IP에서 24시간 내 ${count}개 계정이 기여`
+    );
+  }
+}
+
 module.exports = {
   checkVoteBrigading,
   checkFollowBrigading,
   checkJoinBrigading,
+  checkNeighborhoodContributionBrigading,
   VOTE_BRIGADE_THRESHOLD,
   FOLLOW_BRIGADE_THRESHOLD,
   JOIN_BRIGADE_THRESHOLD,
+  NEIGHBORHOOD_CONTRIBUTION_BRIGADE_THRESHOLD,
 };

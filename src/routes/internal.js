@@ -6,6 +6,8 @@ const { distributeItem } = require("../services/itemDistribution");
 const { settleExpiredWars } = require("../services/war");
 const { settleExpiredApprovals } = require("../services/congress");
 const { settleDueBattles } = require("../services/warBattle");
+const { settleSeason } = require("../services/neighborhoodSeason");
+const { seedNeighborhoodsIfEmpty } = require("../seedNeighborhoods");
 const { db } = require("../db");
 
 const router = express.Router();
@@ -121,6 +123,24 @@ router.post("/wars/battles/settle", (req, res) => {
 router.post("/congress-approvals/settle", (req, res) => {
   const results = settleExpiredApprovals();
   res.json({ settled_count: results.length, results });
+});
+
+// POST /internal/neighborhoods/seed
+// V3(동단위 정복) NPC 시딩 — 이미 동 데이터가 있으면 아무것도 하지 않는다(파괴적 재시드 방지).
+// 이 라우터는 index.js에서 app.use("/internal", requireAdmin, internalRoutes)로 이미 관리자
+// 인증이 걸려 있으므로 여기서 별도로 requireAdmin을 또 걸 필요는 없다.
+router.post("/neighborhoods/seed", (req, res) => {
+  const before = db.prepare("SELECT COUNT(*) AS count FROM neighborhoods").get().count;
+  seedNeighborhoodsIfEmpty();
+  const after = db.prepare("SELECT COUNT(*) AS count FROM neighborhoods").get().count;
+  res.json({ already_seeded: before > 0, neighborhood_count: after });
+});
+
+// POST /internal/neighborhoods/season/settle
+// V3 시즌 종료 배치(8주 주기, 수동 또는 cron 호출 전제). 챔피언 아카이브 후 전부 npc로 리셋.
+router.post("/neighborhoods/season/settle", (req, res) => {
+  const result = settleSeason();
+  res.json(result);
 });
 
 module.exports = router;
