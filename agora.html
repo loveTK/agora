@@ -252,6 +252,33 @@
     padding:10px 18px; border:1px solid var(--line); pointer-events:none; white-space:nowrap;
   }
   .map-thread-btn{ position:absolute; top:24px; right:24px; z-index:10; border:none; padding:12px 20px; font-size:13px; cursor:pointer; font-family:'Archivo',sans-serif; }
+  .map-post-btn{
+    position:absolute; top:76px; right:24px; z-index:10; border:1px solid var(--line);
+    background:rgba(17,17,16,0.82); color:#fff; padding:11px 20px; font-size:13px;
+    cursor:pointer; font-family:'Archivo',sans-serif;
+  }
+  .map-post-btn.active{ background:var(--gold); color:var(--on-gold); border-color:var(--gold); }
+  .map-post-hint{
+    position:absolute; left:50%; top:24px; transform:translateX(-50%); z-index:10;
+    background:var(--gold); color:var(--on-gold); font-size:12.5px; padding:9px 18px;
+    pointer-events:none; white-space:nowrap;
+  }
+  /* 지도 자유 게시(맵 핀) — 국가 마커와 헷갈리지 않게 말풍선 모양 + 골드 톤으로 구분 */
+  .map-post-pin{ width:26px; height:28px; display:flex; align-items:center; justify-content:center; }
+  .leaflet-popup.map-post-popup .leaflet-popup-content-wrapper{
+    background:var(--white); color:var(--black); border:1px solid var(--black); border-radius:0;
+  }
+  .leaflet-popup.map-post-popup .leaflet-popup-content{ margin:14px 16px; font-family:'Archivo',sans-serif; }
+  .map-post-form textarea{
+    width:220px; max-width:60vw; height:70px; resize:vertical; font-family:'Archivo',sans-serif;
+    font-size:12.5px; padding:8px; border:1px solid var(--line); box-sizing:border-box;
+  }
+  .map-post-form .mini-btn{ margin-top:8px; }
+  .map-post-detail{ width:230px; max-width:62vw; font-size:12.5px; }
+  .map-post-detail .mp-author{ display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+  .map-post-detail .mp-body{ line-height:1.5; margin-bottom:10px; white-space:pre-wrap; }
+  .map-post-detail .arg-actions{ margin-top:0; }
+  .map-post-detail .reaction-btn.active-vote{ background:var(--gold); color:var(--on-gold); border-color:var(--gold); }
 
   /* V2: 전황 개요 라벨을 지도 위 오버레이로 — 목업의 "지도 위에 정보 얹기" 방향 */
   .map-overlay-eyebrow{ position:absolute; top:24px; left:24px; z-index:10; max-width:60%; }
@@ -664,6 +691,7 @@
           </div>
         </div>
         <button class="cta-gold map-thread-btn" id="mapThreadBtn">+ 논제 등록</button>
+        <button class="map-post-btn" id="mapPostModeBtn">📍 글쓰기 모드</button>
         <div class="map-legend">
           <span><i class="dot dominant"></i>지배 확정</span>
           <span><i class="dot contested"></i>판정 진행중</span>
@@ -1512,6 +1540,144 @@
     } else {
       console.warn('Socket.io를 불러오지 못해 실시간 갱신이 비활성화됩니다.');
     }
+
+    initMapPosts(map);
+  }
+
+  /* ---------------- 지도 자유 게시(맵 핀) ---------------- */
+  // 국가 지배 마커와는 완전히 별개 레이어 — 로그인한 유저가 지도 아무 곳이나 클릭해 짧은 글을
+  // 남기고, 다른 유저는 마커를 클릭해 팝업으로 읽고 추천/비추천/바보 반응을 남긴다.
+  let mapPostModeActive = false;
+  const mapPostMarkersById = {};
+
+  function mapPostPinIcon() {
+    return L.divIcon({
+      html: `<div class="map-post-pin"><svg width="24" height="26" viewBox="0 0 24 26"><path d="M12 1C6 1 2 5 2 10c0 7 10 15 10 15s10-8 10-15c0-5-4-9-10-9z" fill="var(--gold, #C9A227)" stroke="#111110" stroke-width="1.4"/><circle cx="12" cy="10" r="3.2" fill="#111110"/></svg></div>`,
+      className: '', iconSize: [24, 26], iconAnchor: [12, 26],
+    });
+  }
+
+  function mapPostVoteButtonsHtml(post) {
+    const active = (type) => (post.my_vote === type ? ' active-vote' : '');
+    return `
+      <div class="arg-actions">
+        <button class="reaction-btn${active('up')}" data-mp-vote="up">추천 <span class="reaction-count">${Math.round(post.upvotes)}</span></button>
+        <button class="reaction-btn${active('down')}" data-mp-vote="down">비추천 <span class="reaction-count">${Math.round(post.downvotes)}</span></button>
+        <button class="reaction-btn${active('fool')}" data-mp-vote="fool">바보 <span class="reaction-count">${Math.round(post.fool_votes)}</span></button>
+      </div>`;
+  }
+
+  async function renderMapPostPopup(popup, postId) {
+    const container = popup.getElement()?.querySelector('.leaflet-popup-content');
+    if (!container) return;
+    container.innerHTML = '<div class="loading-text">불러오는 중...</div>';
+    try {
+      const post = await apiRequest(`/map-posts/${postId}`);
+      const rankLabel = RANK_LABEL[post.author_rank] || post.author_rank;
+      container.innerHTML = `
+        <div class="map-post-detail">
+          <div class="mp-author">
+            <span class="profile-link" data-open-profile="${post.author_id}">${post.author_nickname}</span>
+            <span class="badge">${rankLabel}</span>
+            ${tickerBadgesHtml(post.author_tickers.join(','))}
+          </div>
+          <div class="mp-body">${post.body}</div>
+          ${authToken && currentUser && currentUser.id !== post.author_id ? mapPostVoteButtonsHtml(post) : ''}
+        </div>`;
+      container.querySelectorAll('[data-mp-vote]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          try {
+            await apiRequest(`/map-posts/${postId}/vote`, {
+              method: 'POST',
+              body: JSON.stringify({ vote_type: btn.dataset.mpVote }),
+            });
+            renderMapPostPopup(popup, postId);
+          } catch (err) { alert(err.message); }
+        });
+      });
+    } catch (err) {
+      container.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
+  }
+
+  function addMapPostMarker(map, post) {
+    const marker = L.marker([post.lat, post.lng], { icon: mapPostPinIcon() })
+      .bindPopup('', { className: 'map-post-popup', maxWidth: 260 })
+      .on('click', () => {
+        const popup = marker.getPopup();
+        marker.openPopup();
+        renderMapPostPopup(popup, post.id);
+      })
+      .addTo(map);
+    mapPostMarkersById[post.id] = marker;
+  }
+
+  async function loadMapPosts(map) {
+    try {
+      const posts = await apiRequest('/map-posts');
+      posts.forEach((p) => addMapPostMarker(map, p));
+    } catch (err) {
+      console.error('지도 게시글을 불러오지 못했습니다:', err);
+    }
+  }
+
+  function openMapPostWriteForm(map, latlng) {
+    const popup = L.popup({ className: 'map-post-popup', maxWidth: 260 })
+      .setLatLng(latlng)
+      .setContent(`
+        <div class="map-post-form">
+          <textarea maxlength="300" placeholder="이 위치에 남길 글을 적어주세요 (300자 이내)"></textarea>
+          <button type="button" class="mini-btn" id="mapPostSubmitBtn">등록</button>
+        </div>`)
+      .openOn(map);
+
+    setTimeout(() => {
+      const el = popup.getElement();
+      if (!el) return;
+      el.querySelector('#mapPostSubmitBtn').addEventListener('click', async () => {
+        const textarea = el.querySelector('textarea');
+        const body = textarea.value.trim();
+        if (!body) return;
+        try {
+          const post = await apiRequest('/map-posts', {
+            method: 'POST',
+            body: JSON.stringify({ lat: latlng.lat, lng: latlng.lng, body }),
+          });
+          map.closePopup(popup);
+          addMapPostMarker(map, post);
+          showToast('지도에 글을 남겼습니다.');
+          setMapPostMode(map, false);
+        } catch (err) { alert(err.message); }
+      });
+    }, 0);
+  }
+
+  function setMapPostMode(map, active) {
+    mapPostModeActive = active;
+    const btn = document.getElementById('mapPostModeBtn');
+    btn.classList.toggle('active', active);
+    btn.textContent = active ? '글쓰기 모드 끄기' : '📍 글쓰기 모드';
+    let hint = document.querySelector('.map-post-hint');
+    if (active && !hint) {
+      hint = document.createElement('div');
+      hint.className = 'map-post-hint';
+      hint.textContent = '지도를 클릭해 글을 남기세요';
+      document.querySelector('.map-wrap').appendChild(hint);
+    } else if (!active && hint) {
+      hint.remove();
+    }
+  }
+
+  function initMapPosts(map) {
+    loadMapPosts(map);
+    document.getElementById('mapPostModeBtn').addEventListener('click', () => {
+      if (!authToken) { alert('로그인 후 이용할 수 있습니다.'); return; }
+      setMapPostMode(map, !mapPostModeActive);
+    });
+    map.on('click', (e) => {
+      if (!mapPostModeActive) return;
+      openMapPostWriteForm(map, e.latlng);
+    });
   }
 
   /* ---------------- 회원가입 / 로그인 / 캐릭터 패널 ---------------- */

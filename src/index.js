@@ -29,6 +29,7 @@ const replyRoutes = require("./routes/replies");
 const activityRoutes = require("./routes/activity");
 const chatRoutes = require("./routes/chat");
 const neighborhoodRoutes = require("./routes/neighborhoods"); // V3(동단위 정복) — 기존 V2 라우트와 완전히 별개
+const mapPostRoutes = require("./routes/mapPosts"); // 지도 자유 게시(맵 핀)
 const { requireAdmin } = require("./middleware/adminAuth");
 
 runMigrations();
@@ -72,6 +73,7 @@ app.use("/replies", replyRoutes);
 app.use("/activity", activityRoutes);
 app.use("/chat", chatRoutes);
 app.use("/neighborhoods", neighborhoodRoutes);
+app.use("/map-posts", mapPostRoutes);
 app.use("/internal", requireAdmin, internalRoutes);
 
 app.use((req, res) => res.status(404).json({ error: "존재하지 않는 경로입니다." }));
