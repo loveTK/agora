@@ -298,6 +298,50 @@
     animation:flashOut 0.85s ease-out forwards;
   }
 
+  /* ---------- 묶음(클러스터) 원 ----------
+     테두리 링이 상태 비율(초록 내 영토 → 빨강 타 세력 → 회색 미개척), 가운데가 영토 수. 상태별 원을
+     따로 그리면 한 자리에 원이 셋 겹치므로 비율을 링 하나에 접었다. 💬는 기록·댓글, 🔥는 24시간 활동. */
+  @keyframes clIn     { from{ opacity:0; transform:scale(0.6) } to{ opacity:1; transform:none } }
+  @keyframes flicker  { from{ transform:scale(0.9) rotate(-7deg) } to{ transform:scale(1.14) rotate(7deg) } }
+  @keyframes emberGlow{
+    0%,100%{ box-shadow:0 2px 8px rgba(0,0,0,0.45), 0 0 0 0 rgba(255,122,0,0.6); }
+    50%    { box-shadow:0 2px 8px rgba(0,0,0,0.45), 0 0 0 10px rgba(255,122,0,0); }
+  }
+  .cl{
+    position:relative; width:var(--s); height:var(--s); padding:4px; border-radius:50%;
+    background:var(--ring); box-shadow:0 2px 8px rgba(0,0,0,0.45); cursor:pointer;
+    animation:clIn 0.35s cubic-bezier(0.2,0.85,0.3,1) both; transition:transform 0.15s ease;
+  }
+  .cl:hover{ transform:scale(1.08); }
+  .cl b{
+    display:flex; align-items:center; justify-content:center; width:100%; height:100%; border-radius:50%;
+    background:var(--black); color:var(--white); font-weight:800; letter-spacing:-0.02em;
+    font-size:clamp(10px, calc(var(--s) * 0.3), 14px);
+  }
+  .cl.has-mine b{ color:#8fdca8; } /* 내 영토가 섞인 묶음은 숫자도 초록으로 */
+  .cl.hot{ animation:clIn 0.35s cubic-bezier(0.2,0.85,0.3,1) both, emberGlow 1.6s ease-in-out infinite; }
+  .cl-talk{
+    position:absolute; top:-7px; right:-10px; background:var(--gold); color:var(--on-gold);
+    font-size:9.5px; font-weight:800; padding:2px 5px; border-radius:9px; white-space:nowrap;
+    box-shadow:0 1px 3px rgba(0,0,0,0.4); line-height:1.2;
+  }
+  .cl-fire{
+    position:absolute; top:-12px; left:-9px; font-size:calc(14px + 6px * var(--heat, 0)); line-height:1;
+    transform-origin:50% 90%; animation:flicker 0.55s ease-in-out infinite alternate;
+    filter:drop-shadow(0 0 4px rgba(255,140,0,0.9));
+  }
+  .cl-name{
+    position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:3px;
+    font-size:9.5px; font-weight:700; color:var(--white); background:rgba(17,17,16,0.85);
+    padding:1px 5px; white-space:nowrap; pointer-events:none;
+  }
+  .z-low .cl-name{ display:none; } /* 세계 전체가 보일 땐 250개 이름표가 서로 덮인다 */
+
+  .search-sub{ display:block; font-size:10.5px; color:var(--gray-3); }
+  .hot-row{ cursor:pointer; }
+  .hot-row:hover span:first-child{ color:var(--gold); }
+  .legend-note{ flex-basis:100%; font-size:10px; color:var(--gray-3); word-break:keep-all; }
+
   @media (max-width:600px){
     .modal-backdrop{ padding:0; align-items:flex-end; }
     .modal-box{ max-height:92vh; width:100%; animation:sheetIn 0.32s cubic-bezier(0.2,0.85,0.3,1) both; }
@@ -342,6 +386,7 @@
   <span><i class="dot taken"></i>타 세력</span>
   <span><i class="dot mine"></i>내 영토</span>
   <span><i class="dot post"></i>기록</span>
+  <span class="legend-note">묶음 테두리 = 비율 · 💬 기록·댓글 · 🔥 24시간 활동</span>
 </div>
 
 <button class="fab" id="writeModeBtn">지도에 기록 남기기</button>
@@ -365,8 +410,7 @@
   // 기여/공격 결과는 알리고 나서 곧바로 목록을 새로고침하고 카드를 다시 그리기 때문에,
   // 결과 메시지를 여기에 잠깐 맡겨뒀다가 다시 그린 카드에 그대로 실어준다(안 그러면 한 프레임 만에 지워진다).
   let pendingResult = '';
-  let territories = [];
-  const territoryById = {};
+  const territoryById = {}; // 화면에 찍힌 개별 구 캐시(전체 목록이 아니다)
   const markersById = {};
   const postMarkersById = {};
   let writeMode = false;
@@ -436,9 +480,21 @@
   }
 
   /* ---------------- 지도 ---------------- */
-  // preferCanvas — 영토 마커가 750개가 넘어서 DOM 마커(divIcon)로는 팬/줌이 눈에 띄게 버벅인다.
+  // 영토가 6천 곳이 넘어 한 번에 다 찍지 않는다. 줌에 따라 국가 묶음 → 광역 묶음 → 개별 구로 펼치고
+  // (직방이 시/도 → 시/군/구 → 동으로 내려가는 행정 계층 클러스터링과 같은 방식), 개별 구는 화면 범위만
+  // 서버에서 받아 캔버스 마커로 찍는다(preferCanvas — DOM 마커는 수백 개부터 팬이 끊긴다).
   const mapAvailable = typeof L !== 'undefined';
   let map = null;
+  const LEVEL_ZOOM = { province: 4.25, leaf: 7 }; // 이 줌 미만이면 국가 묶음, 다음 미만이면 광역 묶음, 그 이상이면 개별 구
+  const NEXT_ZOOM = { region: 5, province: 7.5 };  // 묶음을 누르면 다음 단계가 펼쳐지는 줌으로 날아간다
+  let viewLevel = null;
+  let clusterLayer = null;
+  let leafLayer = null;
+  let postLayer = null;
+  let pulseLayer = null;
+  const clusterMarkers = {};
+  const clusterCache = {};
+  let viewSeq = 0;
 
   // 사람이 사는 위도대 전체. 예전에는 setView([25,15], 2.3)으로 시작했는데, Leaflet 기본 zoomSnap이
   // 1이라 실제로는 줌 2로 반올림돼 세계 지도 폭이 1024px로 고정됐다. 1280px 창에서는 우연히 딱
@@ -453,7 +509,11 @@
     map.fitBounds(WORLD_BOUNDS, { animate: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, subdomains: 'abc' }).addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map); // 확대/축소는 오른쪽 아래
-    map.on('zoomend', syncMarkerRadius);
+    clusterLayer = L.layerGroup().addTo(map);
+    leafLayer = L.layerGroup();
+    postLayer = L.layerGroup();
+    pulseLayer = L.layerGroup();
+    map.on('moveend', scheduleRefresh); // 줌이 끝나도 moveend가 온다
   } else {
     console.warn('Leaflet을 불러오지 못해 지도 대신 목록으로 표시합니다.');
     document.getElementById('map').innerHTML =
@@ -464,50 +524,159 @@
     if (authToken) {
       try { currentUserId = (await apiRequest('/users/me')).id; } catch (err) { /* 토큰 만료 등 — 비로그인처럼 진행 */ }
     }
-    await Promise.all([loadTerritories(), loadSeason(), loadPosts()]);
+    await Promise.all([refreshView(), loadOverview(), loadSeason(), loadPosts()]);
   }
 
-  async function loadTerritories() {
-    territories = await apiRequest('/neighborhoods');
-    territories.forEach((t) => { territoryById[t.id] = t; });
+  let refreshTimer = null;
+  function scheduleRefresh() {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(refreshView, 120);
+  }
+  function invalidateClusters() {
+    for (const k in clusterCache) delete clusterCache[k];
+  }
 
-    if (mapAvailable) {
-      territories.forEach((t) => {
-        if (t.lat == null || t.lng == null) return;
-        const color = STATUS_COLOR[statusOf(t)];
-        if (markersById[t.id]) {
-          markersById[t.id].setStyle({ fillColor: color });
-          return;
-        }
-        const marker = L.circleMarker([t.lat, t.lng], {
-          radius: markerRadius(), fillColor: color, fillOpacity: 0.95, color: '#ffffff', weight: 1.4,
-        }).addTo(map);
-        marker.on('click', (e) => {
-          if (writeMode) return; // 기록 모드에서는 지도 클릭이 우선
-          L.DomEvent.stopPropagation(e);
-          openTerritory(t.id);
-        });
-        markersById[t.id] = marker;
-      });
-    } else {
-      const list = document.getElementById('mapFallbackList');
-      list.innerHTML = territories.slice(0, 200).map((t) => `
-        <div data-open="${esc(t.id)}" style="padding:12px 14px; border:1px solid rgba(255,255,255,0.15); margin-bottom:8px; cursor:pointer;">
-          <b>${esc(t.name)}</b> — ${t.status === 'npc' ? '미개척' : esc(t.dominant_nickname || '점령됨')} · ${t.total_points}pt
-        </div>`).join('');
-      list.querySelectorAll('[data-open]').forEach((el) => el.addEventListener('click', () => openTerritory(el.dataset.open)));
+  const levelForZoom = (z) => (z < LEVEL_ZOOM.province ? 'region' : z < LEVEL_ZOOM.leaf ? 'province' : 'leaf');
+  const wrapLng = (lng) => ((((lng + 180) % 360) + 360) % 360) - 180;
+
+  // 화면보다 30% 넓게 잡아 살짝 움직일 때마다 가장자리가 비었다 채워지는 깜빡임을 없앤다.
+  // worldCopyJump 때문에 경계가 ±180을 넘을 수 있어 서버 규격(-180~180, 날짜변경선은 w>e)으로 감싼다.
+  function bboxParam() {
+    const b = map.getBounds().pad(0.3);
+    let w = b.getWest();
+    let e = b.getEast();
+    if (e - w >= 360) { w = -180; e = 180; } else { w = wrapLng(w); e = wrapLng(e); }
+    return [b.getSouth(), w, b.getNorth(), e].map((v) => Number(v).toFixed(2)).join(',');
+  }
+
+  async function refreshView() {
+    if (!mapAvailable) return renderFallbackList();
+    const z = map.getZoom();
+    const level = levelForZoom(z);
+    map.getContainer().classList.toggle('z-low', z < 2); // 세계 전체가 보일 땐 묶음 이름표를 접는다
+    if (level !== viewLevel) {
+      // 단계가 바뀌면 이전 단계 마커를 전부 걷어낸다 — 국가 묶음과 광역 묶음이 겹쳐 보이면 안 된다.
+      clusterLayer.clearLayers();
+      for (const id in clusterMarkers) delete clusterMarkers[id];
+      const leaf = level === 'leaf';
+      [leafLayer, postLayer, pulseLayer].forEach((l) => (leaf ? l.addTo(map) : map.removeLayer(l)));
+      if (leaf) map.removeLayer(clusterLayer); else clusterLayer.addTo(map);
+      viewLevel = level;
     }
-
-    syncMarkerRadius();
-    syncPulse();
-    renderMineOverlay();
+    const seq = ++viewSeq;
+    if (level === 'leaf') await renderLeaves(seq);
+    else await renderClusters(level, seq);
   }
 
-  // 세계 전체가 보이는 줌에서 5px 점 780개는 서로 뭉개진다. 줌 구간이 바뀔 때만 한 번 훑어
-  // 크기를 맞춘다(캔버스 렌더러는 이 호출들을 프레임당 한 번의 다시 그리기로 묶는다).
+  // 100 미만은 그대로, 그 위는 직방처럼 "300+", 천 단위부터는 "1.2k".
+  function fmtCount(n) {
+    if (n < 100) return String(n);
+    if (n < 1000) return `${Math.floor(n / 100) * 100}+`;
+    return `${(n / 1000).toFixed(n < 10000 ? 1 : 0).replace(/\.0$/, '')}k`;
+  }
+
+  // 묶음 원: 테두리 링이 상태 비율(초록 내 영토 → 빨강 타 세력 → 회색 미개척)이고 가운데가 영토 수다.
+  // 상태별로 원을 따로 그리면 한 자리에 원이 세 개 겹치므로, 비율을 링 하나에 접었다.
+  function clusterIcon(c, delayIndex) {
+    const size = Math.round(Math.max(34, Math.min(62, 28 + 14 * Math.log10(Math.max(1, c.total)))));
+    const minePct = c.total ? (c.mine / c.total) * 100 : 0;
+    const takenEnd = c.total ? minePct + (c.taken / c.total) * 100 : 0;
+    const ring = `conic-gradient(var(--mine) 0 ${minePct}%, var(--taken) ${minePct}% ${takenEnd}%, var(--npc) ${takenEnd}% 100%)`;
+    const talk = c.posts + c.comments;
+    const delay = Math.min(600, (delayIndex || 0) * 4);
+    return L.divIcon({
+      className: '',
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+      html: `<div class="cl${c.hot ? ' hot' : ''}${c.mine ? ' has-mine' : ''}" style="--s:${size}px; --ring:${ring}; animation-delay:${delay}ms">
+        <b>${fmtCount(c.total)}</b>
+        ${talk ? `<span class="cl-talk">💬 ${fmtCount(talk)}</span>` : ''}
+        ${c.hot ? `<span class="cl-fire" style="--heat:${Math.min(1, c.heat / 40).toFixed(2)}">🔥</span>` : ''}
+        <span class="cl-name">${esc(c.name)}</span>
+      </div>`,
+    });
+  }
+
+  async function renderClusters(level, seq) {
+    const bbox = level === 'province' ? bboxParam() : '';
+    const key = level === 'region' ? 'region' : `province:${bbox}`;
+    let rows;
+    const cached = clusterCache[key];
+    if (cached && Date.now() - cached.at < 15000) rows = cached.rows;
+    else {
+      rows = await apiRequest(`/neighborhoods/clusters?level=${level}${bbox ? `&bbox=${bbox}` : ''}`);
+      clusterCache[key] = { at: Date.now(), rows };
+    }
+    if (seq !== viewSeq || viewLevel !== level) return; // 그 사이 더 움직였으면 이 응답은 버린다
+
+    const keep = new Set();
+    rows.forEach((c, i) => {
+      keep.add(c.id);
+      const sig = `${c.total}|${c.npc}|${c.taken}|${c.mine}|${c.posts + c.comments}|${c.hot ? 1 : 0}`;
+      let m = clusterMarkers[c.id];
+      if (m && m._sig === sig) return;
+      if (!m) {
+        m = L.marker([c.lat, c.lng], { icon: clusterIcon(c, i), zIndexOffset: c.hot ? 400 : 0 });
+        m.on('click', (e) => {
+          if (writeMode) return;
+          L.DomEvent.stopPropagation(e);
+          map.flyTo([c.lat, c.lng], NEXT_ZOOM[level], { duration: reduceMotion ? 0 : 0.9 });
+        });
+        clusterLayer.addLayer(m);
+        clusterMarkers[c.id] = m;
+      } else {
+        m.setIcon(clusterIcon(c, 0));
+      }
+      m._sig = sig;
+    });
+    for (const id in clusterMarkers) {
+      if (!keep.has(id)) { clusterLayer.removeLayer(clusterMarkers[id]); delete clusterMarkers[id]; }
+    }
+  }
+
+  async function renderLeaves(seq) {
+    const rows = await apiRequest(`/neighborhoods?bbox=${bboxParam()}`);
+    if (seq !== viewSeq || viewLevel !== 'leaf') return;
+
+    const keep = new Set();
+    rows.forEach((t) => {
+      if (t.lat == null || t.lng == null) return;
+      keep.add(t.id);
+      territoryById[t.id] = t;
+      const color = STATUS_COLOR[statusOf(t)];
+      if (markersById[t.id]) { markersById[t.id].setStyle({ fillColor: color }); return; }
+      const marker = L.circleMarker([t.lat, t.lng], {
+        radius: markerRadius(), fillColor: color, fillOpacity: 0.95, color: '#ffffff', weight: 1.4,
+      });
+      marker.on('click', (e) => {
+        if (writeMode) return; // 기록 모드에서는 지도 클릭이 우선
+        L.DomEvent.stopPropagation(e);
+        openTerritory(t.id);
+      });
+      leafLayer.addLayer(marker);
+      markersById[t.id] = marker;
+    });
+    // 화면 밖으로 나간 마커는 지운다 — 세계를 한 바퀴 돌면 캔버스에 수천 개가 쌓인다.
+    for (const id in markersById) {
+      if (!keep.has(id)) { leafLayer.removeLayer(markersById[id]); delete markersById[id]; }
+    }
+    syncMarkerRadius();
+    syncPulse(rows);
+  }
+
+  async function renderFallbackList() {
+    const regions = await apiRequest('/neighborhoods/clusters?level=region');
+    document.getElementById('mapFallbackList').innerHTML = regions.map((c) => `
+      <div style="padding:12px 14px; border:1px solid rgba(255,255,255,0.15); margin-bottom:8px;">
+        <b>${esc(c.name)}</b> — 영토 ${c.total} · 미개척 ${c.npc} · 타 세력 ${c.taken}${c.hot ? ' · 🔥' : ''}
+      </div>`).join('');
+  }
+
+  // 개별 구 단계(줌 7 이상)에서만 캔버스 점을 찍는다. 줌 구간이 바뀔 때만 한 번 훑어 크기를
+  // 맞춘다(캔버스 렌더러는 이 호출들을 프레임당 한 번의 다시 그리기로 묶는다).
   function markerRadius() {
-    const z = map ? map.getZoom() : 2;
-    return z < 2 ? 3 : z < 3.5 ? 4 : z < 6 ? 5 : 6.5;
+    const z = map ? map.getZoom() : 8;
+    return z < 8 ? 4.5 : z < 10 ? 6 : 7.5;
   }
   let radiusNow = null;
   function syncMarkerRadius() {
@@ -518,27 +687,40 @@
     Object.values(markersById).forEach((m) => m.setRadius(r));
   }
 
-  // 내 영토에만 확산 링을 얹는다 — 전 영토에 걸면 DOM 마커가 780개로 늘어 팬이 그대로 끊긴다.
+  // 화면 안의 내 영토에만 확산 링을 얹는다 — 전 영토에 걸면 DOM 마커가 수백 개로 늘어 팬이 끊긴다.
   const MAX_PULSE = 40;
-  let pulseMarkers = [];
-  function syncPulse() {
+  function syncPulse(rows) {
     if (!mapAvailable) return;
-    pulseMarkers.forEach((m) => map.removeLayer(m));
-    pulseMarkers = territories
+    pulseLayer.clearLayers();
+    rows
       .filter((t) => currentUserId && t.dominant_user_id === currentUserId && t.lat != null)
       .slice(0, MAX_PULSE)
-      .map((t) => L.marker([t.lat, t.lng], {
+      .forEach((t) => pulseLayer.addLayer(L.marker([t.lat, t.lng], {
         icon: L.divIcon({ html: '<i class="territory-pulse"></i>', className: '', iconSize: [0, 0], iconAnchor: [0, 0] }),
         interactive: false, keyboard: false, zIndexOffset: -100,
-      }).addTo(map));
+      })));
+  }
+
+  // 전황 카드 — 세계 합계는 국가 묶음 집계에서, 내 영토/저항 목록은 필터 조회로 받는다
+  // (전체 6천 곳을 내려받지 않는다).
+  async function loadOverview() {
+    const [regions, mine, resisting] = await Promise.all([
+      apiRequest('/neighborhoods/clusters?level=region'),
+      authToken ? apiRequest('/neighborhoods?mine=1') : [],
+      authToken ? apiRequest('/neighborhoods?resisting=1') : [],
+    ]);
+    clusterCache.region = { at: Date.now(), rows: regions };
+    renderMineOverlay(regions, mine, resisting);
   }
 
   let mineOverlayCounted = false;
-  function renderMineOverlay() {
+  function renderMineOverlay(regions, mine, resisting) {
     const el = document.getElementById('mineOverlay');
-    const npc = territories.filter((t) => t.status === 'npc').length;
-    const mine = territories.filter((t) => currentUserId && t.dominant_user_id === currentUserId);
-    const taken = territories.length - npc - mine.length;
+    const sum = (k) => regions.reduce((a, r) => a + r[k], 0);
+    const total = sum('total');
+    const npc = sum('npc');
+    const taken = sum('taken');
+    const hot = regions.filter((r) => r.hot).sort((a, b) => b.heat - a.heat).slice(0, 3);
 
     // data-count가 붙은 숫자는 첫 렌더에서만 0부터 차오른다. 기여할 때마다 전황 숫자가 전부
     // 다시 튀면 정작 방금 바뀐 값이 묻히므로, 재렌더에서는 그냥 최종값으로 둔다.
@@ -546,24 +728,32 @@
     const worldRows = `
       <div class="mine-row"><span>미개척</span>${num(npc)}</div>
       <div class="mine-row"><span>타 세력</span>${num(taken)}</div>`;
+    const hotRows = hot.length
+      ? `<h3 style="margin-top:11px;">🔥 지금 뜨거운 곳</h3>` + hot.map((r) =>
+          `<div class="mine-row hot-row" data-fly="${r.lat},${r.lng}"><span>${esc(r.name)}</span><span>${r.heat}</span></div>`).join('')
+      : '';
 
     if (!authToken) {
       el.innerHTML = `<h3>세계 전황</h3>${worldRows}
-        <div class="mine-row"><span>전체 영토</span>${num(territories.length)}</div>
+        <div class="mine-row"><span>전체 영토</span>${num(total)}</div>${hotRows}
         <div style="margin-top:9px; font-size:11.5px; color:var(--gray-2);">
           <a href="/v2.html" style="color:var(--gold); font-weight:700;">로그인하고 참전 →</a>
         </div>`;
     } else {
-      const resisting = territories.filter((t) => (t.my_resistance_points || 0) > 0);
       el.innerHTML = `
         <h3>세계 전황</h3>${worldRows}
         <div class="mine-row"><span>내 영토</span>${num(mine.length)}</div>
-        ${mine.slice(0, 5).map((t) => `<div class="mine-row"><span>${esc(t.name)}</span><span>${t.total_points}pt</span></div>`).join('')}
+        ${mine.slice(0, 5).map((t) => `<div class="mine-row hot-row" data-fly="${t.lat},${t.lng}" data-leaf="1"><span>${esc(t.name)}</span><span>${t.total_points}pt</span></div>`).join('')}
         ${resisting.length ? `<h3 style="margin-top:11px;">저항 중</h3>` +
           resisting.slice(0, 3).map((t) => `<div class="mine-row"><span>${esc(t.name)}</span><span>${t.my_resistance_points}pt</span></div>`).join('') : ''}
+        ${hotRows}
       `;
     }
 
+    el.querySelectorAll('[data-fly]').forEach((row) => row.addEventListener('click', () => {
+      const [lat, lng] = row.dataset.fly.split(',').map(Number);
+      if (map) map.flyTo([lat, lng], row.dataset.leaf ? 9 : NEXT_ZOOM.region, { duration: reduceMotion ? 0 : 1 });
+    }));
     if (!mineOverlayCounted) { animateCounts(el); mineOverlayCounted = true; }
   }
 
@@ -590,23 +780,30 @@
     document.getElementById('searchOverlay').style.top = `${season.offsetTop + season.offsetHeight + 8}px`;
   }
 
+  // 영토 6천 곳을 클라이언트에 들고 있지 않으므로 검색은 서버가 한다(이름·광역·국가 부분 일치).
+  let searchTimer = null;
+  let searchSeq = 0;
   searchInput.addEventListener('input', () => {
-    const q = searchInput.value.trim().toLowerCase();
+    const q = searchInput.value.trim();
+    clearTimeout(searchTimer);
     if (!q) { searchResults.innerHTML = ''; return; }
-    const hits = territories
-      .filter((t) => t.name.toLowerCase().includes(q) || (t.region_name || '').toLowerCase().includes(q))
-      .slice(0, 20);
-    searchResults.innerHTML = hits.length
-      ? hits.map((t, i) => `<div data-go="${esc(t.id)}" style="animation-delay:${(i * 0.022).toFixed(3)}s">${esc(t.name)}</div>`).join('')
-      : '<div style="color:var(--gray-2); cursor:default;">결과 없음</div>';
-    searchResults.querySelectorAll('[data-go]').forEach((el) => el.addEventListener('click', () => {
-      const t = territoryById[el.dataset.go];
-      // 순간이동 대신 날아가서 내려앉는다 — 세계 지도에서 어디로 이동했는지 눈으로 따라갈 수 있다.
-      if (map && t && t.lat != null) map.flyTo([t.lat, t.lng], 6, { duration: reduceMotion ? 0 : 1.2 });
-      searchInput.value = '';
-      searchResults.innerHTML = '';
-      openTerritory(t.id);
-    }));
+    searchTimer = setTimeout(async () => {
+      const seq = ++searchSeq;
+      const hits = await apiRequest(`/neighborhoods/search?q=${encodeURIComponent(q)}`).catch(() => []);
+      if (seq !== searchSeq) return; // 더 타이핑했으면 이 응답은 버린다
+      searchResults.innerHTML = hits.length
+        ? hits.map((t, i) => `<div data-go="${esc(t.id)}" data-ll="${t.lat},${t.lng}" style="animation-delay:${(i * 0.022).toFixed(3)}s">
+            ${esc(t.name)}<span class="search-sub">${esc(t.region_name)}</span></div>`).join('')
+        : '<div style="color:var(--gray-2); cursor:default;">결과 없음</div>';
+      searchResults.querySelectorAll('[data-go]').forEach((el) => el.addEventListener('click', () => {
+        const [lat, lng] = el.dataset.ll.split(',').map(Number);
+        // 순간이동 대신 날아가서 내려앉는다 — 세계 지도에서 어디로 이동했는지 눈으로 따라갈 수 있다.
+        if (map && !Number.isNaN(lat)) map.flyTo([lat, lng], 9, { duration: reduceMotion ? 0 : 1.2 });
+        searchInput.value = '';
+        searchResults.innerHTML = '';
+        openTerritory(el.dataset.go);
+      }));
+    }, 180);
   });
 
   /* ---------------- 모달 ---------------- */
@@ -673,8 +870,7 @@
     // 내가 지배 중인 인접 영토 중 누적 정복력이 가장 높은 곳에서 출발한다(공격력 = 그 영토의 최근 기여).
     const owned = t.adjacent_neighborhoods
       .filter((a) => currentUserId && a.dominant_user_id === currentUserId)
-      .map((a) => ({ ...a, points: (territoryById[a.id] || {}).total_points || 0 }))
-      .sort((a, b) => b.points - a.points);
+      .sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
     if (owned.length) {
       return { kind: 'attack', from: owned[0].id, label: '점령하기', note: `${owned[0].name}에서 출병합니다` };
     }
@@ -771,7 +967,7 @@
       pendingResult = `<div class="result-box win">+${r.points_awarded}pt 기여 — 누적 ${r.total_points}pt` +
         (r.liberation ? `<br><b>해방됐다.</b> 새 지배자: ${esc(r.liberation.dominant_nickname)}` : '') + '</div>';
       if (r.liberation) flashScreen();
-      await loadTerritories();
+      await afterConquestChange();
       await openTerritory(id);
     } catch (err) {
       document.getElementById('actionResult').innerHTML = `<div class="result-box lose">${esc(err.message)}</div>`;
@@ -792,11 +988,17 @@
         공격력 ${r.attacker_power} vs 방어력 ${r.defense_power}${r.insurrection ? ' (반란)' : ''}
       </div>`;
       if (r.attacker_wins) flashScreen();
-      await loadTerritories();
+      await afterConquestChange();
       await openTerritory(targetId);
     } catch (err) {
       box.innerHTML = `<div class="result-box lose">${esc(err.message)}</div>`;
     }
+  }
+
+  // 기여/공격 뒤에는 묶음 집계와 현재 화면, 전황 카드를 전부 새로 받는다.
+  async function afterConquestChange() {
+    invalidateClusters();
+    await Promise.all([refreshView(), loadOverview()]);
   }
 
   /* ---------------- 지도 기록(맵 핀) ---------------- */
@@ -809,9 +1011,11 @@
     });
   }
 
+  // 핀은 개별 구 단계에서만 보이는 postLayer에 넣는다. 묶음 단계에서는 💬 배지가 그 몫을 한다.
   function addPostMarker(post) {
     if (!mapAvailable || postMarkersById[post.id]) return;
-    const marker = L.marker([post.lat, post.lng], { icon: postPinIcon(), zIndexOffset: 500 }).addTo(map);
+    const marker = L.marker([post.lat, post.lng], { icon: postPinIcon(), zIndexOffset: 500 });
+    postLayer.addLayer(marker);
     marker.on('click', (e) => {
       if (writeMode) return;
       L.DomEvent.stopPropagation(e);
@@ -1000,6 +1204,7 @@
           body: JSON.stringify({ lat: latlng.lat, lng: latlng.lng, body }),
         });
         addPostMarker(post);
+        invalidateClusters(); // 묶음의 💬 수가 바로 늘어나야 한다
         setWriteMode(false);
         openPost(post.id);
       } catch (err) {

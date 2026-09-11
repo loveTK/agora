@@ -1,56 +1,55 @@
 # Graph Report - agora  (2026-09-11)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 106 files · ~86,676 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 680 nodes · 1083 edges · 55 communities (40 shown, 13 thin omitted)
-- Extraction: 83% EXTRACTED · 16% INFERRED · 0% AMBIGUOUS · INFERRED: 175 edges (avg confidence: 0.87)
+- 725 nodes · 1154 edges · 53 communities (38 shown, 13 thin omitted)
+- Extraction: 84% EXTRACTED · 16% INFERRED · 0% AMBIGUOUS · INFERRED: 180 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0cd61216`
+- Built from commit: `024095fa`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- Homepage Map & UI
-- Replies/XP Backend
+- initMap
+- votes.js
 - Mobile App Frontend
-- Threads Route Backend
-- Users Route Backend
-- Express App Bootstrap
-- Party/Religion Backend
+- threads.js
+- seedProvinces.js
+- index.js
+- parties.js
 - Docs: Sprint Feature Log
 - NPM Dependencies
-- V3 Neighborhood Conquest
-- Wars/Battles Backend
-- Auth Backend
+- neighborhoods.js
+- wars.js
+- users.js
 - Mobile App Config
-- Congress Approval Backend
-- Activity/Follower Conquest
-- Map-Post Pins Backend
-- Internal Admin Batch Jobs
+- reactionPath
+- Backend route: /users/*
+- mapPosts.js
+- db.js
 - DB Seeding
-- DB Core & Military Power
-- Judgment/Execution Settlement
+- openThreadModal
+- Map Free-Post Pin System
 - Google Auth & Admin UI
 - Auth Middleware & Items
 - Messages & Content Filter
 - War/Congress Frontend UI
 - Hall of Fame & Hot Agenda
 - Chat Backend
-- Regions Route Backend
+- Q: Is V3 (neighborhood conquest) meant to replace the region-level war/dominance system, or run alongside it permanently?
 - Reports Moderation Backend
 - Real-time Chat Frontend
 - Admin Auth Middleware
-- Neighborhood Seeding
+- openUserProfileModal
 - Mobile TS Config
-- Dominance Settlement
 - Direct Messaging Frontend
 - Lightsail Deploy Pipeline
 - Mobile App Docs
-- Tyrant Status Logic
 - Faction System Frontend
 - Admin/Moderation Docs
 - Abuse Detection Docs
@@ -69,14 +68,14 @@
 - Region-Move Reset Policy
 
 ## God Nodes (most connected - your core abstractions)
-1. `db` - 51 edges
+1. `db` - 54 edges
 2. `express` - 23 edges
 3. `requireAuth()` - 16 edges
 4. `grantXp()` - 11 edges
 5. `expo` - 10 edges
-6. `levelProgress()` - 9 edges
-7. `getVoteWeight()` - 9 edges
-8. `belligerenceTier()` - 9 edges
+6. `belligerenceTier()` - 9 edges
+7. `levelProgress()` - 9 edges
+8. `getVoteWeight()` - 9 edges
 9. `initMap()` - 9 edges
 10. `toggleLaugh()` - 8 edges
 
@@ -103,35 +102,35 @@
 - **Region Detail → Dominance Check → Conquer Action** — agora_openregionmodal, agora_renderregionpage, agora_route_regions, agora_conquest_system [INFERRED 0.85]
 - **Thread → Argument → Reaction/Reply Debate Flow** — agora_openthreadmodal, agora_attachreactionhandlers, agora_renderreplylist, agora_route_threads, agora_route_arguments [INFERRED 0.85]
 
-## Communities (55 total, 13 thin omitted)
+## Communities (53 total, 13 thin omitted)
 
-### Community 0 - "Homepage Map & UI"
-Cohesion: 0.06
-Nodes (46): addMapPostMarker(), apiRequest(), attachReactionHandlers(), centerMapOnUser(), Region Dominance / Conquest System, handleXpGain(), initMap(), initMapPosts() (+38 more)
+### Community 0 - "initMap"
+Cohesion: 0.26
+Nodes (10): centerMapOnUser(), Region Dominance / Conquest System, initMap(), Leaflet.js Map Library (external), Leaflet World Region Map, markerIcon(), openRegionModal(), renderRegionPage() (+2 more)
 
-### Community 1 - "Replies/XP Backend"
-Cohesion: 0.07
-Nodes (37): express, { requireAuth }, router, { toggleLaugh }, { toggleReplyVote }, { db }, grantTitleForLevel(), grantXp() (+29 more)
+### Community 1 - "votes.js"
+Cohesion: 0.05
+Nodes (45): express, { requireAuth }, router, { toggleLaugh }, { toggleReplyVote }, { applyInfluenceDelta }, { checkVoteBrigading }, { containsBannedWord } (+37 more)
 
 ### Community 2 - "Mobile App Frontend"
 Cohesion: 0.05
 Nodes (38): apiRequest(), App(), handleSubmit(), HotIssue, RANK_LABEL, Region, storage, styles (+30 more)
 
-### Community 3 - "Threads Route Backend"
-Cohesion: 0.06
-Nodes (36): { checkAndGrantSphinxTicker }, { containsBannedWord }, { db }, express, { getTally, settleThread, QUORUM, COLLAPSE_THRESHOLD }, { grantWeaponIfEligible }, { grantXp, XP_THREAD_CREATE, XP_ARGUMENT_CREATE }, { randomUUID } (+28 more)
+### Community 3 - "threads.js"
+Cohesion: 0.05
+Nodes (42): { checkAndGrantSphinxTicker }, { containsBannedWord }, { db }, express, { getTally, settleThread, QUORUM, COLLAPSE_THRESHOLD }, { grantWeaponIfEligible }, { grantXp, XP_THREAD_CREATE, XP_ARGUMENT_CREATE }, { randomUUID } (+34 more)
 
-### Community 4 - "Users Route Backend"
-Cohesion: 0.06
-Nodes (35): { belligerenceTier }, { checkFollowBrigading }, { db }, express, followerCount(), { getUserProfileSummary }, { INFLUENCE_THRESHOLD }, { levelProgress } (+27 more)
+### Community 4 - "seedProvinces.js"
+Cohesion: 0.09
+Nodes (29): clampLat(), COUNTRIES, { db }, { randomUUID }, seedCountriesIfMissing(), TERRITORIES, wrapLng(), backfillPostProvinces() (+21 more)
 
-### Community 5 - "Express App Bootstrap"
-Cohesion: 0.06
-Nodes (34): activityRoutes, adminRoutes, app, authRoutes, chatRoutes, congressRoutes, cors, express (+26 more)
+### Community 5 - "index.js"
+Cohesion: 0.05
+Nodes (36): activityRoutes, adminRoutes, app, authRoutes, chatRoutes, congressRoutes, cors, express (+28 more)
 
-### Community 6 - "Party/Religion Backend"
-Cohesion: 0.08
-Nodes (29): { checkJoinBrigading }, { db }, express, { grantExistingPaidItemsOnJoin }, joinParty(), { PARTY_CREATE_FOLLOWER_THRESHOLD }, { randomUUID }, { requireAuth } (+21 more)
+### Community 6 - "parties.js"
+Cohesion: 0.09
+Nodes (26): { checkJoinBrigading }, { db }, express, { grantExistingPaidItemsOnJoin }, joinParty(), { PARTY_CREATE_FOLLOWER_THRESHOLD }, { randomUUID }, { requireAuth } (+18 more)
 
 ### Community 7 - "Docs: Sprint Feature Log"
 Cohesion: 0.10
@@ -141,61 +140,61 @@ Nodes (28): AGORA Korean About Page, Thread Archive Placeholder Page, AGORA Engl
 Cohesion: 0.07
 Nodes (27): author, dependencies, bcryptjs, better-sqlite3, cors, dotenv, express, google-auth-library (+19 more)
 
-### Community 9 - "V3 Neighborhood Conquest"
-Cohesion: 0.13
-Nodes (23): { db }, express, { getSeasonProgress }, {
+### Community 9 - "neighborhoods.js"
+Cohesion: 0.11
+Nodes (26): baseProvinceRows(), clusterCache, countBy(), { db }, express, { getSeasonProgress }, {
   getTotalPoints,
   getTopContributors,
   getResistancePoints,
   recordContribution,
   attemptAttack,
   RESISTANCE_THRESHOLD,
-}, { requireAuth, optionalAuth }, router, attemptAttack(), checkLiberation() (+15 more)
+}, { requireAuth, optionalAuth } (+18 more)
 
-### Community 10 - "Wars/Battles Backend"
-Cohesion: 0.13
-Nodes (19): { createBattle, getBattleTally, isWarParticipant, resolveBattle }, { db }, express, { getWarTally, resolveWarIfReady, VOTE_QUORUM, APPROVAL_RATIO }, { grantXp, XP_WAR_PARTICIPATION }, { randomUUID }, { requestWarDeclaration }, { requireAuth } (+11 more)
+### Community 10 - "wars.js"
+Cohesion: 0.05
+Nodes (49): { db }, express, {
+  getApprovalTally,
+  resolveApprovalIfReady,
+  CONGRESS_POWER_THRESHOLD,
+  APPROVAL_RATIO,
+}, { randomUUID }, { requireAuth }, router, { attemptFollowerConquest }, { db } (+41 more)
 
-### Community 11 - "Auth Backend"
-Cohesion: 0.12
-Nodes (17): bcrypt, { belligerenceTier }, { db }, express, jwt, { JWT_SECRET }, { levelProgress }, { OAuth2Client } (+9 more)
+### Community 11 - "users.js"
+Cohesion: 0.05
+Nodes (50): { db }, express, { getUserProfileSummary }, router, bcrypt, { belligerenceTier }, { db }, express (+42 more)
 
 ### Community 12 - "Mobile App Config"
 Cohesion: 0.11
 Nodes (18): backgroundColor, backgroundImage, foregroundImage, monochromeImage, adaptiveIcon, predictiveBackGestureEnabled, expo, android (+10 more)
 
-### Community 13 - "Congress Approval Backend"
-Cohesion: 0.18
-Nodes (16): { db }, express, {
-  getApprovalTally,
-  resolveApprovalIfReady,
-  CONGRESS_POWER_THRESHOLD,
-  APPROVAL_RATIO,
-}, { randomUUID }, { requireAuth }, router, { db }, { declareWar } (+8 more)
+### Community 13 - "reactionPath"
+Cohesion: 0.33
+Nodes (8): apiRequest(), attachReactionHandlers(), handleXpGain(), 추천/비추천/바보 Reaction System, reactionPath(), Backend route: /replies/*, updateXpBar(), XP / Level Progression System
 
-### Community 14 - "Activity/Follower Conquest"
-Cohesion: 0.16
-Nodes (13): { db }, express, { getUserProfileSummary }, router, attemptFollowerConquest(), { db }, { followerCount }, { randomUUID } (+5 more)
+### Community 14 - "Backend route: /users/*"
+Cohesion: 0.25
+Nodes (8): Shop / Inventory / Equipment System, renderInventoryView(), renderLoggedIn(), renderShop(), renderTopDebater(), Backend route: /activity/*, Backend route: /items/*, Backend route: /users/*
 
-### Community 15 - "Map-Post Pins Backend"
-Cohesion: 0.13
-Nodes (13): { checkAndGrantFoolTicker }, { containsBannedWord }, { db }, express, { getVoteWeight }, { randomUUID }, { refreshTyrantStatus }, { requireAuth, optionalAuth } (+5 more)
+### Community 15 - "mapPosts.js"
+Cohesion: 0.12
+Nodes (15): { checkAndGrantFoolTicker }, { containsBannedWord }, { db }, express, { getVoteWeight }, { levelForXp }, { nearestProvinceId }, { randomUUID } (+7 more)
 
-### Community 16 - "Internal Admin Batch Jobs"
-Cohesion: 0.15
-Nodes (12): { db }, { distributeItem }, express, { refreshTyrantStatus }, router, { seedNeighborhoodsIfEmpty }, { settleAllActiveThreads }, { settleDominance } (+4 more)
+### Community 16 - "db.js"
+Cohesion: 0.06
+Nodes (40): Database, db, fs, path, { db }, { distributeItem }, express, { refreshTyrantStatus } (+32 more)
 
 ### Community 17 - "DB Seeding"
 Cohesion: 0.20
 Nodes (11): bcryptjs, runMigrations(), BANNED_WORDS, bcrypt, { db, runMigrations }, OFFICIAL_QUESTIONS, { randomUUID, randomBytes }, REGIONS (+3 more)
 
-### Community 18 - "DB Core & Military Power"
-Cohesion: 0.20
-Nodes (9): Database, fs, path, { db }, regionMilitaryPower(), { db }, { randomUUID }, { regionMilitaryPower } (+1 more)
+### Community 18 - "openThreadModal"
+Cohesion: 0.31
+Nodes (9): openThreadModal(), renderHotIssues(), renderReplyList(), renderThreadForm(), Backend route: /arguments/*, Backend route: /hot-agenda, Backend route: /threads/*, Thread / Argument Debate System (+1 more)
 
-### Community 19 - "Judgment/Execution Settlement"
-Cohesion: 0.24
-Nodes (10): db, { db }, executeIfRuler(), { randomUUID }, { db }, { executeIfRuler }, getTally(), { randomUUID } (+2 more)
+### Community 19 - "Map Free-Post Pin System"
+Cohesion: 0.46
+Nodes (7): addMapPostMarker(), initMapPosts(), loadMapPosts(), Map Free-Post Pin System, openMapPostWriteForm(), renderMapPostPopup(), Backend route: /map-posts/*
 
 ### Community 20 - "Google Auth & Admin UI"
 Cohesion: 0.22
@@ -221,9 +220,9 @@ Nodes (7): express, { db }, express, router, { db }, express, router
 Cohesion: 0.22
 Nodes (7): { containsBannedWord }, { db }, express, lastSentAt, { randomUUID }, { requireAuth }, router
 
-### Community 26 - "Regions Route Backend"
-Cohesion: 0.25
-Nodes (7): { attemptFollowerConquest }, { db }, express, { randomUUID }, { regionMilitaryPower }, { requireAuth }, router
+### Community 26 - "Q: Is V3 (neighborhood conquest) meant to replace the region-level war/dominance system, or run alongside it permanently?"
+Cohesion: 0.40
+Nodes (4): Answer, Outcome, Q: Is V3 (neighborhood conquest) meant to replace the region-level war/dominance system, or run alongside it permanently?, Source Nodes
 
 ### Community 27 - "Reports Moderation Backend"
 Cohesion: 0.25
@@ -237,17 +236,13 @@ Nodes (7): appendChatMessage(), Real-time Public Chat, initChat(), Socket.io Rea
 Cohesion: 0.33
 Nodes (4): requireAdmin(), { ADMIN_TOKEN, ADMIN_ID, ADMIN_PASSWORD }, express, router
 
-### Community 30 - "Neighborhood Seeding"
-Cohesion: 0.40
-Nodes (5): CITY_NEIGHBORHOODS, { db }, jitter(), { randomUUID }, seedNeighborhoodsIfEmpty()
+### Community 30 - "openUserProfileModal"
+Cohesion: 0.50
+Nodes (4): openUserProfileModal(), User Profile Modal / Character Card, reactionButtonsHtml(), renderCharCard()
 
 ### Community 31 - "Mobile TS Config"
 Cohesion: 0.40
 Nodes (4): compilerOptions, strict, extends, expo/tsconfig.base
-
-### Community 32 - "Dominance Settlement"
-Cohesion: 0.40
-Nodes (4): { db }, { QUORUM }, { randomUUID }, settleDominance()
 
 ### Community 33 - "Direct Messaging Frontend"
 Cohesion: 0.83
@@ -260,10 +255,6 @@ Nodes (4): Lightsail Deploy CD Job, AWS Lightsail Deployment (Nginx+PM2+Certbot)
 ### Community 35 - "Mobile App Docs"
 Cohesion: 0.50
 Nodes (4): Expo Versioned-Docs Notice (AGENTS.md), CLAUDE.md → AGENTS.md Delegation, S1: Auth & Region Assignment, S14: Mobile App (Expo/React Native)
-
-### Community 36 - "Tyrant Status Logic"
-Cohesion: 0.67
-Nodes (3): countActionedReportsAgainst(), { db }, refreshTyrantStatus()
 
 ### Community 37 - "Faction System Frontend"
 Cohesion: 0.67
@@ -288,8 +279,8 @@ Nodes (3): S10: Coordinated Multi-Account Brigading Detection, S4: Realtime Regi
   v3.html · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **383 isolated node(s):** `HotIssue`, `Region`, `User`, `express`, `{ requireAuth }` (+378 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 405 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **407 isolated node(s):** `setup.sh script`, `storage`, `RANK_LABEL`, `Region`, `User` (+402 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 431 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
@@ -303,9 +294,9 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **What is the exact relationship between `V3 Neighborhood-Level Conquest MVP` and `S6: Rank Promotion & Dominance (7-day win streak)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `db` connect `Judgment/Execution Settlement` to `Replies/XP Backend`, `Threads Route Backend`, `Users Route Backend`, `Party/Religion Backend`, `V3 Neighborhood Conquest`, `Wars/Battles Backend`, `Auth Backend`, `Congress Approval Backend`, `Activity/Follower Conquest`, `Map-Post Pins Backend`, `Internal Admin Batch Jobs`, `DB Seeding`, `DB Core & Military Power`, `Auth Middleware & Items`, `Messages & Content Filter`, `Hall of Fame & Hot Agenda`, `Chat Backend`, `Regions Route Backend`, `Reports Moderation Backend`, `Neighborhood Seeding`, `Dominance Settlement`, `Tyrant Status Logic`?**
-  _High betweenness centrality (0.094) - this node is a cross-community bridge._
-- **Why does `express` connect `Hall of Fame & Hot Agenda` to `Replies/XP Backend`, `Threads Route Backend`, `Users Route Backend`, `Express App Bootstrap`, `Party/Religion Backend`, `NPM Dependencies`, `V3 Neighborhood Conquest`, `Wars/Battles Backend`, `Auth Backend`, `Congress Approval Backend`, `Activity/Follower Conquest`, `Map-Post Pins Backend`, `Internal Admin Batch Jobs`, `Auth Middleware & Items`, `Messages & Content Filter`, `Chat Backend`, `Regions Route Backend`, `Reports Moderation Backend`, `Admin Auth Middleware`?**
-  _High betweenness centrality (0.056) - this node is a cross-community bridge._
-- **What connects `HotIssue`, `Region`, `User` to the rest of the system?**
-  _383 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `db` connect `db.js` to `votes.js`, `threads.js`, `seedProvinces.js`, `parties.js`, `neighborhoods.js`, `wars.js`, `users.js`, `mapPosts.js`, `DB Seeding`, `Auth Middleware & Items`, `Messages & Content Filter`, `Hall of Fame & Hot Agenda`, `Chat Backend`, `Reports Moderation Backend`?**
+  _High betweenness centrality (0.101) - this node is a cross-community bridge._
+- **Why does `express` connect `Hall of Fame & Hot Agenda` to `votes.js`, `threads.js`, `index.js`, `parties.js`, `NPM Dependencies`, `neighborhoods.js`, `wars.js`, `users.js`, `mapPosts.js`, `db.js`, `Auth Middleware & Items`, `Messages & Content Filter`, `Chat Backend`, `Reports Moderation Backend`, `Admin Auth Middleware`?**
+  _High betweenness centrality (0.052) - this node is a cross-community bridge._
+- **What connects `setup.sh script`, `storage`, `RANK_LABEL` to the rest of the system?**
+  _407 weakly-connected nodes found - possible documentation gaps or missing edges._

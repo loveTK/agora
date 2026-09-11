@@ -7,6 +7,7 @@ const { getVoteWeight } = require("../services/voteWeight");
 const { refreshTyrantStatus } = require("../services/tyranny");
 const { checkAndGrantFoolTicker } = require("../services/foolTicker");
 const { levelForXp } = require("../services/experience");
+const { nearestProvinceId } = require("../services/provinceLookup");
 
 const router = express.Router();
 
@@ -63,9 +64,10 @@ router.post("/", requireAuth, (req, res) => {
   }
 
   const id = randomUUID();
+  // 광역을 붙여 두어야 지도 묶음(클러스터)에 이 기록이 집계된다.
   db.prepare(
-    "INSERT INTO map_posts (id, author_id, lat, lng, body) VALUES (?, ?, ?, ?, ?)"
-  ).run(id, req.userId, lat, lng, body.trim());
+    "INSERT INTO map_posts (id, author_id, lat, lng, body, province_id) VALUES (?, ?, ?, ?, ?, ?)"
+  ).run(id, req.userId, lat, lng, body.trim(), nearestProvinceId(lat, lng));
 
   const post = db.prepare("SELECT * FROM map_posts WHERE id = ?").get(id);
   res.status(201).json(toSummary(post));
