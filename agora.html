@@ -39,6 +39,7 @@
     --line: rgba(17,17,16,0.14);
     --gold:#BA7517;
     --on-gold:#111110; /* 골드 배경 위 텍스트는 테마와 무관하게 항상 짙게 — 대비 확보용 */
+    --npc:#8a8a84; --taken:#B23A3A; --mine:#2F7D4F; /* V3 동단위 정복 마커 색상 */
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{height:100%;}
@@ -333,6 +334,7 @@
   .dot.dominant{ background:#2F7D4F; }
   .dot.contested{ background:#BA7517; }
   .dot.dispute{ background:#B23A3A; }
+  .dot.npc{ background:var(--gray-3); }
 
   /* ---------------- 지역(폴리스) 상세 페이지 — 지도 마커/분쟁 목록 클릭 시 열림 ---------------- */
   .region-hero{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:4px; }
@@ -362,6 +364,23 @@
 
   /* 지도지역위젯 — 700x500 고정 크기, 목업 '지도지역위젯.jpg' 참고 */
   #regionModal .modal-box{ width:700px; max-width:92vw; height:500px; overflow-y:auto; }
+
+  /* V3 동단위 정복 상세 패널 — regionModal DOM을 그대로 재사용해서 그 안에 렌더링 */
+  .nb-status-pill{ display:inline-block; font-size:10.5px; padding:2px 9px; border-radius:999px; border:1px solid var(--black); margin-right:6px; }
+  .nb-status-pill.npc{ background:var(--gray-3); }
+  .nb-status-pill.taken{ background:rgba(186,117,23,0.18); border-color:var(--gold); }
+  .nb-stat-row{ display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid var(--line); font-size:13.5px; }
+  .nb-stat-row:first-of-type{ border-top:none; }
+  .nb-stat-row span:first-child{ color:var(--gray-2); }
+  .nb-section-label{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--gray-2); margin:16px 0 8px; }
+  .nb-contrib-row{ display:flex; justify-content:space-between; font-size:13px; padding:4px 0; }
+  .nb-adj-row{ display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid var(--line); gap:8px; }
+  .nb-adj-row:first-of-type{ border-top:none; }
+  .nb-adj-status{ font-size:11px; color:var(--gray-2); }
+  .nb-insurrection-box{ margin-top:14px; padding:12px; border:1px solid var(--gold); background:rgba(186,117,23,0.08); font-size:12.5px; }
+  .nb-result-box{ margin-top:14px; padding:12px; font-size:13px; border:1px solid var(--line); }
+  .nb-result-box.win{ border-color:var(--mine); background:rgba(47,125,79,0.08); }
+  .nb-result-box.lose{ border-color:var(--taken); background:rgba(178,58,58,0.08); }
   #authModal .modal-box{ width:440px; max-width:92vw; }
   .region-widget-top{ display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
   .region-widget-left{ flex:1; min-width:0; }
@@ -683,19 +702,19 @@
       <div class="map-wrap">
         <div id="map"></div>
         <div class="map-overlay-eyebrow">
-          <div class="map-eyebrow">전황 개요</div>
-          <span class="section-title" id="mapStatusHeadline">실시간 국가 지배 현황</span>
+          <div class="map-eyebrow">V3 · 동단위 정복</div>
+          <span class="section-title" id="mapStatusHeadline">실시간 동단위 정복 현황</span>
           <div class="map-search-wrap">
-            <input type="text" id="mapSearchInput" list="mapRegionList" placeholder="지역 이름으로 검색" autocomplete="off">
+            <input type="text" id="mapSearchInput" list="mapRegionList" placeholder="동 이름으로 검색" autocomplete="off">
             <datalist id="mapRegionList"></datalist>
           </div>
         </div>
         <button class="cta-gold map-thread-btn" id="mapThreadBtn">+ 논제 등록</button>
         <button class="map-post-btn" id="mapPostModeBtn">📍 글쓰기 모드</button>
         <div class="map-legend">
-          <span><i class="dot dominant"></i>지배 확정</span>
-          <span><i class="dot contested"></i>판정 진행중</span>
-          <span><i class="dot dispute"></i>분쟁 지역</span>
+          <span><i class="dot npc"></i>NPC</span>
+          <span><i class="dot dispute"></i>점령됨</span>
+          <span><i class="dot dominant"></i>내 지배</span>
         </div>
       </div>
     </section>
@@ -984,11 +1003,6 @@
     renderDisputes();
 
     document.getElementById('heroRegionCount').textContent = regions.length || '·';
-    const dominantCount = regions.filter(r => r.status === 'dominant').length;
-    const contestedCount = regions.filter(r => r.status === 'contested').length;
-    const disputeCount = regions.length - dominantCount - contestedCount;
-    document.getElementById('mapStatusHeadline').textContent =
-      `지배 확정 ${dominantCount} · 판정 진행중 ${contestedCount} · 분쟁 지역 ${disputeCount}`;
 
     // ?region=<id>로 직접 들어온 경우 대시보드 대신 그 지역 페이지를 바로 보여준다.
     const initialRegionId = new URLSearchParams(location.search).get('region');
@@ -1482,66 +1496,162 @@
     // CartoDB 무료 타일이 API 키를 요구하도록 바뀌어서(워터마크 노출) OSM 표준 타일로 교체 — 흑백 필터는 #map CSS에서 그대로 처리
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, subdomains:'abc' }).addTo(map);
 
-    const markersById = {};
-    const regionsById = {};
-    regions.forEach(r => {
-      regionsById[r.id] = r;
-      const statusLabel = r.status === 'dominant' ? '지배 확정' : (r.status === 'contested' ? '판정 진행중' : '분쟁 지역');
-      const marker = L.marker([r.lat, r.lng], { icon: markerIcon(r) })
-        .bindTooltip(`${r.name} · ${statusLabel}`, { permanent:false, direction:'top', className:'region-preview-tooltip' })
-        .on('click', (e) => openRegionModal(r.id, e.originalEvent.target.getBoundingClientRect()))
-        .addTo(map);
-      // 호버할 때 이미 받아둔 Hot Issue 데이터(hotIssuesCache)에서 그 지역 1위 논제를 찾아
-      // 제목/참여자수까지 보여주는 미리보기 카드로 내용을 바꿔치기한다 — 없으면 상태만.
-      marker.on('mouseover', () => {
-        const regionThreads = hotIssuesCache.filter(t => t.region_id === r.id);
-        const top = regionThreads.sort((a, b) => b.participant_count - a.participant_count)[0];
-        const content = top
-          ? `<div class="rp-title">${r.name} · ${statusLabel}</div><div class="rp-meta">"${top.title}" · 참여 ${top.participant_count}명</div>`
-          : `<div class="rp-title">${r.name} · ${statusLabel}</div><div class="rp-meta">등록된 Hot 논제 없음</div>`;
-        marker.setTooltipContent(content);
-      });
-      markersById[r.id] = marker;
-    });
-
-    // 지역 검색 — 실제로 지도를 그 지역 위치로 이동시키는 기능(장식용 아님)
-    const regionListEl = document.getElementById('mapRegionList');
-    regionListEl.innerHTML = regions.map(r => `<option value="${r.name}">`).join('');
-    document.getElementById('mapSearchInput').addEventListener('change', (e) => {
-      const match = regions.find(r => r.name === e.target.value.trim());
-      if (!match) return;
-      gaEvent('search', { search_term: match.name });
-      map.flyTo([match.lat, match.lng], 6);
-      openRegionModal(match.id);
-    });
-
-    if (typeof io !== 'undefined') {
-      const socket = io(API_BASE);
-      socket.on('region:update', ({ region_id, status }) => {
-        const marker = markersById[region_id];
-        if (!marker || !regionsById[region_id]) return;
-        regionsById[region_id].status = status;
-        marker.setIcon(markerIcon(regionsById[region_id]));
-        const name = regionsById[region_id].name;
-        showToast(`${name} 지역에 새 반응이 있습니다`);
-      });
-      // 전쟁 선포/수락/부결 시 칼 아이콘만 다시 확인(정확한 값은 서버가 알고 있으니 재조회).
-      socket.on('region:war_status', async ({ region_id }) => {
-        const marker = markersById[region_id];
-        if (!marker || !regionsById[region_id]) return;
-        try {
-          const fresh = await apiRequest(`/regions`);
-          const updated = fresh.find(r => r.id === region_id);
-          if (!updated) return;
-          regionsById[region_id] = updated;
-          marker.setIcon(markerIcon(updated));
-        } catch (err) { /* 실시간 갱신 실패해도 다음 새로고침 때 정상화되므로 조용히 무시 */ }
-      });
-    } else {
-      console.warn('Socket.io를 불러오지 못해 실시간 갱신이 비활성화됩니다.');
-    }
+    // 홈 지도는 V3 동단위 정복으로 대체 — 지역(국가) 시스템 자체(전쟁/지배/정당·종교 창설)는
+    // regionModal/renderRegionPage 등 다른 진입 경로(위 Hot Issue 목록, 프로필 등)로 그대로 살아있다.
+    loadNeighborhoodMap(map);
 
     initMapPosts(map);
+  }
+
+  /* ---------------- V3 동단위 정복 지도 — 홈 메인 지도 ---------------- */
+  let neighborhoodsData = [];
+  const neighborhoodMarkersById = {};
+
+  function neighborhoodMarkerIcon(n) {
+    const fill = n.status === 'npc'
+      ? 'var(--npc)'
+      : (currentUser && n.dominant_user_id === currentUser.id ? 'var(--mine)' : 'var(--taken)');
+    return L.divIcon({
+      html: `<div style="width:14px;height:14px;border-radius:50%;background:${fill};border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,0.4);"></div>`,
+      className: '', iconSize: [14, 14], iconAnchor: [7, 7],
+    });
+  }
+
+  async function loadNeighborhoodMap(map) {
+    try {
+      neighborhoodsData = await apiRequest('/neighborhoods');
+    } catch (err) {
+      console.warn('동단위 정복 데이터를 불러오지 못했습니다.', err);
+      return;
+    }
+
+    const npcCount = neighborhoodsData.filter(n => n.status === 'npc').length;
+    const mineCount = currentUser ? neighborhoodsData.filter(n => n.dominant_user_id === currentUser.id).length : 0;
+    const takenCount = neighborhoodsData.length - npcCount - mineCount;
+    document.getElementById('mapStatusHeadline').textContent =
+      `NPC ${npcCount} · 점령됨 ${takenCount} · 내 지배 ${mineCount}`;
+
+    neighborhoodsData.forEach(n => {
+      if (n.lat == null || n.lng == null) return;
+      const statusLabel = n.status === 'npc' ? 'NPC' : (n.dominant_nickname || '점령됨');
+      const marker = L.marker([n.lat, n.lng], { icon: neighborhoodMarkerIcon(n) })
+        .bindTooltip(`${n.region_name} · ${n.name} — ${statusLabel}`, { permanent:false, direction:'top', className:'region-preview-tooltip' })
+        .on('click', () => openNeighborhoodModal(n.id))
+        .addTo(map);
+      neighborhoodMarkersById[n.id] = marker;
+    });
+
+    // 동 검색 — 지역 검색을 대체
+    const listEl = document.getElementById('mapRegionList');
+    listEl.innerHTML = neighborhoodsData.map(n => `<option value="${n.name}">`).join('');
+    document.getElementById('mapSearchInput').addEventListener('change', (e) => {
+      const match = neighborhoodsData.find(n => n.name === e.target.value.trim());
+      if (!match || match.lat == null) return;
+      gaEvent('search', { search_term: match.name });
+      map.flyTo([match.lat, match.lng], 6);
+      openNeighborhoodModal(match.id);
+    });
+  }
+
+  async function openNeighborhoodModal(id) {
+    regionModal.style.display = 'flex';
+    regionModalBox.style.position = '';
+    regionModalBox.style.left = '';
+    regionModalBox.style.top = '';
+    regionModalBox.style.margin = '';
+    const content = document.getElementById('regionModalContent');
+    content.innerHTML = '<div class="loading-text">불러오는 중...</div>';
+    try {
+      const n = await apiRequest(`/neighborhoods/${id}`);
+      renderNeighborhoodDetail(n);
+    } catch (err) {
+      content.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+    }
+  }
+
+  function renderNeighborhoodDetail(n) {
+    const content = document.getElementById('regionModalContent');
+    const statusLabel = n.status === 'npc' ? 'NPC' : '점령됨';
+    const canInsurrect = n.my_resistance_points != null && n.my_resistance_points >= n.resistance_threshold;
+
+    const adjacentHtml = (n.adjacent_neighborhoods || []).map(adj => {
+      const iDominateAdj = currentUser && adj.dominant_user_id === currentUser.id;
+      const alreadyMine = currentUser && n.dominant_user_id === currentUser.id;
+      const canAttackFromHere = iDominateAdj && n.status !== 'npc' && !alreadyMine;
+      return `
+        <div class="nb-adj-row">
+          <div><div>${adj.name}</div><div class="nb-adj-status">${adj.status === 'npc' ? 'NPC' : '점령됨'}</div></div>
+          ${canAttackFromHere
+            ? `<button class="cta-gold" data-attack-from="${adj.id}">여기서 공격</button>`
+            : `<span class="nb-adj-status">${iDominateAdj && n.status === 'npc' ? '기여로만 해방 가능' : ''}</span>`}
+        </div>`;
+    }).join('') || '<div class="nb-adj-status">등록된 인접 동이 없습니다.</div>';
+
+    content.innerHTML = `
+      <span class="section-title" style="font-size:20px;">${n.name}</span>
+      <div class="region-widget-stats">${n.region_name} 소속</div>
+      <div style="margin-top:8px;">
+        <span class="nb-status-pill ${n.status === 'npc' ? 'npc' : 'taken'}">${statusLabel}</span>
+        ${n.status === 'npc' ? `<span class="nb-status-pill npc">난이도 ${n.npc_difficulty}</span>` : ''}
+      </div>
+
+      <div class="nb-stat-row"><span>지배자</span><span>${n.dominant_nickname || '없음(NPC)'}</span></div>
+      <div class="nb-stat-row"><span>누적 기여 포인트</span><span>${n.total_points}${n.status === 'npc' ? ` / ${n.npc_difficulty}` : ''}</span></div>
+      ${n.my_resistance_points != null ? `<div class="nb-stat-row"><span>내 저항 포인트</span><span>${n.my_resistance_points} / ${n.resistance_threshold}</span></div>` : ''}
+
+      <div class="nb-section-label">기여 상위</div>
+      ${(n.top_contributors || []).length ? n.top_contributors.map(c => `<div class="nb-contrib-row"><span>${c.nickname}</span><span>${c.total_points}pt</span></div>`).join('') : '<div class="nb-adj-status">아직 기여 기록이 없습니다.</div>'}
+
+      ${currentUser ? `<button class="cta-gold" id="nbContributeBtn" style="width:100%; margin-top:14px; padding:12px;">이 동에 기여하기 (+포인트)</button>` : `<div class="nb-adj-status" style="margin-top:14px;">로그인하면 기여/공격에 참여할 수 있어요</div>`}
+
+      ${canInsurrect ? `<div class="nb-insurrection-box">저항 포인트가 임계치를 넘었습니다 — 인접 조건 없이 즉시 재탈환을 시도할 수 있습니다.<br><button class="cta-gold" id="nbInsurrectBtn" style="margin-top:8px;">반란 공격 (재탈환 시도)</button></div>` : ''}
+
+      <div class="nb-section-label">인접 동</div>
+      ${adjacentHtml}
+
+      <div id="nbActionResult"></div>
+    `;
+
+    const contributeBtn = document.getElementById('nbContributeBtn');
+    if (contributeBtn) {
+      contributeBtn.addEventListener('click', async () => {
+        contributeBtn.disabled = true;
+        try {
+          const result = await apiRequest(`/neighborhoods/${n.id}/contribute`, { method: 'POST' });
+          document.getElementById('nbActionResult').innerHTML = `<div class="nb-result-box win">+${result.points_awarded}pt 기여! 누적 ${result.total_points}pt` +
+            (result.liberation ? `<br><b>해방되었습니다!</b> 새 지배자: ${result.liberation.dominant_nickname}` : '') + `</div>`;
+          if (result.xp_gain) handleXpGain(result.xp_gain);
+          openNeighborhoodModal(n.id);
+        } catch (err) {
+          document.getElementById('nbActionResult').innerHTML = `<div class="nb-result-box lose">${err.message}</div>`;
+          contributeBtn.disabled = false;
+        }
+      });
+    }
+
+    content.querySelectorAll('[data-attack-from]').forEach(btn => {
+      btn.addEventListener('click', () => runNeighborhoodAttack(n.id, btn.dataset.attackFrom));
+    });
+    const insurrectBtn = document.getElementById('nbInsurrectBtn');
+    if (insurrectBtn) insurrectBtn.addEventListener('click', () => runNeighborhoodAttack(n.id, null));
+  }
+
+  async function runNeighborhoodAttack(targetId, fromId) {
+    const box = document.getElementById('nbActionResult');
+    box.innerHTML = '<div class="loading-text">공격 중...</div>';
+    try {
+      const result = await apiRequest(`/neighborhoods/${targetId}/attack`, {
+        method: 'POST',
+        body: JSON.stringify({ from_neighborhood_id: fromId }),
+      });
+      box.innerHTML = `<div class="nb-result-box ${result.attacker_wins ? 'win' : 'lose'}">
+        ${result.attacker_wins ? '승리! 지배자가 교체되었습니다.' : '패배했습니다.'}<br>
+        내 공격력 ${result.attacker_power} vs 방어력 ${result.defense_power}${result.insurrection ? ' (반란 공격)' : ''}
+      </div>`;
+      openNeighborhoodModal(targetId);
+    } catch (err) {
+      box.innerHTML = `<div class="nb-result-box lose">${err.message}</div>`;
+    }
   }
 
   /* ---------------- 지도 자유 게시(맵 핀) ---------------- */
