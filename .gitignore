@@ -4,3 +4,5 @@ node_modules/
 *.db-journal
 npm-debug.log*
 .DS_Store
+graphify-out/.graphify_python
+graphify-out/.graphify_root
