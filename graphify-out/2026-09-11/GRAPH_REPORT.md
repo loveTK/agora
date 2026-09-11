@@ -1,17 +1,13 @@
 # Graph Report - agora  (2026-09-11)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 117 files · ~73,857 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
 - 680 nodes · 1083 edges · 55 communities (40 shown, 13 thin omitted)
 - Extraction: 83% EXTRACTED · 16% INFERRED · 0% AMBIGUOUS · INFERRED: 175 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
-
-## Graph Freshness
-- Built from commit: `0cd61216`
-- Run `git rev-parse HEAD` and compare to check if the graph is stale.
-- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Homepage Map & UI
@@ -74,34 +70,34 @@
 3. `requireAuth()` - 16 edges
 4. `grantXp()` - 11 edges
 5. `expo` - 10 edges
-6. `levelProgress()` - 9 edges
-7. `getVoteWeight()` - 9 edges
-8. `belligerenceTier()` - 9 edges
+6. `belligerenceTier()` - 9 edges
+7. `levelProgress()` - 9 edges
+8. `getVoteWeight()` - 9 edges
 9. `initMap()` - 9 edges
 10. `toggleLaugh()` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Tenet Selection From Own Threads (3-5, via GET /threads/mine)` --semantically_similar_to--> `Party Creation Gate: Follower Count ≥100 or Current Ruler`  [INFERRED] [semantically similar]
-  religion-create.html → party-create.html
 - `Contribution / Attack / Insurrection Mechanic` --semantically_similar_to--> `S11: War Declaration & Acceptance Vote`  [INFERRED] [semantically similar]
   v3.html → README.md
+- `Tenet Selection From Own Threads (3-5, via GET /threads/mine)` --semantically_similar_to--> `Party Creation Gate: Follower Count ≥100 or Current Ruler`  [INFERRED] [semantically similar]
+  religion-create.html → party-create.html
 - `Lightsail Deploy CD Job` --conceptually_related_to--> `SQLite→PostgreSQL Migration Path`  [AMBIGUOUS]
   .github/workflows/deploy-lightsail.yml → README.md
 - `Thread Archive Placeholder Page` --conceptually_related_to--> `S2: Threads & Arguments`  [INFERRED]
   archive.html → README.md
-- `v3.html /neighborhoods API Calls` --conceptually_related_to--> `Public/Internal REST API Endpoint List`  [AMBIGUOUS]
+- `V3 Neighborhood-Level Conquest MVP` --conceptually_related_to--> `S6: Rank Promotion & Dominance (7-day win streak)`  [AMBIGUOUS]
   v3.html → README.md
 
 ## Import Cycles
 - None detected.
 
 ## Hyperedges (group relationships)
-- **Faction Creation Flow (Religion & Party)** — party_create_form, religion_create_form, readme_follow_religion_party [EXTRACTED 1.00]
-- **Production Deployment Pipeline** — github_workflows_deploy_lightsail_deploy_job, readme_lightsail_deployment, readme_sqlite_postgres_migration_path [EXTRACTED 1.00]
-- **Territory Conquest Mechanics (Region War vs Neighborhood Conquest)** — v3_neighborhood_conquest, readme_war_declaration_system, readme_battle_conquest_system [INFERRED 0.75]
-- **Socket.io-driven Live Map/Chat Updates** — agora_initmap, agora_initchat, agora_realtime_socket, agora_chat_system, agora_map_system [INFERRED 0.85]
-- **Region Detail → Dominance Check → Conquer Action** — agora_openregionmodal, agora_renderregionpage, agora_route_regions, agora_conquest_system [INFERRED 0.85]
 - **Thread → Argument → Reaction/Reply Debate Flow** — agora_openthreadmodal, agora_attachreactionhandlers, agora_renderreplylist, agora_route_threads, agora_route_arguments [INFERRED 0.85]
+- **Region Detail → Dominance Check → Conquer Action** — agora_openregionmodal, agora_renderregionpage, agora_route_regions, agora_conquest_system [INFERRED 0.85]
+- **Socket.io-driven Live Map/Chat Updates** — agora_initmap, agora_initchat, agora_realtime_socket, agora_chat_system, agora_map_system [INFERRED 0.85]
+- **Faction Creation Flow (Religion & Party)** — party_create_form, religion_create_form, readme_follow_religion_party [EXTRACTED 1.00]
+- **Territory Conquest Mechanics (Region War vs Neighborhood Conquest)** — v3_neighborhood_conquest, readme_war_declaration_system, readme_battle_conquest_system [INFERRED 0.75]
+- **Production Deployment Pipeline** — github_workflows_deploy_lightsail_deploy_job, readme_lightsail_deployment, readme_sqlite_postgres_migration_path [EXTRACTED 1.00]
 
 ## Communities (55 total, 13 thin omitted)
 
@@ -278,34 +274,34 @@ Cohesion: 0.67
 Nodes (3): S10: Coordinated Multi-Account Brigading Detection, S4: Realtime Region Sync & Abuse Detection v1, S3: Voting & Judgment (Collapse)
 
 ## Ambiguous Edges - Review These
-- `openUserProfileModal()` → `reactionButtonsHtml()`  [AMBIGUOUS]
+- `reactionButtonsHtml()` → `openUserProfileModal()`  [AMBIGUOUS]
   agora.html · relation: calls
 - `Lightsail Deploy CD Job` → `SQLite→PostgreSQL Migration Path`  [AMBIGUOUS]
   .github/workflows/deploy-lightsail.yml · relation: conceptually_related_to
-- `v3.html /neighborhoods API Calls` → `Public/Internal REST API Endpoint List`  [AMBIGUOUS]
+- `S6: Rank Promotion & Dominance (7-day win streak)` → `V3 Neighborhood-Level Conquest MVP`  [AMBIGUOUS]
   v3.html · relation: conceptually_related_to
-- `V3 Neighborhood-Level Conquest MVP` → `S6: Rank Promotion & Dominance (7-day win streak)`  [AMBIGUOUS]
+- `Public/Internal REST API Endpoint List` → `v3.html /neighborhoods API Calls`  [AMBIGUOUS]
   v3.html · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **383 isolated node(s):** `HotIssue`, `Region`, `User`, `express`, `{ requireAuth }` (+378 more)
+- **383 isolated node(s):** `setup.sh script`, `storage`, `RANK_LABEL`, `Region`, `User` (+378 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 405 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **What is the exact relationship between `openUserProfileModal()` and `reactionButtonsHtml()`?**
+- **What is the exact relationship between `reactionButtonsHtml()` and `openUserProfileModal()`?**
   _Edge tagged AMBIGUOUS (relation: calls) - confidence is low._
 - **What is the exact relationship between `Lightsail Deploy CD Job` and `SQLite→PostgreSQL Migration Path`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **What is the exact relationship between `v3.html /neighborhoods API Calls` and `Public/Internal REST API Endpoint List`?**
+- **What is the exact relationship between `S6: Rank Promotion & Dominance (7-day win streak)` and `V3 Neighborhood-Level Conquest MVP`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **What is the exact relationship between `V3 Neighborhood-Level Conquest MVP` and `S6: Rank Promotion & Dominance (7-day win streak)`?**
+- **What is the exact relationship between `Public/Internal REST API Endpoint List` and `v3.html /neighborhoods API Calls`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **Why does `db` connect `Judgment/Execution Settlement` to `Replies/XP Backend`, `Threads Route Backend`, `Users Route Backend`, `Party/Religion Backend`, `V3 Neighborhood Conquest`, `Wars/Battles Backend`, `Auth Backend`, `Congress Approval Backend`, `Activity/Follower Conquest`, `Map-Post Pins Backend`, `Internal Admin Batch Jobs`, `DB Seeding`, `DB Core & Military Power`, `Auth Middleware & Items`, `Messages & Content Filter`, `Hall of Fame & Hot Agenda`, `Chat Backend`, `Regions Route Backend`, `Reports Moderation Backend`, `Neighborhood Seeding`, `Dominance Settlement`, `Tyrant Status Logic`?**
   _High betweenness centrality (0.094) - this node is a cross-community bridge._
 - **Why does `express` connect `Hall of Fame & Hot Agenda` to `Replies/XP Backend`, `Threads Route Backend`, `Users Route Backend`, `Express App Bootstrap`, `Party/Religion Backend`, `NPM Dependencies`, `V3 Neighborhood Conquest`, `Wars/Battles Backend`, `Auth Backend`, `Congress Approval Backend`, `Activity/Follower Conquest`, `Map-Post Pins Backend`, `Internal Admin Batch Jobs`, `Auth Middleware & Items`, `Messages & Content Filter`, `Chat Backend`, `Regions Route Backend`, `Reports Moderation Backend`, `Admin Auth Middleware`?**
   _High betweenness centrality (0.056) - this node is a cross-community bridge._
-- **What connects `HotIssue`, `Region`, `User` to the rest of the system?**
+- **What connects `setup.sh script`, `storage`, `RANK_LABEL` to the rest of the system?**
   _383 weakly-connected nodes found - possible documentation gaps or missing edges._
