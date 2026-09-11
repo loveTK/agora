@@ -558,9 +558,10 @@
       // 단계가 바뀌면 이전 단계 마커를 전부 걷어낸다 — 국가 묶음과 광역 묶음이 겹쳐 보이면 안 된다.
       clusterLayer.clearLayers();
       for (const id in clusterMarkers) delete clusterMarkers[id];
+      leafLayer.clearLayers();
+      for (const id in markersById) delete markersById[id];
       const leaf = level === 'leaf';
       [leafLayer, postLayer, pulseLayer].forEach((l) => (leaf ? l.addTo(map) : map.removeLayer(l)));
-      if (leaf) map.removeLayer(clusterLayer); else clusterLayer.addTo(map);
       viewLevel = level;
     }
     const seq = ++viewSeq;
@@ -577,8 +578,52 @@
 
   // 묶음 원: 테두리 링이 상태 비율(초록 내 영토 → 빨강 타 세력 → 회색 미개척)이고 가운데가 영토 수다.
   // 상태별로 원을 따로 그리면 한 자리에 원이 세 개 겹치므로, 비율을 링 하나에 접었다.
+  const clusterSize = (c) => Math.round(Math.max(34, Math.min(62, 28 + 14 * Math.log10(Math.max(1, c.total)))));
+
+  // 화면 픽셀에서 서로 겹치는 원을 하나로 합친다(직방이 중간 줌에서 시·군·구를 합치는 것과 같다).
+  // 큰 원부터 자리를 잡고, 그 원과 반지름 합 + 여백 안에 들어오는 작은 원은 흡수한다. 흡수될수록
+  // 원이 커지므로 반지름을 그때그때 다시 잰다. 합쳐진 묶음은 "가장 큰 구성원 +N"으로 부른다.
+  const OVERLAP_GAP = 6;
+  function mergeOverlaps(items, sizeOf) {
+    const placed = [];
+    const sorted = items
+      .map((it) => ({ it, p: map.latLngToLayerPoint([it.lat, it.lng]) }))
+      .sort((a, b) => b.it.total - a.it.total);
+    for (const x of sorted) {
+      const host = placed.find((g) => g.p.distanceTo(x.p) < g.r + sizeOf(x.it) / 2 + OVERLAP_GAP);
+      if (!host) { placed.push({ anchor: x.it, p: x.p, r: sizeOf(x.it) / 2, members: [x.it] }); continue; }
+      host.members.push(x.it);
+      host.r = sizeOf(groupToCluster(host)) / 2;
+    }
+    return placed.map(groupToCluster);
+  }
+  function groupToCluster(g) {
+    if (g.members.length === 1) return g.members[0];
+    const sum = (k) => g.members.reduce((a, m) => a + (m[k] || 0), 0);
+    // 개별 구끼리 뭉친 묶음은 구성원이 전부 같은 크기라 "첫 구 +N"이 의미가 없다. 가장 많은 광역
+    // 이름으로 "서울 19곳"이라 부르고, 한쪽 가장자리가 아니라 점들의 무게중심에 놓는다.
+    const leafGroup = g.members.every((m) => m.total === 1);
+    let name = `${g.anchor.name} +${g.members.length - 1}`;
+    let lat = g.anchor.lat;
+    let lng = g.anchor.lng;
+    if (leafGroup) {
+      const tally = {};
+      g.members.forEach((m) => { tally[m.province_name || m.region_name] = (tally[m.province_name || m.region_name] || 0) + 1; });
+      const top = Object.entries(tally).sort((a, b) => b[1] - a[1])[0][0];
+      name = `${top} ${g.members.length}곳`;
+      lat = sum('lat') / g.members.length;
+      lng = sum('lng') / g.members.length;
+    }
+    return {
+      id: g.members.map((m) => m.id).sort().join('+'),
+      name, lat, lng, merged: true,
+      total: sum('total'), npc: sum('npc'), taken: sum('taken'), mine: sum('mine'),
+      posts: sum('posts'), comments: sum('comments'), heat: sum('heat'), hot: g.members.some((m) => m.hot),
+    };
+  }
+
   function clusterIcon(c, delayIndex) {
-    const size = Math.round(Math.max(34, Math.min(62, 28 + 14 * Math.log10(Math.max(1, c.total)))));
+    const size = clusterSize(c);
     const minePct = c.total ? (c.mine / c.total) * 100 : 0;
     const takenEnd = c.total ? minePct + (c.taken / c.total) * 100 : 0;
     const ring = `conic-gradient(var(--mine) 0 ${minePct}%, var(--taken) ${minePct}% ${takenEnd}%, var(--npc) ${takenEnd}% 100%)`;
@@ -608,11 +653,15 @@
       clusterCache[key] = { at: Date.now(), rows };
     }
     if (seq !== viewSeq || viewLevel !== level) return; // 그 사이 더 움직였으면 이 응답은 버린다
+    drawClusters(mergeOverlaps(rows, clusterSize), level);
+  }
 
+  // 합쳐진 묶음을 누르면 두 단계 확대해 구성원이 풀어지게 하고, 단일 묶음은 다음 단계 줌으로 날아간다.
+  function drawClusters(clusters, level) {
     const keep = new Set();
-    rows.forEach((c, i) => {
+    clusters.forEach((c, i) => {
       keep.add(c.id);
-      const sig = `${c.total}|${c.npc}|${c.taken}|${c.mine}|${c.posts + c.comments}|${c.hot ? 1 : 0}`;
+      const sig = `${c.name}|${c.total}|${c.npc}|${c.taken}|${c.mine}|${c.posts + c.comments}|${c.hot ? 1 : 0}`;
       let m = clusterMarkers[c.id];
       if (m && m._sig === sig) return;
       if (!m) {
@@ -620,7 +669,8 @@
         m.on('click', (e) => {
           if (writeMode) return;
           L.DomEvent.stopPropagation(e);
-          map.flyTo([c.lat, c.lng], NEXT_ZOOM[level], { duration: reduceMotion ? 0 : 0.9 });
+          const target = c.merged || level === 'leaf' ? map.getZoom() + 2 : NEXT_ZOOM[level];
+          map.flyTo([c.lat, c.lng], target, { duration: reduceMotion ? 0 : 0.9 });
         });
         clusterLayer.addLayer(m);
         clusterMarkers[c.id] = m;
@@ -638,9 +688,20 @@
     const rows = await apiRequest(`/neighborhoods?bbox=${bboxParam()}`);
     if (seq !== viewSeq || viewLevel !== 'leaf') return;
 
+    // 서울 25개 구처럼 좁은 데 모인 점들은 이 줌에서 서로 덮인다. 점도 묶음과 같은 규칙으로 합쳐
+    // 작은 묶음 원으로 보여 주고, 홀로 선 점만 캔버스에 찍는다.
+    const items = rows.filter((t) => t.lat != null && t.lng != null).map((t) => {
+      const st = statusOf(t);
+      return { ...t, total: 1, npc: st === 'npc' ? 1 : 0, taken: st === 'taken' ? 1 : 0, mine: st === 'mine' ? 1 : 0,
+        posts: 0, comments: 0, heat: 0, hot: false };
+    });
+    const dot = markerRadius() * 2 + 2;
+    const merged = mergeOverlaps(items, (it) => (it.total > 1 ? clusterSize(it) : dot));
+    const singles = merged.filter((c) => !c.merged);
+    drawClusters(merged.filter((c) => c.merged), 'leaf');
+
     const keep = new Set();
-    rows.forEach((t) => {
-      if (t.lat == null || t.lng == null) return;
+    singles.forEach((t) => {
       keep.add(t.id);
       territoryById[t.id] = t;
       const color = STATUS_COLOR[statusOf(t)];
@@ -656,12 +717,12 @@
       leafLayer.addLayer(marker);
       markersById[t.id] = marker;
     });
-    // 화면 밖으로 나간 마커는 지운다 — 세계를 한 바퀴 돌면 캔버스에 수천 개가 쌓인다.
+    // 화면 밖으로 나갔거나 묶음에 흡수된 점은 지운다 — 세계를 한 바퀴 돌면 캔버스에 수천 개가 쌓인다.
     for (const id in markersById) {
       if (!keep.has(id)) { leafLayer.removeLayer(markersById[id]); delete markersById[id]; }
     }
     syncMarkerRadius();
-    syncPulse(rows);
+    syncPulse(singles);
   }
 
   async function renderFallbackList() {
