@@ -190,10 +190,127 @@
   .signed-out-note{ font-size:12.5px; color:var(--gray-2); margin-top:16px; }
   .signed-out-note a{ color:var(--gold); font-weight:700; }
 
+  /* ---------- 모션 ----------
+     "정복 지도"라는 소재에 맞춰 통통 튀는 이징 대신 빠르게 들어와 단단히 멈추는 곡선을 쓴다.
+     레이아웃 규칙은 위에 그대로 두고 움직임만 여기 모아둬서, 맨 아래 prefers-reduced-motion
+     블록 하나로 전부 끌 수 있게 했다. */
+  @keyframes fadeIn  { from{ opacity:0 } to{ opacity:1 } }
+  @keyframes fadeUp  { from{ opacity:0; transform:translateY(10px) } to{ opacity:1; transform:none } }
+  @keyframes dropIn  { from{ transform:translateY(-100%) } to{ transform:none } }
+  @keyframes popIn   { from{ opacity:0; transform:translateY(14px) scale(0.97) } to{ opacity:1; transform:none } }
+  @keyframes popOut  { to{ opacity:0; transform:translateY(10px) scale(0.98) } }
+  @keyframes sheetIn { from{ transform:translateY(100%) } to{ transform:none } }
+  @keyframes hintIn  { from{ opacity:0; transform:translate(-50%,16px) } to{ opacity:1; transform:translate(-50%,0) } }
+  @keyframes bump    { 40%{ transform:scale(1.5) } to{ transform:none } }
+  @keyframes sweep   { 0%{ transform:translateX(-130%) } 55%,100%{ transform:translateX(130%) } }
+  @keyframes shimmer { to{ background-position:-200% 0 } }
+  @keyframes ringOut { from{ transform:scale(0.5); opacity:0.8 } to{ transform:scale(3.4); opacity:0 } }
+  @keyframes flashOut{ from{ opacity:0.6 } to{ opacity:0 } }
+  @keyframes urgent  { 0%,100%{ opacity:1 } 50%{ opacity:0.5 } }
+  @keyframes fabPulse{
+    0%,100%{ box-shadow:0 2px 10px rgba(0,0,0,0.45), 0 0 0 0 rgba(186,117,23,0.5); }
+    50%    { box-shadow:0 2px 10px rgba(0,0,0,0.45), 0 0 0 10px rgba(186,117,23,0); }
+  }
+
+  header{ animation:dropIn 0.5s cubic-bezier(0.2,0.8,0.25,1) both; }
+  .brand-badge{ animation:fadeIn 0.5s 0.35s both; }
+  .wordmark, .header-link{ transition:color 0.18s ease, letter-spacing 0.25s ease; }
+  .wordmark:hover{ letter-spacing:0.2em; }
+  #map{ animation:fadeIn 0.9s 0.05s both; }
+
+  /* 오버레이 네 장이 왼쪽 위 → 오른쪽 위 → 아래 순으로 차례차례 자리를 잡는다. */
+  .overlay, .overlay-search{ animation:fadeUp 0.55s cubic-bezier(0.2,0.8,0.25,1) both; }
+  .overlay-season{ animation-delay:0.14s; }
+  .overlay-search{ animation-delay:0.22s; }
+  .overlay-mine{ animation-delay:0.3s; }
+  .overlay-legend{ animation-delay:0.38s; }
+  .overlay-season .days.urgent{ animation:urgent 2s ease-in-out infinite; } /* 시즌 막바지에만 맥동 */
+
+  .search-results div{ animation:fadeUp 0.26s both; transition:background 0.15s ease, padding-left 0.15s ease; }
+  .search-results div:hover{ padding-left:15px; }
+
+  .fab{ transition:background 0.18s ease, color 0.18s ease, transform 0.14s ease; animation:fadeUp 0.5s 0.45s both; }
+  .fab:hover{ transform:translateY(-2px); }
+  .fab:active{ transform:translateY(0) scale(0.97); }
+  .fab.active{ animation:fabPulse 1.9s ease-in-out infinite; }
+  .write-hint{ animation:hintIn 0.3s cubic-bezier(0.2,0.85,0.3,1) both; }
+
+  /* 내 영토 위에 얹는 확산 링. 캔버스 마커를 매 프레임 다시 그리면 750개짜리 지도가 그대로
+     끊기므로, DOM 마커 하나에 CSS 애니메이션만 얹어 합성기에 맡긴다. */
+  .territory-pulse{
+    display:block; width:11px; height:11px; margin:-5.5px 0 0 -5.5px; border-radius:50%;
+    border:2px solid var(--mine); animation:ringOut 1.9s ease-out infinite;
+  }
+
+  .modal-backdrop{ animation:fadeIn 0.22s ease both; }
+  .modal-box{ animation:popIn 0.34s cubic-bezier(0.2,0.85,0.3,1) both; }
+  .modal-backdrop.closing{ animation:fadeIn 0.18s ease reverse both; }
+  .modal-backdrop.closing .modal-box{ animation:popOut 0.18s ease both; }
+  .modal-close{ transition:color 0.15s ease, transform 0.2s ease; }
+  .modal-close:hover{ color:var(--black); transform:rotate(90deg); }
+
+  /* 카드 안의 블록이 위에서부터 차례로 내려앉는다. 열 번째부터는 같은 지연을 공유해서
+     인접 영토가 긴 카드에서도 마지막 줄까지 기다리는 일이 없다. */
+  .card-head > *, .card-body > *{ animation:fadeUp 0.42s cubic-bezier(0.2,0.8,0.25,1) both; }
+  .card-body > *:nth-child(1){ animation-delay:0.04s; }
+  .card-body > *:nth-child(2){ animation-delay:0.075s; }
+  .card-body > *:nth-child(3){ animation-delay:0.11s; }
+  .card-body > *:nth-child(4){ animation-delay:0.145s; }
+  .card-body > *:nth-child(5){ animation-delay:0.18s; }
+  .card-body > *:nth-child(6){ animation-delay:0.215s; }
+  .card-body > *:nth-child(7){ animation-delay:0.25s; }
+  .card-body > *:nth-child(8){ animation-delay:0.285s; }
+  .card-body > *:nth-child(9){ animation-delay:0.32s; }
+  .card-body > *:nth-child(n+10){ animation-delay:0.34s; }
+
+  .meter i{ transition:width 0.95s cubic-bezier(0.2,0.8,0.25,1); } /* 정복 진행도가 차오르는 연출 */
+  button.act{ transition:background 0.18s ease, color 0.18s ease, transform 0.12s ease; }
+  button.act:active:not(:disabled){ transform:translateY(1px) scale(0.985); }
+  .cta{ position:relative; overflow:hidden; }
+  .cta::after{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(100deg, transparent 36%, rgba(255,255,255,0.5) 50%, transparent 64%);
+    transform:translateX(-130%);
+  }
+  .cta:not(:disabled)::after{ animation:sweep 3s 1.1s ease-in-out infinite; } /* 누를 수 있을 때만 빛이 지나간다 */
+  .react-btn{ transition:background 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.12s ease; }
+  .react-btn:active:not(:disabled){ transform:scale(0.96); }
+  .react-btn.just .n{ animation:bump 0.45s cubic-bezier(0.2,0.9,0.3,1); }
+  .result-box{ animation:popIn 0.3s cubic-bezier(0.2,0.85,0.3,1) both; }
+  .comment{ animation:fadeUp 0.34s both; }
+  .overlay-search input, .comment-form input, .write-form textarea{ transition:border-color 0.16s ease, box-shadow 0.16s ease; }
+  .overlay-search input:focus, .comment-form input:focus, .write-form textarea:focus{
+    outline:none; border-color:var(--gold); box-shadow:0 0 0 2px rgba(186,117,23,0.25);
+  }
+
+  .skeleton{
+    height:12px; margin-bottom:10px;
+    background:linear-gradient(90deg, rgba(17,17,16,0.07) 25%, rgba(17,17,16,0.17) 37%, rgba(17,17,16,0.07) 63%);
+    background-size:200% 100%; animation:shimmer 1.15s linear infinite;
+  }
+  .skeleton.w60{ width:60%; }
+  .skeleton.w80{ width:80%; }
+
+  /* 해방/점령이 성사된 순간 화면 전체에 금빛이 한 번 번진다. */
+  .flash{
+    position:fixed; inset:0; z-index:2500; pointer-events:none;
+    background:radial-gradient(circle at 50% 45%, rgba(186,117,23,0.7), rgba(186,117,23,0) 62%);
+    animation:flashOut 0.85s ease-out forwards;
+  }
+
   @media (max-width:600px){
     .modal-backdrop{ padding:0; align-items:flex-end; }
-    .modal-box{ max-height:92vh; width:100%; }
+    .modal-box{ max-height:92vh; width:100%; animation:sheetIn 0.32s cubic-bezier(0.2,0.85,0.3,1) both; }
+    .modal-backdrop.closing .modal-box{ animation:sheetIn 0.2s ease reverse both; }
     .brand-badge{ display:none; }
+  }
+
+  /* 멀미·전정 장애가 있는 사용자는 OS 설정 하나로 모든 연출을 끈다. */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.001ms !important; animation-delay:0ms !important;
+      animation-iteration-count:1 !important; transition-duration:0.001ms !important;
+    }
   }
 </style>
 </head>
@@ -293,15 +410,50 @@
   const STATUS_COLOR = { npc: '#8a8a84', taken: '#B23A3A', mine: '#2F7D4F' };
   const STATUS_LABEL = { npc: '미개척', taken: '타 세력 지배', mine: '내 지배' };
 
+  /* ---------------- 모션 ---------------- */
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 숫자가 툭 바뀌는 대신 짧게 차오른다. 마크업에는 최종값을 그대로 써 두고 여기서 덮어쓰기 때문에,
+  // 이 함수가 안 돌아도(모션 끔 등) 화면에는 정확한 값이 남는다.
+  function countUp(el, to, ms = 650) {
+    if (reduceMotion || !(to > 0)) { el.textContent = to; return; }
+    const start = performance.now();
+    (function step(now) {
+      const p = Math.min(1, (now - start) / ms);
+      el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(step);
+    })(start);
+  }
+  const animateCounts = (root) =>
+    root.querySelectorAll('[data-count]').forEach((el) => countUp(el, Number(el.dataset.count)));
+
+  function flashScreen() {
+    if (reduceMotion) return;
+    const el = document.createElement('div');
+    el.className = 'flash';
+    el.addEventListener('animationend', () => el.remove());
+    document.body.appendChild(el);
+  }
+
   /* ---------------- 지도 ---------------- */
   // preferCanvas — 영토 마커가 750개가 넘어서 DOM 마커(divIcon)로는 팬/줌이 눈에 띄게 버벅인다.
   const mapAvailable = typeof L !== 'undefined';
   let map = null;
+
+  // 사람이 사는 위도대 전체. 예전에는 setView([25,15], 2.3)으로 시작했는데, Leaflet 기본 zoomSnap이
+  // 1이라 실제로는 줌 2로 반올림돼 세계 지도 폭이 1024px로 고정됐다. 1280px 창에서는 우연히 딱
+  // 맞았지만 좁은 화면에서는 경도 약 -53°~83°만 남아서 미국(-77°)과 중국(+116°)이 화면 밖으로
+  // 밀려났다. 폭에 맞춰 줌을 계산하는 fitBounds로 바꿔 어떤 화면에서도 250개국이 처음부터 들어온다.
+  const WORLD_BOUNDS = [[-56, -172], [74, 178]];
   if (mapAvailable) {
-    map = L.map('map', { zoomControl: false, attributionControl: false, preferCanvas: true, worldCopyJump: true })
-      .setView([25, 15], 2.3);
+    map = L.map('map', {
+      zoomControl: false, attributionControl: false, preferCanvas: true, worldCopyJump: true,
+      zoomSnap: 0.25, minZoom: 0, // 정수 줌만 허용하면 좁은 화면에서 한 단계 더 줄어들어 지도가 쓸데없이 작아진다
+    });
+    map.fitBounds(WORLD_BOUNDS, { animate: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, subdomains: 'abc' }).addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map); // 확대/축소는 오른쪽 아래
+    map.on('zoomend', syncMarkerRadius);
   } else {
     console.warn('Leaflet을 불러오지 못해 지도 대신 목록으로 표시합니다.');
     document.getElementById('map').innerHTML =
@@ -328,7 +480,7 @@
           return;
         }
         const marker = L.circleMarker([t.lat, t.lng], {
-          radius: 5, fillColor: color, fillOpacity: 0.95, color: '#ffffff', weight: 1.4,
+          radius: markerRadius(), fillColor: color, fillOpacity: 0.95, color: '#ffffff', weight: 1.4,
         }).addTo(map);
         marker.on('click', (e) => {
           if (writeMode) return; // 기록 모드에서는 지도 클릭이 우선
@@ -346,44 +498,82 @@
       list.querySelectorAll('[data-open]').forEach((el) => el.addEventListener('click', () => openTerritory(el.dataset.open)));
     }
 
+    syncMarkerRadius();
+    syncPulse();
     renderMineOverlay();
   }
 
+  // 세계 전체가 보이는 줌에서 5px 점 780개는 서로 뭉개진다. 줌 구간이 바뀔 때만 한 번 훑어
+  // 크기를 맞춘다(캔버스 렌더러는 이 호출들을 프레임당 한 번의 다시 그리기로 묶는다).
+  function markerRadius() {
+    const z = map ? map.getZoom() : 2;
+    return z < 2 ? 3 : z < 3.5 ? 4 : z < 6 ? 5 : 6.5;
+  }
+  let radiusNow = null;
+  function syncMarkerRadius() {
+    if (!mapAvailable) return;
+    const r = markerRadius();
+    if (r === radiusNow) return;
+    radiusNow = r;
+    Object.values(markersById).forEach((m) => m.setRadius(r));
+  }
+
+  // 내 영토에만 확산 링을 얹는다 — 전 영토에 걸면 DOM 마커가 780개로 늘어 팬이 그대로 끊긴다.
+  const MAX_PULSE = 40;
+  let pulseMarkers = [];
+  function syncPulse() {
+    if (!mapAvailable) return;
+    pulseMarkers.forEach((m) => map.removeLayer(m));
+    pulseMarkers = territories
+      .filter((t) => currentUserId && t.dominant_user_id === currentUserId && t.lat != null)
+      .slice(0, MAX_PULSE)
+      .map((t) => L.marker([t.lat, t.lng], {
+        icon: L.divIcon({ html: '<i class="territory-pulse"></i>', className: '', iconSize: [0, 0], iconAnchor: [0, 0] }),
+        interactive: false, keyboard: false, zIndexOffset: -100,
+      }).addTo(map));
+  }
+
+  let mineOverlayCounted = false;
   function renderMineOverlay() {
     const el = document.getElementById('mineOverlay');
     const npc = territories.filter((t) => t.status === 'npc').length;
     const mine = territories.filter((t) => currentUserId && t.dominant_user_id === currentUserId);
     const taken = territories.length - npc - mine.length;
 
+    // data-count가 붙은 숫자는 첫 렌더에서만 0부터 차오른다. 기여할 때마다 전황 숫자가 전부
+    // 다시 튀면 정작 방금 바뀐 값이 묻히므로, 재렌더에서는 그냥 최종값으로 둔다.
+    const num = (n) => `<span data-count="${n}">${n}</span>`;
     const worldRows = `
-      <div class="mine-row"><span>미개척</span><span>${npc}</span></div>
-      <div class="mine-row"><span>타 세력</span><span>${taken}</span></div>`;
+      <div class="mine-row"><span>미개척</span>${num(npc)}</div>
+      <div class="mine-row"><span>타 세력</span>${num(taken)}</div>`;
 
     if (!authToken) {
       el.innerHTML = `<h3>세계 전황</h3>${worldRows}
-        <div class="mine-row"><span>전체 영토</span><span>${territories.length}</span></div>
+        <div class="mine-row"><span>전체 영토</span>${num(territories.length)}</div>
         <div style="margin-top:9px; font-size:11.5px; color:var(--gray-2);">
           <a href="/v2.html" style="color:var(--gold); font-weight:700;">로그인하고 참전 →</a>
         </div>`;
-      return;
+    } else {
+      const resisting = territories.filter((t) => (t.my_resistance_points || 0) > 0);
+      el.innerHTML = `
+        <h3>세계 전황</h3>${worldRows}
+        <div class="mine-row"><span>내 영토</span>${num(mine.length)}</div>
+        ${mine.slice(0, 5).map((t) => `<div class="mine-row"><span>${esc(t.name)}</span><span>${t.total_points}pt</span></div>`).join('')}
+        ${resisting.length ? `<h3 style="margin-top:11px;">저항 중</h3>` +
+          resisting.slice(0, 3).map((t) => `<div class="mine-row"><span>${esc(t.name)}</span><span>${t.my_resistance_points}pt</span></div>`).join('') : ''}
+      `;
     }
 
-    const resisting = territories.filter((t) => (t.my_resistance_points || 0) > 0);
-    el.innerHTML = `
-      <h3>세계 전황</h3>${worldRows}
-      <div class="mine-row"><span>내 영토</span><span>${mine.length}</span></div>
-      ${mine.slice(0, 5).map((t) => `<div class="mine-row"><span>${esc(t.name)}</span><span>${t.total_points}pt</span></div>`).join('')}
-      ${resisting.length ? `<h3 style="margin-top:11px;">저항 중</h3>` +
-        resisting.slice(0, 3).map((t) => `<div class="mine-row"><span>${esc(t.name)}</span><span>${t.my_resistance_points}pt</span></div>`).join('') : ''}
-    `;
+    if (!mineOverlayCounted) { animateCounts(el); mineOverlayCounted = true; }
   }
 
   async function loadSeason() {
     try {
       const s = await apiRequest('/neighborhoods/season/current');
+      // 남은 날이 한 주 안쪽일 때만 숫자를 맥동시킨다 — 늘 깜빡이면 그냥 배경이 된다.
       document.getElementById('seasonOverlay').innerHTML = `
         <div class="season-label">시즌 ${s.season_weeks}주</div>
-        <div class="days">D-${s.days_remaining}</div>
+        <div class="days${s.days_remaining <= 7 ? ' urgent' : ''}">D-${s.days_remaining}</div>
         <div class="season-note">종료 시 전 영토 초기화</div>`;
     } catch (err) {
       document.getElementById('seasonOverlay').innerHTML = '<div class="season-label">시즌 정보 없음</div>';
@@ -407,11 +597,12 @@
       .filter((t) => t.name.toLowerCase().includes(q) || (t.region_name || '').toLowerCase().includes(q))
       .slice(0, 20);
     searchResults.innerHTML = hits.length
-      ? hits.map((t) => `<div data-go="${esc(t.id)}">${esc(t.name)}</div>`).join('')
+      ? hits.map((t, i) => `<div data-go="${esc(t.id)}" style="animation-delay:${(i * 0.022).toFixed(3)}s">${esc(t.name)}</div>`).join('')
       : '<div style="color:var(--gray-2); cursor:default;">결과 없음</div>';
     searchResults.querySelectorAll('[data-go]').forEach((el) => el.addEventListener('click', () => {
       const t = territoryById[el.dataset.go];
-      if (map && t && t.lat != null) map.setView([t.lat, t.lng], 6);
+      // 순간이동 대신 날아가서 내려앉는다 — 세계 지도에서 어디로 이동했는지 눈으로 따라갈 수 있다.
+      if (map && t && t.lat != null) map.flyTo([t.lat, t.lng], 6, { duration: reduceMotion ? 0 : 1.2 });
       searchInput.value = '';
       searchResults.innerHTML = '';
       openTerritory(t.id);
@@ -421,20 +612,43 @@
   /* ---------------- 모달 ---------------- */
   const modal = document.getElementById('modal');
   const modalContent = document.getElementById('modalContent');
-  function closeModal() { modal.style.display = 'none'; }
+  // 닫는 연출이 끝난 뒤에 숨긴다. 예약된 숨김은 openModal에서 반드시 취소해야 한다 —
+  // 닫자마자 다른 카드를 여는 흐름(기록 작성 → 글 카드)에서 새로 연 모달이 도로 사라진다.
+  const MODAL_EXIT_MS = 190;
+  let modalHideTimer = null;
+  function closeModal() {
+    if (modal.style.display === 'none') return;
+    modal.classList.add('closing');
+    clearTimeout(modalHideTimer);
+    modalHideTimer = setTimeout(() => {
+      modal.style.display = 'none';
+      modal.classList.remove('closing');
+    }, MODAL_EXIT_MS);
+  }
   document.getElementById('modalClose').addEventListener('click', closeModal);
   modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
+  const SKELETON = `<div class="card-body">
+    <div class="skeleton w60"></div><div class="skeleton"></div>
+    <div class="skeleton w80"></div><div class="skeleton"></div></div>`;
+
   function openModal(html) {
+    clearTimeout(modalHideTimer);
+    modal.classList.remove('closing');
     modalContent.innerHTML = html;
     modal.style.display = 'flex';
     modal.querySelector('.modal-box').scrollTop = 0;
+    animateCounts(modalContent);
+    // 미터는 0에서 목표 너비로 흘러야 하므로, 붙인 다음 프레임에 목표값을 넣는다.
+    requestAnimationFrame(() => {
+      modalContent.querySelectorAll('.meter i[data-fill]').forEach((i) => { i.style.width = `${i.dataset.fill}%`; });
+    });
   }
 
   /* ---------------- 영토 프로필 카드 ---------------- */
   async function openTerritory(id) {
-    openModal('<div class="card-body"><div class="muted">불러오는 중...</div></div>');
+    openModal(SKELETON);
     try {
       renderTerritory(await apiRequest(`/neighborhoods/${id}`));
     } catch (err) {
@@ -513,10 +727,10 @@
           </div>
         </div>
 
-        <div class="meter"><i style="width:${pct}%"></i></div>
+        <div class="meter"><i data-fill="${pct}" style="width:0"></i></div>
 
         <div class="section-label">전황</div>
-        <div class="stat-row"><span>누적 정복력</span><b>${t.total_points}${t.status === 'npc' ? ` / ${t.npc_difficulty}` : 'pt'}</b></div>
+        <div class="stat-row"><span>누적 정복력</span><b><span data-count="${t.total_points}">${t.total_points}</span>${t.status === 'npc' ? ` / ${t.npc_difficulty}` : 'pt'}</b></div>
         ${t.my_resistance_points
           ? `<div class="stat-row"><span>내 저항 포인트</span><b>${t.my_resistance_points} / ${t.resistance_threshold}</b></div>` : ''}
 
@@ -556,6 +770,7 @@
       const r = await apiRequest(`/neighborhoods/${id}/contribute`, { method: 'POST' });
       pendingResult = `<div class="result-box win">+${r.points_awarded}pt 기여 — 누적 ${r.total_points}pt` +
         (r.liberation ? `<br><b>해방됐다.</b> 새 지배자: ${esc(r.liberation.dominant_nickname)}` : '') + '</div>';
+      if (r.liberation) flashScreen();
       await loadTerritories();
       await openTerritory(id);
     } catch (err) {
@@ -576,6 +791,7 @@
         ${r.attacker_wins ? '<b>점령 성공.</b> 지배자가 교체됐다.' : '<b>점령 실패.</b>'}<br>
         공격력 ${r.attacker_power} vs 방어력 ${r.defense_power}${r.insurrection ? ' (반란)' : ''}
       </div>`;
+      if (r.attacker_wins) flashScreen();
       await loadTerritories();
       await openTerritory(targetId);
     } catch (err) {
@@ -613,7 +829,7 @@
   }
 
   async function openPost(id) {
-    openModal('<div class="card-body"><div class="muted">불러오는 중...</div></div>');
+    openModal(SKELETON);
     try {
       const [post, comments] = await Promise.all([
         apiRequest(`/map-posts/${id}`),
@@ -624,6 +840,10 @@
       openModal(`<div class="card-body"><div class="muted">불러오지 못했습니다: ${esc(err.message)}</div></div>`);
     }
   }
+
+  // 방금 누른 반응 버튼의 숫자만 한 번 튀게 하려고 어떤 표였는지 기억해 둔다(재렌더에서 소비).
+  const REACTIONS = [['up', '추천', 'upvotes'], ['down', '비추천', 'downvotes'], ['fool', '바보', 'fool_votes']];
+  let justVoted = null;
 
   function renderPost(post, comments) {
     const isMine = currentUserId && post.author_id === currentUserId;
@@ -655,9 +875,9 @@
         <div class="post-body">${esc(post.body)}</div>
 
         <div class="react-row">
-          <button class="react-btn${on('up')}" data-vote="up" ${reactDisabled ? 'disabled' : ''}><span class="n">${voteCount(post.upvotes)}</span>추천</button>
-          <button class="react-btn${on('down')}" data-vote="down" ${reactDisabled ? 'disabled' : ''}><span class="n">${voteCount(post.downvotes)}</span>비추천</button>
-          <button class="react-btn${on('fool')}" data-vote="fool" ${reactDisabled ? 'disabled' : ''}><span class="n">${voteCount(post.fool_votes)}</span>바보</button>
+          ${REACTIONS.map(([type, label, field]) => `
+            <button class="react-btn${on(type)}${justVoted === type ? ' just' : ''}" data-vote="${type}" ${reactDisabled ? 'disabled' : ''}>
+              <span class="n">${voteCount(post[field])}</span>${label}</button>`).join('')}
         </div>
         ${isMine ? '<div class="cta-note">본인 글에는 반응할 수 없습니다.</div>' : ''}
         <div id="voteResult"></div>
@@ -665,7 +885,7 @@
         <div class="section-label">댓글 ${comments.length}</div>
         <div id="commentList">
           ${comments.length
-            ? comments.map((c) => `<div class="comment">
+            ? comments.map((c, i) => `<div class="comment" style="animation-delay:${(0.36 + i * 0.05).toFixed(3)}s">
                 <div class="comment-head"><b>${esc(c.author_nickname)}</b><span class="muted">${esc(RANK_LABEL[c.author_rank] || c.author_rank)}</span></div>
                 <div class="comment-body">${esc(c.body)}</div>
               </div>`).join('')
@@ -680,6 +900,7 @@
       </div>
     `);
 
+    justVoted = null;
     document.querySelectorAll('[data-vote]').forEach((btn) => {
       btn.addEventListener('click', async () => {
         try {
@@ -687,6 +908,7 @@
             method: 'POST',
             body: JSON.stringify({ vote_type: btn.dataset.vote }),
           });
+          justVoted = btn.dataset.vote;
           openPost(post.id);
         } catch (err) {
           document.getElementById('voteResult').innerHTML = `<div class="result-box lose">${esc(err.message)}</div>`;
