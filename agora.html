@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title id="pageTitle">AGORA — 동단위 정복 · 실시간 정치 시뮬레이션</title>
-<meta name="description" id="metaDescription" content="내 동네를 기여로 해방하고, 인접 동을 공격해 지배권을 뺏는다. 실시간으로 갈리는 동단위 정복 지도.">
+<title id="pageTitle">AGORA PANGAEA — 세계 250개국 영토 정복 지도</title>
+<meta name="description" id="metaDescription" content="전 세계 250개국, 750여 개 영토를 기여로 해방하고 인접 영토를 공격해 지배권을 빼앗는다. 지도 아무 곳에나 글을 남기고 반응을 주고받는 실시간 정복 지도.">
 <link rel="canonical" href="https://myagora.xyz/" id="canonicalLink">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111110'/%3E%3Ctext x='32' y='46' font-family='Arial, sans-serif' font-weight='900' font-size='38' fill='%23BA7517' text-anchor='middle'%3E%CE%91%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AGORA">
-<meta property="og:title" id="ogTitle" content="AGORA — 동단위 정복 · 실시간 정치 시뮬레이션">
-<meta property="og:description" id="ogDescription" content="내 동네를 기여로 해방하고, 인접 동을 공격해 지배권을 뺏는다. 실시간으로 갈리는 동단위 정복 지도.">
+<meta property="og:title" id="ogTitle" content="AGORA PANGAEA — 세계 250개국 영토 정복 지도">
+<meta property="og:description" id="ogDescription" content="전 세계 250개국, 750여 개 영토를 기여로 해방하고 인접 영토를 공격해 지배권을 빼앗는다.">
 <meta property="og:image" content="https://myagora.xyz/og-image.png">
 <meta property="og:url" id="ogUrl" content="https://myagora.xyz/">
 <meta name="twitter:card" content="summary_large_image">
@@ -26,98 +26,213 @@
     --black:#111110; --ink:#1c1c1a; --gray-1:#4a4a46; --gray-2:#8a8a84; --gray-3:#c9c9c2;
     --white:#ffffff; --line:rgba(17,17,16,0.14); --gold:#BA7517; --on-gold:#111110;
     --npc:#8a8a84; --taken:#B23A3A; --mine:#2F7D4F;
+    --panel:rgba(17,17,16,0.9);
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   html,body{ height:100%; overflow:hidden; }
   body{ font-family:'Archivo',sans-serif; color:var(--ink); background:var(--black); }
 
   header{
-    position:fixed; top:0; left:0; right:0; z-index:20; height:48px;
-    display:flex; align-items:center; justify-content:space-between; padding:0 16px;
-    background:rgba(17,17,16,0.88); color:var(--white); backdrop-filter:blur(4px);
+    position:fixed; top:0; left:0; right:0; z-index:1200; height:48px;
+    display:flex; align-items:center; gap:10px; padding:0 14px;
+    background:rgba(17,17,16,0.92); color:var(--white); backdrop-filter:blur(4px);
   }
-  .wordmark{ font-weight:800; letter-spacing:0.14em; font-size:15px; color:var(--white); text-decoration:none; }
-  .v3-badge{ font-size:11px; color:var(--gold); font-weight:700; letter-spacing:0.04em; }
-  .v3-back{ font-size:12px; color:var(--gray-3); text-decoration:none; }
-  .v3-back:hover{ color:var(--white); }
+  .wordmark{ font-weight:800; letter-spacing:0.14em; font-size:15px; color:var(--white); text-decoration:none; flex-shrink:0; }
+  .brand-badge{
+    font-size:10.5px; color:var(--gold); font-weight:800; letter-spacing:0.18em;
+    border:1px solid rgba(186,117,23,0.55); padding:3px 8px; flex-shrink:0;
+  }
+  .header-spacer{ flex:1; }
+  .header-link{ font-size:12px; color:var(--gray-3); text-decoration:none; white-space:nowrap; flex-shrink:0; }
+  .header-link:hover{ color:var(--white); }
 
   #map{ position:fixed; inset:0; top:48px; z-index:1; }
-  #map .leaflet-tile-pane{ filter:grayscale(1) contrast(1.05) brightness(0.75); }
+  #map .leaflet-tile-pane{ filter:grayscale(1) contrast(1.05) brightness(0.72); }
+  .leaflet-control-zoom a{ border-radius:0 !important; }
 
   .overlay{
-    position:fixed; z-index:15; background:rgba(17,17,16,0.88); color:var(--white);
-    padding:12px 16px; font-size:12.5px; line-height:1.5;
+    position:fixed; z-index:1000; background:var(--panel); color:var(--white);
+    padding:10px 13px; font-size:12.5px; line-height:1.5; backdrop-filter:blur(3px);
   }
-  .overlay-season{ top:60px; left:16px; min-width:180px; }
-  .overlay-season .days{ font-size:22px; font-weight:800; color:var(--gold); }
-  .overlay-mine{ top:60px; right:16px; min-width:220px; max-width:280px; max-height:40vh; overflow-y:auto; }
-  .overlay-mine h3{ font-size:12px; color:var(--gold); margin-bottom:8px; letter-spacing:0.04em; }
-  .overlay-mine .mine-row{ display:flex; justify-content:space-between; gap:8px; padding:5px 0; border-top:1px solid rgba(255,255,255,0.12); }
-  .overlay-mine .mine-row:first-of-type{ border-top:none; }
-  .overlay-legend{
-    bottom:16px; left:16px; display:flex; gap:14px; align-items:center; font-size:11px;
-  }
-  .overlay-legend .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; }
-  .dot.npc{ background:var(--npc); } .dot.taken{ background:var(--taken); } .dot.mine{ background:var(--mine); }
 
+  /* 시즌 카드와 내 영토 카드가 좁은 화면에서 겹치지 않도록 둘 다 화면 절반을 넘지 않게 묶어둔다. */
+  .overlay-season{ top:58px; left:12px; width:max-content; max-width:min(210px, 44vw); }
+  .overlay-season .season-label{ font-size:10px; letter-spacing:0.12em; color:var(--gray-3); text-transform:uppercase; }
+  .overlay-season .days{ font-size:20px; font-weight:800; color:var(--gold); line-height:1.15; }
+  .overlay-season .season-note{ font-size:10.5px; color:var(--gray-2); }
+
+  .overlay-search{ position:fixed; z-index:1000; top:126px; left:12px; width:min(210px, 44vw); }
+  .overlay-search input{
+    width:100%; background:var(--panel); color:var(--white); border:1px solid rgba(255,255,255,0.18);
+    padding:7px 10px; font-family:'Archivo',sans-serif; font-size:12px;
+  }
+  .overlay-search input::placeholder{ color:var(--gray-2); }
+  .search-results{ background:var(--panel); color:var(--white); max-height:34vh; overflow-y:auto; }
+  .search-results div{ padding:7px 10px; cursor:pointer; border-top:1px solid rgba(255,255,255,0.1); font-size:12px; }
+  .search-results div:hover{ background:rgba(186,117,23,0.25); }
+
+  .overlay-mine{ top:58px; right:12px; width:max-content; min-width:150px; max-width:min(260px, 44vw); max-height:46vh; overflow-y:auto; }
+  .overlay-mine h3{ font-size:10px; color:var(--gold); margin-bottom:7px; letter-spacing:0.12em; text-transform:uppercase; }
+  .overlay-mine .mine-row{ display:flex; justify-content:space-between; gap:10px; padding:4px 0; border-top:1px solid rgba(255,255,255,0.12); }
+  .overlay-mine .mine-row:first-of-type{ border-top:none; }
+  .overlay-mine .mine-row span:last-child{ color:var(--gold); font-weight:700; white-space:nowrap; }
+
+  .overlay-legend{ bottom:12px; left:12px; display:flex; flex-wrap:wrap; gap:6px 12px; align-items:center; font-size:11px; max-width:min(320px, 58vw); }
+  .overlay-legend .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; vertical-align:middle; }
+  .dot.npc{ background:var(--npc); } .dot.taken{ background:var(--taken); } .dot.mine{ background:var(--mine); }
+  .dot.post{ background:var(--gold); border-radius:0; }
+
+  /* 글쓰기 FAB — Leaflet 줌 컨트롤(오른쪽 아래)을 가리지 않도록 그 위에 띄운다. */
+  .fab{
+    position:fixed; right:12px; bottom:92px; z-index:1000;
+    background:var(--gold); color:var(--on-gold); border:none; cursor:pointer;
+    font-family:'Archivo',sans-serif; font-weight:800; font-size:12px; letter-spacing:0.04em;
+    padding:11px 14px; box-shadow:0 2px 10px rgba(0,0,0,0.45);
+  }
+  .fab.active{ background:var(--white); color:var(--black); }
+  .write-hint{
+    position:fixed; left:50%; transform:translateX(-50%); bottom:12px; z-index:1000;
+    background:var(--gold); color:var(--on-gold); padding:8px 14px; font-size:12px; font-weight:700;
+  }
+
+  .map-post-pin svg{ display:block; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5)); }
+
+  /* ---------- 모달 / 프로필 카드 ---------- */
   .modal-backdrop{
-    position:fixed; inset:0; background:rgba(17,17,16,0.6); z-index:30;
+    position:fixed; inset:0; background:rgba(17,17,16,0.68); z-index:2000;
     display:flex; align-items:center; justify-content:center; padding:16px;
   }
   .modal-box{
     background:var(--white); width:420px; max-width:100%; max-height:86vh; overflow-y:auto;
-    padding:24px; position:relative;
+    padding:0; position:relative;
   }
-  .modal-close{ position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--gray-1); }
-  .modal-box h2{ font-size:19px; font-weight:800; margin-bottom:4px; }
-  .modal-sub{ font-size:12px; color:var(--gray-2); margin-bottom:16px; }
-  .status-pill{ display:inline-block; font-size:10.5px; padding:2px 9px; border-radius:999px; border:1px solid var(--black); margin-right:6px; }
-  .status-pill.npc{ background:var(--gray-3); }
-  .status-pill.contested{ background:rgba(186,117,23,0.18); border-color:var(--gold); }
-  .stat-row{ display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid var(--line); font-size:13.5px; }
+  .modal-close{
+    position:absolute; top:10px; right:12px; background:none; border:none; font-size:22px;
+    cursor:pointer; color:var(--gray-3); line-height:1; z-index:2;
+  }
+
+  /* 카드 헤더 — 영토/게시글 공통. 검정 바탕에 금색 라벨로 "문서" 느낌을 준다. */
+  .card-head{ background:var(--black); color:var(--white); padding:18px 22px 16px; }
+  .card-eyebrow{ font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--gold); margin-bottom:5px; }
+  .card-title{ font-size:20px; font-weight:800; line-height:1.2; }
+  .card-sub{ font-size:12px; color:var(--gray-3); margin-top:3px; }
+  .card-body{ padding:18px 22px 22px; }
+
+  .status-pill{ display:inline-block; font-size:10px; padding:3px 9px; margin:9px 6px 0 0; font-weight:700; letter-spacing:0.06em; }
+  .status-pill.npc{ background:var(--npc); color:var(--black); }
+  .status-pill.contested,.status-pill.dominant{ background:var(--taken); color:var(--white); }
+  .status-pill.owned{ background:var(--mine); color:var(--white); }
+  .status-pill.ghost{ background:none; border:1px solid rgba(255,255,255,0.35); color:var(--gray-3); }
+
+  /* 프로필 카드 — 투구 픽토그램 + 신원 정보. 졸라맨 대신 코린토스식 투구를 쓴다. */
+  .profile-card{ display:flex; gap:14px; align-items:center; padding:13px; background:#f4f3ee; border-left:3px solid var(--gold); }
+  .profile-sigil{ width:52px; height:52px; flex-shrink:0; background:var(--black); color:var(--gold); display:flex; align-items:center; justify-content:center; }
+  .profile-sigil.owner-me{ color:var(--mine); }
+  .profile-sigil.owner-none{ color:var(--gray-2); }
+  .profile-meta{ min-width:0; }
+  .profile-role{ font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gray-2); }
+  .profile-name{ font-size:16px; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
+  .profile-tags{ display:flex; flex-wrap:wrap; gap:5px; margin-top:5px; }
+  .tag{ font-size:10px; padding:2px 7px; background:var(--black); color:var(--white); font-weight:600; }
+  .tag.soft{ background:var(--gray-3); color:var(--ink); }
+
+  .section-label{ font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.14em; color:var(--gray-2); margin:20px 0 8px; }
+  .stat-row{ display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-top:1px solid var(--line); font-size:13.5px; }
   .stat-row:first-of-type{ border-top:none; }
   .stat-row span:first-child{ color:var(--gray-2); }
-  .section-label{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--gray-2); margin:16px 0 8px; }
-  .contrib-row{ display:flex; justify-content:space-between; font-size:13px; padding:4px 0; }
-  .adj-row{ display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid var(--line); gap:8px; }
+  .stat-row b{ font-weight:700; }
+
+  .meter{ height:6px; background:var(--gray-3); margin-top:8px; }
+  .meter i{ display:block; height:100%; background:var(--gold); }
+
+  .contrib-row{ display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:5px 0; }
+  .contrib-row .rank-no{ color:var(--gray-2); width:18px; display:inline-block; }
+  .adj-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--line); }
   .adj-row:first-of-type{ border-top:none; }
   .adj-name{ font-size:13px; }
-  .adj-status{ font-size:11px; color:var(--gray-2); }
-  button.act{ background:var(--black); color:var(--white); border:none; padding:9px 14px; font-family:'Archivo',sans-serif; font-weight:700; font-size:12.5px; cursor:pointer; }
-  button.act:hover{ background:var(--gold); color:var(--on-gold); }
+  .muted{ font-size:11.5px; color:var(--gray-2); }
+
+  button.act{
+    background:var(--black); color:var(--white); border:none; padding:9px 14px;
+    font-family:'Archivo',sans-serif; font-weight:700; font-size:12.5px; cursor:pointer;
+  }
+  button.act:hover:not(:disabled){ background:var(--gold); color:var(--on-gold); }
   button.act:disabled{ background:var(--gray-3); color:var(--gray-1); cursor:not-allowed; }
-  button.act-gold{ background:var(--gold); color:var(--on-gold); }
-  .contribute-btn{ width:100%; margin-top:14px; padding:12px; }
-  .insurrection-box{ margin-top:14px; padding:12px; border:1px solid var(--gold); background:rgba(186,117,23,0.08); font-size:12.5px; }
+  .cta{ width:100%; margin-top:18px; padding:14px; font-size:14px; letter-spacing:0.03em; background:var(--gold); color:var(--on-gold); }
+  .cta:hover:not(:disabled){ background:var(--black); color:var(--white); }
+  .cta-note{ font-size:11.5px; color:var(--gray-2); margin-top:7px; text-align:center; }
+
   .result-box{ margin-top:14px; padding:12px; font-size:13px; border:1px solid var(--line); }
-  .result-box.win{ border-color:var(--mine); background:rgba(47,125,79,0.08); }
-  .result-box.lose{ border-color:var(--taken); background:rgba(178,58,58,0.08); }
-  .signed-out-note{ font-size:12px; color:var(--gray-2); }
+  .result-box.win{ border-color:var(--mine); background:rgba(47,125,79,0.09); }
+  .result-box.lose{ border-color:var(--taken); background:rgba(178,58,58,0.09); }
+
+  .post-body{ font-size:14.5px; line-height:1.65; margin-top:14px; overflow-wrap:anywhere; white-space:pre-wrap; }
+  .react-row{ display:flex; gap:7px; margin-top:16px; flex-wrap:wrap; }
+  .react-btn{
+    flex:1; min-width:82px; background:var(--white); border:1px solid var(--black); color:var(--ink);
+    padding:8px 6px; font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; cursor:pointer;
+  }
+  .react-btn:hover:not(:disabled){ background:var(--black); color:var(--white); }
+  .react-btn.on{ background:var(--gold); border-color:var(--gold); color:var(--on-gold); }
+  .react-btn:disabled{ opacity:0.45; cursor:not-allowed; }
+  .react-btn .n{ display:block; font-size:15px; font-weight:800; }
+
+  .comment{ padding:10px 0; border-top:1px solid var(--line); }
+  .comment-head{ display:flex; gap:7px; align-items:baseline; font-size:12px; }
+  .comment-head b{ font-weight:800; }
+  .comment-body{ font-size:13.5px; line-height:1.55; margin-top:3px; overflow-wrap:anywhere; }
+  .comment-form{ display:flex; gap:7px; margin-top:12px; }
+  .comment-form input, .write-form textarea{
+    flex:1; border:1px solid var(--black); padding:9px 10px; font-family:'Archivo',sans-serif; font-size:13px; color:var(--ink); background:var(--white);
+  }
+  .write-form textarea{ width:100%; min-height:110px; resize:vertical; line-height:1.55; }
+  .write-count{ font-size:11px; color:var(--gray-2); text-align:right; margin-top:5px; }
+  .signed-out-note{ font-size:12.5px; color:var(--gray-2); margin-top:16px; }
   .signed-out-note a{ color:var(--gold); font-weight:700; }
+
+  @media (max-width:600px){
+    .modal-backdrop{ padding:0; align-items:flex-end; }
+    .modal-box{ max-height:92vh; width:100%; }
+    .brand-badge{ display:none; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <a class="wordmark" href="https://myagora.xyz/">ΑΓΟΡΑ</a>
-  <span class="v3-badge">동단위 정복</span>
-  <a class="v3-back" href="/v2.html">채팅·논쟁·랭킹 →</a>
+  <span class="brand-badge">PANGAEA</span>
+  <span class="header-spacer"></span>
+  <a class="header-link" href="/v2.html">채팅 · 논쟁 · 랭킹 →</a>
 </header>
 
 <div id="map"></div>
 
-<div class="overlay overlay-season" id="seasonOverlay">시즌 정보를 불러오는 중...</div>
-<div class="overlay overlay-mine" id="mineOverlay"></div>
-<div class="overlay overlay-legend">
-  <span><i class="dot npc"></i>NPC</span>
-  <span><i class="dot taken"></i>점령됨</span>
-  <span><i class="dot mine"></i>내 지배</span>
+<div class="overlay overlay-season" id="seasonOverlay">
+  <div class="season-label">시즌</div>
+  <div class="days">···</div>
 </div>
 
-<div class="modal-backdrop" id="detailModal" style="display:none;">
+<div class="overlay-search" id="searchOverlay">
+  <input type="search" id="searchInput" placeholder="국가 · 영토 검색" autocomplete="off">
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<div class="overlay overlay-mine" id="mineOverlay"></div>
+
+<div class="overlay overlay-legend">
+  <span><i class="dot npc"></i>미개척</span>
+  <span><i class="dot taken"></i>타 세력</span>
+  <span><i class="dot mine"></i>내 영토</span>
+  <span><i class="dot post"></i>기록</span>
+</div>
+
+<button class="fab" id="writeModeBtn">지도에 기록 남기기</button>
+
+<div class="modal-backdrop" id="modal" style="display:none;">
   <div class="modal-box">
-    <button class="modal-close" id="detailClose">×</button>
-    <div id="detailContent"></div>
+    <button class="modal-close" id="modalClose">×</button>
+    <div id="modalContent"></div>
   </div>
 </div>
 
@@ -125,9 +240,19 @@
 <script>
   const API_BASE = 'https://api.myagora.xyz';
   const authToken = localStorage.getItem('agora_token'); // V2와 같은 origin/키를 공유 — 로그인 상태 그대로 이어받음
+  const RANK_LABEL = { citizen: '시민', supporter: '지지자', prophet: '선지자' };
+  const BODY_MAX = 300;
+  const COMMENT_MAX = 200;
+
   let currentUserId = null;
-  let neighborhoods = [];
+  // 기여/공격 결과는 알리고 나서 곧바로 목록을 새로고침하고 카드를 다시 그리기 때문에,
+  // 결과 메시지를 여기에 잠깐 맡겨뒀다가 다시 그린 카드에 그대로 실어준다(안 그러면 한 프레임 만에 지워진다).
+  let pendingResult = '';
+  let territories = [];
+  const territoryById = {};
   const markersById = {};
+  const postMarkersById = {};
+  let writeMode = false;
 
   async function apiRequest(path, options = {}) {
     const res = await fetch(`${API_BASE}${path}`, {
@@ -143,57 +268,82 @@
     return body;
   }
 
-  function markerColor(n) {
-    if (n.status === 'npc') return getComputedStyle(document.documentElement).getPropertyValue('--npc').trim();
-    if (currentUserId && n.dominant_user_id === currentUserId) return getComputedStyle(document.documentElement).getPropertyValue('--mine').trim();
-    return getComputedStyle(document.documentElement).getPropertyValue('--taken').trim();
+  // 신규 계정 표는 서버에서 0.1로 깎여 들어오는데(voteWeight.js 어뷰징 방지), 반올림하면 방금 누른
+  // 표가 0으로 보인다. 올림으로 표시해 "눌렀는데 0" 상황을 없앤다 — 내부 가중치는 그대로다.
+  const voteCount = (n) => Math.ceil(n || 0);
+
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // 투구 볏을 세운 흉상 픽토그램. 선으로 그린 졸라맨 대신 면으로 채운 실루엣이라 20px 이하로
+  // 줄여도 형태가 뭉개지지 않는다(모달 카드와 목록에서 같은 아이콘을 쓴다).
+  function sigilSvg(size) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 1.3l1.8 2v2.1h-3.6V3.3z"/>
+      <circle cx="12" cy="9.5" r="4.1"/>
+      <path d="M3.7 22.4c0-4.4 3.7-7.5 8.3-7.5s8.3 3.1 8.3 7.5z"/>
+    </svg>`;
   }
 
-  function neighborhoodIcon(n) {
-    const fill = markerColor(n);
-    return L.divIcon({
-      html: `<div style="width:14px;height:14px;border-radius:50%;background:${fill};border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,0.4);"></div>`,
-      className: '', iconSize: [14, 14], iconAnchor: [7, 7],
-    });
+  function statusOf(t) {
+    if (t.status === 'npc') return 'npc';
+    if (currentUserId && t.dominant_user_id === currentUserId) return 'mine';
+    return 'taken';
   }
+  const STATUS_COLOR = { npc: '#8a8a84', taken: '#B23A3A', mine: '#2F7D4F' };
+  const STATUS_LABEL = { npc: '미개척', taken: '타 세력 지배', mine: '내 지배' };
 
-  // 지도(Leaflet CDN)를 못 불러와도 나머지 기능(시즌/내 동 요약/기여/공격)은 그대로 동작해야 하므로,
-  // 지도 초기화는 별도로 감싸고 실패하면 클릭 가능한 목록으로 대체한다.
+  /* ---------------- 지도 ---------------- */
+  // preferCanvas — 영토 마커가 750개가 넘어서 DOM 마커(divIcon)로는 팬/줌이 눈에 띄게 버벅인다.
   const mapAvailable = typeof L !== 'undefined';
   let map = null;
   if (mapAvailable) {
-    map = L.map('map', { zoomControl: true, attributionControl: false }).setView([30, 20], 2.4);
+    map = L.map('map', { zoomControl: false, attributionControl: false, preferCanvas: true, worldCopyJump: true })
+      .setView([25, 15], 2.3);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, subdomains: 'abc' }).addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map); // 확대/축소는 오른쪽 아래
   } else {
     console.warn('Leaflet을 불러오지 못해 지도 대신 목록으로 표시합니다.');
-    document.getElementById('map').innerHTML = '<div id="mapFallbackList" style="position:absolute; inset:0; overflow-y:auto; padding:150px 16px 60px; color:#fff;"></div>';
+    document.getElementById('map').innerHTML =
+      '<div id="mapFallbackList" style="position:absolute; inset:0; overflow-y:auto; padding:150px 16px 60px; color:#fff;"></div>';
   }
 
   async function loadEverything() {
     if (authToken) {
       try { currentUserId = (await apiRequest('/users/me')).id; } catch (err) { /* 토큰 만료 등 — 비로그인처럼 진행 */ }
     }
-    await Promise.all([loadNeighborhoods(), loadSeason()]);
+    await Promise.all([loadTerritories(), loadSeason(), loadPosts()]);
   }
 
-  async function loadNeighborhoods() {
-    neighborhoods = await apiRequest('/neighborhoods');
+  async function loadTerritories() {
+    territories = await apiRequest('/neighborhoods');
+    territories.forEach((t) => { territoryById[t.id] = t; });
 
     if (mapAvailable) {
-      neighborhoods.forEach((n) => {
-        if (n.lat == null || n.lng == null) return;
-        if (markersById[n.id]) { markersById[n.id].setIcon(neighborhoodIcon(n)); return; }
-        const marker = L.marker([n.lat, n.lng], { icon: neighborhoodIcon(n) }).addTo(map);
-        marker.on('click', () => openDetail(n.id));
-        markersById[n.id] = marker;
+      territories.forEach((t) => {
+        if (t.lat == null || t.lng == null) return;
+        const color = STATUS_COLOR[statusOf(t)];
+        if (markersById[t.id]) {
+          markersById[t.id].setStyle({ fillColor: color });
+          return;
+        }
+        const marker = L.circleMarker([t.lat, t.lng], {
+          radius: 5, fillColor: color, fillOpacity: 0.95, color: '#ffffff', weight: 1.4,
+        }).addTo(map);
+        marker.on('click', (e) => {
+          if (writeMode) return; // 기록 모드에서는 지도 클릭이 우선
+          L.DomEvent.stopPropagation(e);
+          openTerritory(t.id);
+        });
+        markersById[t.id] = marker;
       });
     } else {
       const list = document.getElementById('mapFallbackList');
-      list.innerHTML = neighborhoods.map((n) => `
-        <div data-open="${n.id}" style="padding:12px 14px; border:1px solid rgba(255,255,255,0.15); margin-bottom:8px; cursor:pointer;">
-          <b>${n.region_name} · ${n.name}</b> — ${n.status === 'npc' ? 'NPC' : (n.dominant_nickname || '점령됨')} · ${n.total_points}pt
+      list.innerHTML = territories.slice(0, 200).map((t) => `
+        <div data-open="${esc(t.id)}" style="padding:12px 14px; border:1px solid rgba(255,255,255,0.15); margin-bottom:8px; cursor:pointer;">
+          <b>${esc(t.name)}</b> — ${t.status === 'npc' ? '미개척' : esc(t.dominant_nickname || '점령됨')} · ${t.total_points}pt
         </div>`).join('');
-      list.querySelectorAll('[data-open]').forEach((el) => el.addEventListener('click', () => openDetail(el.dataset.open)));
+      list.querySelectorAll('[data-open]').forEach((el) => el.addEventListener('click', () => openTerritory(el.dataset.open)));
     }
 
     renderMineOverlay();
@@ -201,131 +351,444 @@
 
   function renderMineOverlay() {
     const el = document.getElementById('mineOverlay');
+    const npc = territories.filter((t) => t.status === 'npc').length;
+    const mine = territories.filter((t) => currentUserId && t.dominant_user_id === currentUserId);
+    const taken = territories.length - npc - mine.length;
+
+    const worldRows = `
+      <div class="mine-row"><span>미개척</span><span>${npc}</span></div>
+      <div class="mine-row"><span>타 세력</span><span>${taken}</span></div>`;
+
     if (!authToken) {
-      el.innerHTML = '<div class="signed-out-note">로그인하면 내 동 요약이 여기 뜹니다.<br><a href="/v2.html">로그인하러 가기 →</a></div>';
+      el.innerHTML = `<h3>세계 전황</h3>${worldRows}
+        <div class="mine-row"><span>전체 영토</span><span>${territories.length}</span></div>
+        <div style="margin-top:9px; font-size:11.5px; color:var(--gray-2);">
+          <a href="/v2.html" style="color:var(--gold); font-weight:700;">로그인하고 참전 →</a>
+        </div>`;
       return;
     }
-    const mine = neighborhoods.filter((n) => n.dominant_user_id === currentUserId);
-    const resisting = neighborhoods.filter((n) => (n.my_resistance_points || 0) > 0);
+
+    const resisting = territories.filter((t) => (t.my_resistance_points || 0) > 0);
     el.innerHTML = `
-      <h3>내 동 요약</h3>
-      <div class="mine-row"><span>지배 중인 동</span><span>${mine.length}개</span></div>
-      ${mine.slice(0, 5).map((n) => `<div class="mine-row"><span>${n.region_name} · ${n.name}</span><span>${n.total_points}pt</span></div>`).join('')}
-      ${resisting.length ? `<h3 style="margin-top:12px;">저항 진행 중</h3>` + resisting.slice(0, 3).map((n) => `<div class="mine-row"><span>${n.region_name} · ${n.name}</span><span>${n.my_resistance_points}pt</span></div>`).join('') : ''}
+      <h3>세계 전황</h3>${worldRows}
+      <div class="mine-row"><span>내 영토</span><span>${mine.length}</span></div>
+      ${mine.slice(0, 5).map((t) => `<div class="mine-row"><span>${esc(t.name)}</span><span>${t.total_points}pt</span></div>`).join('')}
+      ${resisting.length ? `<h3 style="margin-top:11px;">저항 중</h3>` +
+        resisting.slice(0, 3).map((t) => `<div class="mine-row"><span>${esc(t.name)}</span><span>${t.my_resistance_points}pt</span></div>`).join('') : ''}
     `;
   }
 
   async function loadSeason() {
-    const s = await apiRequest('/neighborhoods/season/current');
-    document.getElementById('seasonOverlay').innerHTML = `
-      <div>시즌 ${s.season_weeks}주 주기</div>
-      <div class="days">D-${s.days_remaining}</div>
-      <div style="color:var(--gray-3); font-size:11px;">종료 시 전체 npc로 초기화</div>
-    `;
-  }
-
-  const detailModal = document.getElementById('detailModal');
-  const detailContent = document.getElementById('detailContent');
-  function closeDetail() { detailModal.style.display = 'none'; }
-  document.getElementById('detailClose').addEventListener('click', closeDetail);
-  detailModal.addEventListener('click', (e) => { if (e.target === detailModal) closeDetail(); });
-
-  async function openDetail(id) {
-    detailModal.style.display = 'flex';
-    detailContent.innerHTML = '<div>불러오는 중...</div>';
     try {
-      const n = await apiRequest(`/neighborhoods/${id}`);
-      renderDetail(n);
+      const s = await apiRequest('/neighborhoods/season/current');
+      document.getElementById('seasonOverlay').innerHTML = `
+        <div class="season-label">시즌 ${s.season_weeks}주</div>
+        <div class="days">D-${s.days_remaining}</div>
+        <div class="season-note">종료 시 전 영토 초기화</div>`;
     } catch (err) {
-      detailContent.innerHTML = `<div>불러오지 못했습니다: ${err.message}</div>`;
+      document.getElementById('seasonOverlay').innerHTML = '<div class="season-label">시즌 정보 없음</div>';
     }
   }
 
-  function renderDetail(n) {
-    const statusLabel = { npc: 'NPC', contested: '점령됨', dominant: '점령됨' }[n.status] || n.status;
-    const canInsurrect = n.my_resistance_points != null && n.my_resistance_points >= n.resistance_threshold;
+  /* ---------------- 검색 ---------------- */
+  const searchInput = document.getElementById('searchInput');
+  const searchResults = document.getElementById('searchResults');
 
-    const adjacentHtml = n.adjacent_neighborhoods.map((adj) => {
-      const iDominateAdj = currentUserId && adj.dominant_user_id === currentUserId;
-      const alreadyMine = currentUserId && n.dominant_user_id === currentUserId;
-      const canAttackFromHere = iDominateAdj && n.status !== 'npc' && !alreadyMine;
-      return `
-        <div class="adj-row">
-          <div><div class="adj-name">${adj.name}</div><div class="adj-status">${adj.status === 'npc' ? 'NPC' : '점령됨'}</div></div>
-          ${canAttackFromHere
-            ? `<button class="act" data-attack-from="${adj.id}">여기서 공격</button>`
-            : `<span class="adj-status">${iDominateAdj && n.status === 'npc' ? '기여로만 해방 가능' : ''}</span>`}
-        </div>`;
-    }).join('') || '<div class="adj-status">등록된 인접 동이 없습니다.</div>';
+  // 시즌 카드 높이가 내용에 따라 달라지므로 검색창을 그 아래로 실제 높이만큼 밀어준다.
+  function positionSearch() {
+    const season = document.getElementById('seasonOverlay');
+    document.getElementById('searchOverlay').style.top = `${season.offsetTop + season.offsetHeight + 8}px`;
+  }
 
-    detailContent.innerHTML = `
-      <h2>${n.name}</h2>
-      <div class="modal-sub">${n.region_name} 소속</div>
-      <span class="status-pill ${n.status}">${statusLabel}</span>
-      ${n.status === 'npc' ? `<span class="status-pill npc">난이도 ${n.npc_difficulty}</span>` : ''}
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    if (!q) { searchResults.innerHTML = ''; return; }
+    const hits = territories
+      .filter((t) => t.name.toLowerCase().includes(q) || (t.region_name || '').toLowerCase().includes(q))
+      .slice(0, 20);
+    searchResults.innerHTML = hits.length
+      ? hits.map((t) => `<div data-go="${esc(t.id)}">${esc(t.name)}</div>`).join('')
+      : '<div style="color:var(--gray-2); cursor:default;">결과 없음</div>';
+    searchResults.querySelectorAll('[data-go]').forEach((el) => el.addEventListener('click', () => {
+      const t = territoryById[el.dataset.go];
+      if (map && t && t.lat != null) map.setView([t.lat, t.lng], 6);
+      searchInput.value = '';
+      searchResults.innerHTML = '';
+      openTerritory(t.id);
+    }));
+  });
 
-      <div class="stat-row"><span>지배자</span><span>${n.dominant_nickname || '없음(NPC)'}</span></div>
-      <div class="stat-row"><span>누적 기여 포인트</span><span>${n.total_points}${n.status === 'npc' ? ` / ${n.npc_difficulty}` : ''}</span></div>
-      ${n.my_resistance_points != null ? `<div class="stat-row"><span>내 저항 포인트</span><span>${n.my_resistance_points} / ${n.resistance_threshold}</span></div>` : ''}
+  /* ---------------- 모달 ---------------- */
+  const modal = document.getElementById('modal');
+  const modalContent = document.getElementById('modalContent');
+  function closeModal() { modal.style.display = 'none'; }
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
-      <div class="section-label">기여 상위</div>
-      ${n.top_contributors.length ? n.top_contributors.map((c) => `<div class="contrib-row"><span>${c.nickname}</span><span>${c.total_points}pt</span></div>`).join('') : '<div class="adj-status">아직 기여 기록이 없습니다.</div>'}
+  function openModal(html) {
+    modalContent.innerHTML = html;
+    modal.style.display = 'flex';
+    modal.querySelector('.modal-box').scrollTop = 0;
+  }
 
-      ${authToken ? `<button class="act act-gold contribute-btn" id="contributeBtn">이 동에 기여하기 (+포인트)</button>` : `<div class="signed-out-note" style="margin-top:14px;"><a href="/v2.html">로그인하면 기여/공격에 참여할 수 있어요 →</a></div>`}
+  /* ---------------- 영토 프로필 카드 ---------------- */
+  async function openTerritory(id) {
+    openModal('<div class="card-body"><div class="muted">불러오는 중...</div></div>');
+    try {
+      renderTerritory(await apiRequest(`/neighborhoods/${id}`));
+    } catch (err) {
+      openModal(`<div class="card-body"><div class="muted">불러오지 못했습니다: ${esc(err.message)}</div></div>`);
+    }
+  }
 
-      ${canInsurrect ? `<div class="insurrection-box">저항 포인트가 임계치를 넘었습니다 — 인접 조건 없이 즉시 재탈환을 시도할 수 있습니다.<br><button class="act act-gold" id="insurrectBtn" style="margin-top:8px;">반란 공격 (재탈환 시도)</button></div>` : ''}
+  // 이 영토에 지금 무엇을 할 수 있는지를 버튼 하나로 정리한다. 예전에는 인접 목록 안에만
+  // 공격 버튼이 숨어 있어서 "점령할 방법이 없다"처럼 보였다.
+  function primaryAction(t) {
+    if (!authToken) return { label: '로그인하고 참전하기', href: '/v2.html' };
+    if (currentUserId && t.dominant_user_id === currentUserId) {
+      return { label: '내가 지배 중인 영토', disabled: true, note: '이 영토는 이미 당신의 것입니다.' };
+    }
+    if (t.status === 'npc') {
+      const left = Math.max(0, t.npc_difficulty - t.total_points);
+      return { kind: 'contribute', label: '기여해서 해방하기', note: `정복력 ${left}pt 더 쌓으면 해방됩니다 (1회 +10pt)` };
+    }
+    if ((t.my_resistance_points || 0) >= t.resistance_threshold) {
+      return { kind: 'insurrect', label: '반란 일으키기', note: `저항 ${t.my_resistance_points}pt — 인접 조건 없이 즉시 재탈환 시도` };
+    }
+    // 내가 지배 중인 인접 영토 중 누적 정복력이 가장 높은 곳에서 출발한다(공격력 = 그 영토의 최근 기여).
+    const owned = t.adjacent_neighborhoods
+      .filter((a) => currentUserId && a.dominant_user_id === currentUserId)
+      .map((a) => ({ ...a, points: (territoryById[a.id] || {}).total_points || 0 }))
+      .sort((a, b) => b.points - a.points);
+    if (owned.length) {
+      return { kind: 'attack', from: owned[0].id, label: '점령하기', note: `${owned[0].name}에서 출병합니다` };
+    }
+    return {
+      label: '점령하기', disabled: true,
+      note: '인접 영토를 먼저 확보해야 공격할 수 있습니다. 가까운 미개척 영토를 기여로 해방하세요.',
+    };
+  }
 
-      <div class="section-label">인접 동</div>
-      ${adjacentHtml}
+  function renderTerritory(t) {
+    const st = statusOf(t);
+    const owner = t.dominant_nickname;
+    const action = primaryAction(t);
+    const pct = t.status === 'npc'
+      ? Math.min(100, Math.round((t.total_points / Math.max(1, t.npc_difficulty)) * 100))
+      : 100;
 
-      <div id="actionResult"></div>
-    `;
+    const adjHtml = t.adjacent_neighborhoods.length
+      ? t.adjacent_neighborhoods.map((a) => {
+          const iOwnIt = currentUserId && a.dominant_user_id === currentUserId;
+          const canLaunch = iOwnIt && t.status !== 'npc' && t.dominant_user_id !== currentUserId;
+          return `<div class="adj-row">
+            <div>
+              <div class="adj-name">${esc(a.name)}</div>
+              <div class="muted">${a.status === 'npc' ? '미개척' : (iOwnIt ? '내 영토' : '타 세력')}</div>
+            </div>
+            ${canLaunch ? `<button class="act" data-attack-from="${esc(a.id)}">여기서 출병</button>` : ''}
+          </div>`;
+        }).join('')
+      : '<div class="muted">등록된 인접 영토가 없습니다.</div>';
 
-    const contributeBtn = document.getElementById('contributeBtn');
-    if (contributeBtn) {
-      contributeBtn.addEventListener('click', async () => {
-        contributeBtn.disabled = true;
-        try {
-          const result = await apiRequest(`/neighborhoods/${n.id}/contribute`, { method: 'POST' });
-          const box = document.getElementById('actionResult');
-          box.innerHTML = `<div class="result-box win">+${result.points_awarded}pt 기여! 누적 ${result.total_points}pt` +
-            (result.liberation ? `<br><b>해방되었습니다!</b> 새 지배자: ${result.liberation.dominant_nickname}` : '') + `</div>`;
-          await loadNeighborhoods();
-          openDetail(n.id);
-        } catch (err) {
-          document.getElementById('actionResult').innerHTML = `<div class="result-box lose">${err.message}</div>`;
-          contributeBtn.disabled = false;
-        }
+    openModal(`
+      <div class="card-head">
+        <div class="card-eyebrow">영토 문서</div>
+        <div class="card-title">${esc(t.name)}</div>
+        <div class="card-sub">${esc(t.region_name)}</div>
+        <span class="status-pill ${st === 'mine' ? 'owned' : st}">${STATUS_LABEL[st]}</span>
+        ${t.status === 'npc' ? `<span class="status-pill ghost">난이도 ${t.npc_difficulty}</span>` : ''}
+      </div>
+      <div class="card-body">
+        <div class="profile-card">
+          <div class="profile-sigil ${st === 'mine' ? 'owner-me' : (owner ? '' : 'owner-none')}">${sigilSvg(34)}</div>
+          <div class="profile-meta">
+            <div class="profile-role">지배자</div>
+            <div class="profile-name">${owner ? esc(owner) : '없음 — 미개척지'}</div>
+            <div class="profile-tags">
+              <span class="tag">정복력 ${t.total_points}pt</span>
+              ${t.status === 'npc' ? `<span class="tag soft">해방까지 ${Math.max(0, t.npc_difficulty - t.total_points)}pt</span>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div class="meter"><i style="width:${pct}%"></i></div>
+
+        <div class="section-label">전황</div>
+        <div class="stat-row"><span>누적 정복력</span><b>${t.total_points}${t.status === 'npc' ? ` / ${t.npc_difficulty}` : 'pt'}</b></div>
+        ${t.my_resistance_points
+          ? `<div class="stat-row"><span>내 저항 포인트</span><b>${t.my_resistance_points} / ${t.resistance_threshold}</b></div>` : ''}
+
+        <button class="act cta" id="ctaBtn" ${action.disabled ? 'disabled' : ''}>${esc(action.label)}</button>
+        ${action.note ? `<div class="cta-note">${esc(action.note)}</div>` : ''}
+        <div id="actionResult">${pendingResult}</div>
+
+        <div class="section-label">기여 순위</div>
+        ${t.top_contributors.length
+          ? t.top_contributors.map((c, i) => `<div class="contrib-row"><span><i class="rank-no">${i + 1}</i>${esc(c.nickname)}</span><b>${c.total_points}pt</b></div>`).join('')
+          : '<div class="muted">아직 기여 기록이 없습니다.</div>'}
+
+        <div class="section-label">인접 영토</div>
+        ${adjHtml}
+      </div>
+    `);
+
+    pendingResult = '';
+
+    const cta = document.getElementById('ctaBtn');
+    if (cta && !action.disabled) {
+      cta.addEventListener('click', () => {
+        if (action.href) { location.href = action.href; return; }
+        if (action.kind === 'contribute') return runContribute(t.id, cta);
+        if (action.kind === 'insurrect') return runAttack(t.id, null);
+        if (action.kind === 'attack') return runAttack(t.id, action.from);
       });
     }
-
     document.querySelectorAll('[data-attack-from]').forEach((btn) => {
-      btn.addEventListener('click', () => runAttack(n.id, btn.dataset.attackFrom));
+      btn.addEventListener('click', () => runAttack(t.id, btn.dataset.attackFrom));
     });
-    const insurrectBtn = document.getElementById('insurrectBtn');
-    if (insurrectBtn) insurrectBtn.addEventListener('click', () => runAttack(n.id, null));
+  }
+
+  async function runContribute(id, btn) {
+    btn.disabled = true;
+    try {
+      const r = await apiRequest(`/neighborhoods/${id}/contribute`, { method: 'POST' });
+      pendingResult = `<div class="result-box win">+${r.points_awarded}pt 기여 — 누적 ${r.total_points}pt` +
+        (r.liberation ? `<br><b>해방됐다.</b> 새 지배자: ${esc(r.liberation.dominant_nickname)}` : '') + '</div>';
+      await loadTerritories();
+      await openTerritory(id);
+    } catch (err) {
+      document.getElementById('actionResult').innerHTML = `<div class="result-box lose">${esc(err.message)}</div>`;
+      btn.disabled = false;
+    }
   }
 
   async function runAttack(targetId, fromId) {
     const box = document.getElementById('actionResult');
-    box.innerHTML = '<div>공격 중...</div>';
+    box.innerHTML = '<div class="result-box">출병 중...</div>';
     try {
-      const result = await apiRequest(`/neighborhoods/${targetId}/attack`, {
+      const r = await apiRequest(`/neighborhoods/${targetId}/attack`, {
         method: 'POST',
         body: JSON.stringify({ from_neighborhood_id: fromId }),
       });
-      box.innerHTML = `<div class="result-box ${result.attacker_wins ? 'win' : 'lose'}">
-        ${result.attacker_wins ? '승리! 지배자가 교체되었습니다.' : '패배했습니다.'}<br>
-        내 공격력 ${result.attacker_power} vs 방어력 ${result.defense_power}${result.insurrection ? ' (반란 공격)' : ''}
+      pendingResult = `<div class="result-box ${r.attacker_wins ? 'win' : 'lose'}">
+        ${r.attacker_wins ? '<b>점령 성공.</b> 지배자가 교체됐다.' : '<b>점령 실패.</b>'}<br>
+        공격력 ${r.attacker_power} vs 방어력 ${r.defense_power}${r.insurrection ? ' (반란)' : ''}
       </div>`;
-      await loadNeighborhoods();
-      openDetail(targetId);
+      await loadTerritories();
+      await openTerritory(targetId);
     } catch (err) {
-      box.innerHTML = `<div class="result-box lose">${err.message}</div>`;
+      box.innerHTML = `<div class="result-box lose">${esc(err.message)}</div>`;
     }
   }
 
-  loadEverything();
+  /* ---------------- 지도 기록(맵 핀) ---------------- */
+  function postPinIcon() {
+    return L.divIcon({
+      html: `<div class="map-post-pin"><svg width="22" height="24" viewBox="0 0 24 26">
+        <path d="M12 1C6 1 2 5 2 10c0 7 10 15 10 15s10-8 10-15c0-5-4-9-10-9z" fill="#BA7517" stroke="#111110" stroke-width="1.5"/>
+        <circle cx="12" cy="10" r="3.2" fill="#111110"/></svg></div>`,
+      className: '', iconSize: [22, 24], iconAnchor: [11, 24],
+    });
+  }
+
+  function addPostMarker(post) {
+    if (!mapAvailable || postMarkersById[post.id]) return;
+    const marker = L.marker([post.lat, post.lng], { icon: postPinIcon(), zIndexOffset: 500 }).addTo(map);
+    marker.on('click', (e) => {
+      if (writeMode) return;
+      L.DomEvent.stopPropagation(e);
+      openPost(post.id);
+    });
+    postMarkersById[post.id] = marker;
+  }
+
+  async function loadPosts() {
+    try {
+      (await apiRequest('/map-posts')).forEach(addPostMarker);
+    } catch (err) {
+      console.error('지도 기록을 불러오지 못했습니다:', err);
+    }
+  }
+
+  async function openPost(id) {
+    openModal('<div class="card-body"><div class="muted">불러오는 중...</div></div>');
+    try {
+      const [post, comments] = await Promise.all([
+        apiRequest(`/map-posts/${id}`),
+        apiRequest(`/map-posts/${id}/comments`),
+      ]);
+      renderPost(post, comments);
+    } catch (err) {
+      openModal(`<div class="card-body"><div class="muted">불러오지 못했습니다: ${esc(err.message)}</div></div>`);
+    }
+  }
+
+  function renderPost(post, comments) {
+    const isMine = currentUserId && post.author_id === currentUserId;
+    const on = (type) => (post.my_vote === type ? ' on' : '');
+    const reactDisabled = !authToken || isMine;
+
+    openModal(`
+      <div class="card-head">
+        <div class="card-eyebrow">지도 기록</div>
+        <div class="card-title">${esc(post.author_nickname)}</div>
+        <div class="card-sub">${new Date(post.created_at.replace(' ', 'T') + 'Z').toLocaleString('ko-KR')}</div>
+      </div>
+      <div class="card-body">
+        <div class="profile-card">
+          <div class="profile-sigil ${isMine ? 'owner-me' : ''}">${sigilSvg(34)}</div>
+          <div class="profile-meta">
+            <div class="profile-role">작성자</div>
+            <div class="profile-name">${esc(post.author_nickname)}</div>
+            <div class="profile-tags">
+              <span class="tag">Lv.${post.author_level}</span>
+              <span class="tag soft">${esc(RANK_LABEL[post.author_rank] || post.author_rank)}</span>
+              <span class="tag soft">명성 ${Math.round(post.author_reputation)}</span>
+              ${post.author_region_name ? `<span class="tag soft">${esc(post.author_region_name)}</span>` : ''}
+              ${post.author_tickers.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="post-body">${esc(post.body)}</div>
+
+        <div class="react-row">
+          <button class="react-btn${on('up')}" data-vote="up" ${reactDisabled ? 'disabled' : ''}><span class="n">${voteCount(post.upvotes)}</span>추천</button>
+          <button class="react-btn${on('down')}" data-vote="down" ${reactDisabled ? 'disabled' : ''}><span class="n">${voteCount(post.downvotes)}</span>비추천</button>
+          <button class="react-btn${on('fool')}" data-vote="fool" ${reactDisabled ? 'disabled' : ''}><span class="n">${voteCount(post.fool_votes)}</span>바보</button>
+        </div>
+        ${isMine ? '<div class="cta-note">본인 글에는 반응할 수 없습니다.</div>' : ''}
+        <div id="voteResult"></div>
+
+        <div class="section-label">댓글 ${comments.length}</div>
+        <div id="commentList">
+          ${comments.length
+            ? comments.map((c) => `<div class="comment">
+                <div class="comment-head"><b>${esc(c.author_nickname)}</b><span class="muted">${esc(RANK_LABEL[c.author_rank] || c.author_rank)}</span></div>
+                <div class="comment-body">${esc(c.body)}</div>
+              </div>`).join('')
+            : '<div class="muted">첫 댓글을 남겨보세요.</div>'}
+        </div>
+        ${authToken
+          ? `<div class="comment-form">
+               <input id="commentInput" maxlength="${COMMENT_MAX}" placeholder="댓글 (${COMMENT_MAX}자 이내)">
+               <button class="act" id="commentBtn">등록</button>
+             </div><div id="commentResult"></div>`
+          : '<div class="signed-out-note"><a href="/v2.html">로그인하면 반응과 댓글을 남길 수 있습니다 →</a></div>'}
+      </div>
+    `);
+
+    document.querySelectorAll('[data-vote]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        try {
+          await apiRequest(`/map-posts/${post.id}/vote`, {
+            method: 'POST',
+            body: JSON.stringify({ vote_type: btn.dataset.vote }),
+          });
+          openPost(post.id);
+        } catch (err) {
+          document.getElementById('voteResult').innerHTML = `<div class="result-box lose">${esc(err.message)}</div>`;
+        }
+      });
+    });
+
+    const commentBtn = document.getElementById('commentBtn');
+    if (commentBtn) {
+      const input = document.getElementById('commentInput');
+      const submit = async () => {
+        const body = input.value.trim();
+        if (!body) return;
+        commentBtn.disabled = true;
+        try {
+          await apiRequest(`/map-posts/${post.id}/comments`, { method: 'POST', body: JSON.stringify({ body }) });
+          openPost(post.id);
+        } catch (err) {
+          document.getElementById('commentResult').innerHTML = `<div class="result-box lose">${esc(err.message)}</div>`;
+          commentBtn.disabled = false;
+        }
+      };
+      commentBtn.addEventListener('click', submit);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+    }
+  }
+
+  /* ---------------- 기록 남기기(지도 클릭) ---------------- */
+  const writeBtn = document.getElementById('writeModeBtn');
+
+  function setWriteMode(active) {
+    writeMode = active;
+    writeBtn.classList.toggle('active', active);
+    writeBtn.textContent = active ? '기록 모드 끄기' : '지도에 기록 남기기';
+    if (map) map.getContainer().style.cursor = active ? 'crosshair' : '';
+    let hint = document.querySelector('.write-hint');
+    if (active && !hint) {
+      hint = document.createElement('div');
+      hint.className = 'write-hint';
+      hint.textContent = '지도를 클릭해 기록을 남기세요';
+      document.body.appendChild(hint);
+    } else if (!active && hint) {
+      hint.remove();
+    }
+  }
+
+  writeBtn.addEventListener('click', () => {
+    if (!authToken) { location.href = '/v2.html'; return; }
+    setWriteMode(!writeMode);
+  });
+
+  if (mapAvailable) {
+    map.on('click', (e) => {
+      if (!writeMode) return;
+      openWriteForm(e.latlng);
+    });
+  }
+
+  function openWriteForm(latlng) {
+    openModal(`
+      <div class="card-head">
+        <div class="card-eyebrow">새 기록</div>
+        <div class="card-title">이 위치에 남기기</div>
+        <div class="card-sub">${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}</div>
+      </div>
+      <div class="card-body">
+        <div class="write-form">
+          <textarea id="writeBody" maxlength="${BODY_MAX}" placeholder="이 위치에 남길 기록 (${BODY_MAX}자 이내)"></textarea>
+          <div class="write-count"><span id="writeCount">0</span> / ${BODY_MAX}</div>
+        </div>
+        <button class="act cta" id="writeSubmit">기록 남기기</button>
+        <div class="cta-note">하루 3건까지 남길 수 있습니다.</div>
+        <div id="writeResult"></div>
+      </div>
+    `);
+
+    const textarea = document.getElementById('writeBody');
+    const count = document.getElementById('writeCount');
+    textarea.addEventListener('input', () => { count.textContent = textarea.value.length; });
+    textarea.focus();
+
+    document.getElementById('writeSubmit').addEventListener('click', async (e) => {
+      const body = textarea.value.trim();
+      if (!body) return;
+      e.currentTarget.disabled = true;
+      try {
+        const post = await apiRequest('/map-posts', {
+          method: 'POST',
+          body: JSON.stringify({ lat: latlng.lat, lng: latlng.lng, body }),
+        });
+        addPostMarker(post);
+        setWriteMode(false);
+        openPost(post.id);
+      } catch (err) {
+        document.getElementById('writeResult').innerHTML = `<div class="result-box lose">${esc(err.message)}</div>`;
+        e.currentTarget.disabled = false;
+      }
+    });
+  }
+
+  loadEverything().then(positionSearch);
+  window.addEventListener('resize', positionSearch);
 </script>
 
 </body>

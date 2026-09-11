@@ -6,12 +6,15 @@ const { containsBannedWord } = require("../services/contentFilter");
 const { getVoteWeight } = require("../services/voteWeight");
 const { refreshTyrantStatus } = require("../services/tyranny");
 const { checkAndGrantFoolTicker } = require("../services/foolTicker");
+const { levelForXp } = require("../services/experience");
 
 const router = express.Router();
 
 const BODY_MAX = 300;
+const COMMENT_MAX = 200;
 const DAILY_MAP_POST_LIMIT = 3; // threads.js DAILY_THREAD_LIMIT과 동일한 취지(스팸성 남발 방지)
 const DAILY_MAP_POST_VOTE_LIMIT = 100; // votes.js DAILY_VOTE_LIMIT과 동일한 취지
+const DAILY_MAP_POST_COMMENT_LIMIT = 30;
 const VOTE_COLUMN = { up: "upvotes", down: "downvotes", fool: "fool_votes" };
 
 function toSummary(p) {
@@ -23,6 +26,7 @@ function toSummary(p) {
     upvotes: p.upvotes,
     downvotes: p.downvotes,
     fool_votes: p.fool_votes,
+    comment_count: p.comment_count || 0,
     created_at: p.created_at,
   };
 }
@@ -69,16 +73,29 @@ router.post("/", requireAuth, (req, res) => {
 
 // GET /map-posts — 지도 마커 렌더링용 가벼운 목록(좌표+요약)
 router.get("/", (req, res) => {
-  const posts = db.prepare("SELECT * FROM map_posts ORDER BY created_at DESC").all();
+  const posts = db
+    .prepare(
+      `SELECT p.*, COUNT(c.id) AS comment_count
+       FROM map_posts p
+       LEFT JOIN map_post_comments c ON c.post_id = p.id
+       GROUP BY p.id
+       ORDER BY p.created_at DESC`
+    )
+    .all();
   res.json(posts.map(toSummary));
 });
 
-// GET /map-posts/:id — 상세(본문 전체 + 작성자 프로필: 닉네임/계급/보유 티커)
+// GET /map-posts/:id — 상세(본문 전체 + 작성자 프로필 카드용: 닉네임/계급/레벨/명성/소속/보유 티커)
 router.get("/:id", optionalAuth, (req, res) => {
   const post = db
     .prepare(
-      `SELECT p.*, u.nickname AS author_nickname, u.rank AS author_rank
-       FROM map_posts p JOIN users u ON u.id = p.author_id WHERE p.id = ?`
+      `SELECT p.*, u.nickname AS author_nickname, u.rank AS author_rank,
+              u.reputation AS author_reputation, u.xp AS author_xp,
+              r.name AS author_region_name
+       FROM map_posts p
+       JOIN users u ON u.id = p.author_id
+       LEFT JOIN regions r ON r.id = u.region_id
+       WHERE p.id = ?`
     )
     .get(req.params.id);
   if (!post) return res.status(404).json({ error: "게시글을 찾을 수 없습니다." });
@@ -94,12 +111,20 @@ router.get("/:id", optionalAuth, (req, res) => {
         .get(req.params.id, req.userId)
     : null;
 
+  const commentCount = db
+    .prepare("SELECT COUNT(*) AS count FROM map_post_comments WHERE post_id = ?")
+    .get(req.params.id).count;
+
   res.json({
     id: post.id,
     author_id: post.author_id,
     author_nickname: post.author_nickname,
     author_rank: post.author_rank,
+    author_reputation: post.author_reputation,
+    author_level: levelForXp(post.author_xp || 0).level,
+    author_region_name: post.author_region_name,
     author_tickers: tickers,
+    comment_count: commentCount,
     lat: post.lat,
     lng: post.lng,
     body: post.body,
@@ -196,6 +221,66 @@ router.post("/:id/vote", requireAuth, (req, res) => {
     .prepare("SELECT upvotes, downvotes, fool_votes FROM map_posts WHERE id = ?")
     .get(req.params.id);
   res.json({ result, vote_type, ...updated });
+});
+
+// GET /map-posts/:id/comments — 팝업에서 한 번에 다 보여주는 단일 단계 댓글(대댓글 없음)
+router.get("/:id/comments", (req, res) => {
+  const post = db.prepare("SELECT id FROM map_posts WHERE id = ?").get(req.params.id);
+  if (!post) return res.status(404).json({ error: "게시글을 찾을 수 없습니다." });
+
+  const comments = db
+    .prepare(
+      `SELECT c.id, c.author_id, c.body, c.created_at,
+              u.nickname AS author_nickname, u.rank AS author_rank
+       FROM map_post_comments c JOIN users u ON u.id = c.author_id
+       WHERE c.post_id = ?
+       ORDER BY c.created_at ASC`
+    )
+    .all(req.params.id);
+  res.json(comments);
+});
+
+// POST /map-posts/:id/comments — body: { body }
+router.post("/:id/comments", requireAuth, (req, res) => {
+  const { body } = req.body || {};
+  if (!body || !body.trim()) return res.status(400).json({ error: "내용을 입력해주세요." });
+  if (body.length > COMMENT_MAX) {
+    return res.status(400).json({ error: `댓글은 ${COMMENT_MAX}자 이내로 작성해주세요.` });
+  }
+  if (containsBannedWord(body)) {
+    return res.status(400).json({ error: "부적절한 표현이 포함되어 있어 등록할 수 없습니다." });
+  }
+
+  const post = db.prepare("SELECT id FROM map_posts WHERE id = ?").get(req.params.id);
+  if (!post) return res.status(404).json({ error: "게시글을 찾을 수 없습니다." });
+
+  const todayCount = db
+    .prepare(
+      `SELECT COUNT(*) AS count FROM map_post_comments
+       WHERE author_id = ? AND date(created_at) = date('now')`
+    )
+    .get(req.userId).count;
+  if (todayCount >= DAILY_MAP_POST_COMMENT_LIMIT) {
+    return res.status(429).json({ error: `댓글은 하루 ${DAILY_MAP_POST_COMMENT_LIMIT}건까지만 등록할 수 있습니다.` });
+  }
+
+  const id = randomUUID();
+  db.prepare("INSERT INTO map_post_comments (id, post_id, author_id, body) VALUES (?, ?, ?, ?)").run(
+    id,
+    req.params.id,
+    req.userId,
+    body.trim()
+  );
+
+  const created = db
+    .prepare(
+      `SELECT c.id, c.author_id, c.body, c.created_at,
+              u.nickname AS author_nickname, u.rank AS author_rank
+       FROM map_post_comments c JOIN users u ON u.id = c.author_id
+       WHERE c.id = ?`
+    )
+    .get(id);
+  res.status(201).json(created);
 });
 
 module.exports = router;

@@ -20,28 +20,32 @@ router.get("/season/current", (req, res) => {
 });
 
 // GET /neighborhoods?region_id=<선택>
+// 영토가 전 세계 수백 곳이라 행마다 getTotalPoints/getResistancePoints를 부르면 요청 한 번에
+// 쿼리가 수천 번 나간다(better-sqlite3는 동기 실행이라 그대로 이벤트 루프를 막는다).
+// 그래서 합산은 전부 집계 LEFT JOIN으로 한 방에 가져온다.
 router.get("/", optionalAuth, (req, res) => {
   const { region_id } = req.query;
+  const baseSelect = `
+    SELECT n.*, r.name AS region_name, u.nickname AS dominant_nickname,
+           COALESCE(c.total, 0) AS total_points,
+           res.total AS my_resistance_points
+    FROM neighborhoods n
+    JOIN regions r ON r.id = n.parent_region_id
+    LEFT JOIN users u ON u.id = n.dominant_user_id
+    LEFT JOIN (
+      SELECT neighborhood_id, SUM(points) AS total
+      FROM neighborhood_contributions GROUP BY neighborhood_id
+    ) c ON c.neighborhood_id = n.id
+    LEFT JOIN (
+      SELECT neighborhood_id, SUM(points) AS total
+      FROM neighborhood_resistance WHERE user_id = ? GROUP BY neighborhood_id
+    ) res ON res.neighborhood_id = n.id`;
+
+  // 비로그인이면 어떤 user_id와도 안 맞는 값을 넣어 저항 포인트 서브쿼리가 통째로 비게 한다.
+  const userId = req.userId || null;
   const rows = region_id
-    ? db
-        .prepare(
-          `SELECT n.*, r.name AS region_name, u.nickname AS dominant_nickname
-           FROM neighborhoods n
-           JOIN regions r ON r.id = n.parent_region_id
-           LEFT JOIN users u ON u.id = n.dominant_user_id
-           WHERE n.parent_region_id = ?
-           ORDER BY n.name`
-        )
-        .all(region_id)
-    : db
-        .prepare(
-          `SELECT n.*, r.name AS region_name, u.nickname AS dominant_nickname
-           FROM neighborhoods n
-           JOIN regions r ON r.id = n.parent_region_id
-           LEFT JOIN users u ON u.id = n.dominant_user_id
-           ORDER BY r.name, n.name`
-        )
-        .all();
+    ? db.prepare(`${baseSelect} WHERE n.parent_region_id = ? ORDER BY n.name`).all(userId, region_id)
+    : db.prepare(`${baseSelect} ORDER BY r.name, n.name`).all(userId);
 
   const result = rows.map((n) => ({
     id: n.id,
@@ -52,10 +56,10 @@ router.get("/", optionalAuth, (req, res) => {
     npc_difficulty: n.npc_difficulty,
     dominant_user_id: n.dominant_user_id,
     dominant_nickname: n.dominant_nickname,
-    total_points: getTotalPoints(n.id),
+    total_points: n.total_points,
     lat: n.lat,
     lng: n.lng,
-    my_resistance_points: req.userId ? getResistancePoints(n.id, req.userId) : null,
+    my_resistance_points: req.userId ? n.my_resistance_points || 0 : null,
   }));
   res.json(result);
 });

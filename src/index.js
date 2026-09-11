@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const { runMigrations } = require("./db");
 const { seedIfEmpty } = require("./seed");
 const { seedNeighborhoodsIfEmpty } = require("./seedNeighborhoods");
+const { seedCountriesIfMissing } = require("./seedCountries");
 const { regenerateSitemap } = require("./services/sitemap");
 const { regenerateArchive } = require("./services/archivePage");
 
@@ -34,7 +35,8 @@ const { requireAdmin } = require("./middleware/adminAuth");
 
 runMigrations();
 seedIfEmpty(); // Shell 접근이 안 되는 환경(Render 무료 티어 등)에서도 초기 데이터가 자동으로 채워지게 함
-seedNeighborhoodsIfEmpty(); // V3(동단위 정복) 시드 — 이미 있으면 건너뜀, 기존 seedIfEmpty와 완전히 별개
+seedNeighborhoodsIfEmpty(); // 도시 단위 시드 — 이미 있으면 건너뜀, 기존 seedIfEmpty와 완전히 별개
+seedCountriesIfMissing(); // PANGAEA 세계 정복 시드 — 국가별로 빠진 것만 채우므로 이미 시드된 DB에도 적용된다
 regenerateSitemap(); // 배포/재시작 시점 기준으로 sitemap.xml을 최신 지역/논제 목록으로 다시 씀
 regenerateArchive(); // 논제 아카이브 페이지도 같은 시점에 최신 목록으로 다시 씀
 
