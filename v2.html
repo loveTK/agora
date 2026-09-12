@@ -1040,7 +1040,7 @@
         <div class="profile-card-top">
           <span class="profile-avatar avatar-link" data-open-profile="${top.id}" style="width:56px; height:56px;">${characterAvatarInnerHtml(equippedItems, 46)}</span>
           <div>
-            <div class="char-name" style="font-size:19px;"><span class="profile-link" data-open-profile="${top.id}">${top.nickname}</span></div>
+            <div class="char-name" style="font-size:19px;"><span class="profile-link" data-open-profile="${top.id}">${esc(top.nickname)}</span></div>
             <div class="profile-stats-line" style="margin-top:6px;">
               ${isRuler ? `<span class="badge">지배자</span>` : ''}
               <span class="badge">오늘 활동 ${top.activity_count}회</span>
@@ -1048,10 +1048,10 @@
           </div>
         </div>
         <div class="profile-card-stats">
-          <div class="charter-row"><span>소속 국가</span><span>${top.region_name || '-'}</span></div>
-          <div class="charter-row"><span>정당</span><span>${top.party ? top.party.name : '없음'}</span></div>
-          <div class="charter-row"><span>종교</span><span>${top.religion ? top.religion.name : '없음'}</span></div>
-          ${isRuler ? `<div class="charter-row"><span>지배 지역</span><span>${top.dominance_regions.map(r => r.name).join(', ')}</span></div>` : ''}
+          <div class="charter-row"><span>소속 국가</span><span>${esc(top.region_name || '-')}</span></div>
+          <div class="charter-row"><span>정당</span><span>${esc(top.party ? top.party.name : '없음')}</span></div>
+          <div class="charter-row"><span>종교</span><span>${esc(top.religion ? top.religion.name : '없음')}</span></div>
+          ${isRuler ? `<div class="charter-row"><span>지배 지역</span><span>${top.dominance_regions.map(r => esc(r.name)).join(', ')}</span></div>` : ''}
         </div>
       `;
       card.style.display = '';
@@ -1086,7 +1086,7 @@
     if (list.querySelector('.loading-text, .issue-meta')) list.innerHTML = '';
     const el = document.createElement('div');
     el.className = 'chat-msg';
-    el.innerHTML = `<span class="chat-nickname profile-link" data-open-profile="${msg.user_id}">${msg.nickname}</span><span class="chat-body">${msg.body}</span><span class="chat-time">${timeAgo(msg.created_at)}</span>`;
+    el.innerHTML = `<span class="chat-nickname profile-link" data-open-profile="${msg.user_id}">${esc(msg.nickname)}</span><span class="chat-body">${esc(msg.body)}</span><span class="chat-time">${timeAgo(msg.created_at)}</span>`;
     list.appendChild(el);
     list.scrollTop = list.scrollHeight; // 새 메시지가 오면 항상 아래로 자동 스크롤
   }
@@ -1136,8 +1136,8 @@
         ? events.map(e => `
           <div class="hero-feed-item">
             ${e.type === 'thread_voted'
-              ? `<b class="profile-link" data-open-profile="${e.actor_id}">${e.actor_nickname}</b>님이 "${e.thread_title}" 논제에 투표 · <span class="hero-feed-time">${timeAgo(e.created_at)}</span>`
-              : `<b class="profile-link" data-open-profile="${e.actor_id}">${e.actor_nickname}</b>님이 "${e.thread_title}" 논제 등록 · <span class="hero-feed-time">${timeAgo(e.created_at)}</span>`}
+              ? `<b class="profile-link" data-open-profile="${e.actor_id}">${esc(e.actor_nickname)}</b>님이 "${esc(e.thread_title)}" 논제에 투표 · <span class="hero-feed-time">${timeAgo(e.created_at)}</span>`
+              : `<b class="profile-link" data-open-profile="${e.actor_id}">${esc(e.actor_nickname)}</b>님이 "${esc(e.thread_title)}" 논제 등록 · <span class="hero-feed-time">${timeAgo(e.created_at)}</span>`}
           </div>`).join('')
         : '';
     } catch (err) { /* 실패해도 히어로 자체는 그대로 둔다 */ }
@@ -1219,7 +1219,7 @@
         });
       });
     } catch (err) {
-      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -1229,7 +1229,7 @@
     grid.innerHTML = items.map(it => `
       <div class="shop-item">
         <div class="shop-item-icon">${SHOP_ICON_SVG[it.id] || ''}</div>
-        <div class="shop-item-name">${it.name}</div>
+        <div class="shop-item-name">${esc(it.name)}</div>
         <div class="shop-item-slot">${SLOT_LABEL[it.slot_type] || it.slot_type}</div>
         <div class="shop-item-price">무료</div>
         ${!currentUser
@@ -1262,7 +1262,7 @@
       const inventory = await apiRequest(`/users/${currentUser.id}/inventory`);
       renderInventoryLayout(el, inventory);
     } catch (err) {
-      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -1289,7 +1289,7 @@
       <div class="shop-item inv-grid-item ${it.item_id === inventorySelectedItemId ? 'selected' : ''}" data-select-item="${it.item_id}">
         ${it.equipped ? '<span class="inv-grid-item-equipped-badge">착용중</span>' : ''}
         <div class="shop-item-icon">${SHOP_ICON_SVG[it.item_id] || ''}</div>
-        <div class="shop-item-name">${it.name || SLOT_LABEL[it.slot_type] || it.slot_type}</div>
+        <div class="shop-item-name">${esc(it.name || SLOT_LABEL[it.slot_type] || it.slot_type)}</div>
         <div class="shop-item-slot">${SLOT_LABEL[it.slot_type] || it.slot_type}</div>
       </div>`).join('');
 
@@ -1305,9 +1305,9 @@
         </div>
         <div class="inv-col-detail">
           <div class="inv-detail-icon">${SHOP_ICON_SVG[selected.item_id] || ''}</div>
-          <div class="inv-detail-name">${selected.name || SLOT_LABEL[selected.slot_type] || selected.slot_type}</div>
+          <div class="inv-detail-name">${esc(selected.name || SLOT_LABEL[selected.slot_type] || selected.slot_type)}</div>
           <div class="inv-detail-desc">${ITEM_DESCRIPTIONS[selected.item_id] || '설명이 없는 아이템입니다.'}</div>
-          <div class="inv-detail-status ${selected.equipped ? 'equipped' : ''}">${statusLabel}</div>
+          <div class="inv-detail-status ${selected.equipped ? 'equipped' : ''}">${esc(statusLabel)}</div>
           <div class="inv-detail-row">착용 조건: ${equipConditionLabel(selected.owner_type)}</div>
           <div class="inv-detail-row">필요 티커: 없음</div>
           <button class="mini-btn" id="inventoryEquipBtn">${selected.equipped ? '해제하기' : '착용하기'}</button>
@@ -1391,7 +1391,7 @@
         ${reports.length === 0 ? '<div class="loading-text">처리할 신고가 없습니다.</div>' : reports.map(r => `
           <div class="hot-issue-card">
             <div class="issue-meta">${r.target_type} · ${r.target_id}</div>
-            <div>${r.reason}</div>
+            <div>${esc(r.reason)}</div>
             <div class="arg-actions">
               <button class="mini-btn" data-report-action="actioned:${r.id}">숨김 확정</button>
               <button class="mini-btn" data-report-action="dismissed:${r.id}">기각</button>
@@ -1536,7 +1536,7 @@
       if (n.lat == null || n.lng == null) return;
       const statusLabel = n.status === 'npc' ? 'NPC' : (n.dominant_nickname || '점령됨');
       const marker = L.marker([n.lat, n.lng], { icon: neighborhoodMarkerIcon(n) })
-        .bindTooltip(`${n.region_name} · ${n.name} — ${statusLabel}`, { permanent:false, direction:'top', className:'region-preview-tooltip' })
+        .bindTooltip(`${esc(n.region_name)} · ${esc(n.name)} — ${esc(statusLabel)}`, { permanent:false, direction:'top', className:'region-preview-tooltip' })
         .on('click', () => openNeighborhoodModal(n.id))
         .addTo(map);
       neighborhoodMarkersById[n.id] = marker;
@@ -1544,7 +1544,7 @@
 
     // 동 검색 — 지역 검색을 대체
     const listEl = document.getElementById('mapRegionList');
-    listEl.innerHTML = neighborhoodsData.map(n => `<option value="${n.name}">`).join('');
+    listEl.innerHTML = neighborhoodsData.map(n => `<option value="${esc(n.name)}">`).join('');
     document.getElementById('mapSearchInput').addEventListener('change', (e) => {
       const match = neighborhoodsData.find(n => n.name === e.target.value.trim());
       if (!match || match.lat == null) return;
@@ -1566,7 +1566,7 @@
       const n = await apiRequest(`/neighborhoods/${id}`);
       renderNeighborhoodDetail(n);
     } catch (err) {
-      content.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+      content.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -1581,7 +1581,7 @@
       const canAttackFromHere = iDominateAdj && n.status !== 'npc' && !alreadyMine;
       return `
         <div class="nb-adj-row">
-          <div><div>${adj.name}</div><div class="nb-adj-status">${adj.status === 'npc' ? 'NPC' : '점령됨'}</div></div>
+          <div><div>${esc(adj.name)}</div><div class="nb-adj-status">${adj.status === 'npc' ? 'NPC' : '점령됨'}</div></div>
           ${canAttackFromHere
             ? `<button class="cta-gold" data-attack-from="${adj.id}">여기서 공격</button>`
             : `<span class="nb-adj-status">${iDominateAdj && n.status === 'npc' ? '기여로만 해방 가능' : ''}</span>`}
@@ -1589,19 +1589,19 @@
     }).join('') || '<div class="nb-adj-status">등록된 인접 동이 없습니다.</div>';
 
     content.innerHTML = `
-      <span class="section-title" style="font-size:20px;">${n.name}</span>
-      <div class="region-widget-stats">${n.region_name} 소속</div>
+      <span class="section-title" style="font-size:20px;">${esc(n.name)}</span>
+      <div class="region-widget-stats">${esc(n.region_name)} 소속</div>
       <div style="margin-top:8px;">
-        <span class="nb-status-pill ${n.status === 'npc' ? 'npc' : 'taken'}">${statusLabel}</span>
+        <span class="nb-status-pill ${n.status === 'npc' ? 'npc' : 'taken'}">${esc(statusLabel)}</span>
         ${n.status === 'npc' ? `<span class="nb-status-pill npc">난이도 ${n.npc_difficulty}</span>` : ''}
       </div>
 
-      <div class="nb-stat-row"><span>지배자</span><span>${n.dominant_nickname || '없음(NPC)'}</span></div>
+      <div class="nb-stat-row"><span>지배자</span><span>${esc(n.dominant_nickname || '없음(NPC)')}</span></div>
       <div class="nb-stat-row"><span>누적 기여 포인트</span><span>${n.total_points}${n.status === 'npc' ? ` / ${n.npc_difficulty}` : ''}</span></div>
       ${n.my_resistance_points != null ? `<div class="nb-stat-row"><span>내 저항 포인트</span><span>${n.my_resistance_points} / ${n.resistance_threshold}</span></div>` : ''}
 
       <div class="nb-section-label">기여 상위</div>
-      ${(n.top_contributors || []).length ? n.top_contributors.map(c => `<div class="nb-contrib-row"><span>${c.nickname}</span><span>${c.total_points}pt</span></div>`).join('') : '<div class="nb-adj-status">아직 기여 기록이 없습니다.</div>'}
+      ${(n.top_contributors || []).length ? n.top_contributors.map(c => `<div class="nb-contrib-row"><span>${esc(c.nickname)}</span><span>${c.total_points}pt</span></div>`).join('') : '<div class="nb-adj-status">아직 기여 기록이 없습니다.</div>'}
 
       ${currentUser ? `<button class="cta-gold" id="nbContributeBtn" style="width:100%; margin-top:14px; padding:12px;">이 동에 기여하기 (+포인트)</button>` : `<div class="nb-adj-status" style="margin-top:14px;">로그인하면 기여/공격에 참여할 수 있어요</div>`}
 
@@ -1620,11 +1620,11 @@
         try {
           const result = await apiRequest(`/neighborhoods/${n.id}/contribute`, { method: 'POST' });
           document.getElementById('nbActionResult').innerHTML = `<div class="nb-result-box win">+${result.points_awarded}pt 기여! 누적 ${result.total_points}pt` +
-            (result.liberation ? `<br><b>해방되었습니다!</b> 새 지배자: ${result.liberation.dominant_nickname}` : '') + `</div>`;
+            (result.liberation ? `<br><b>해방되었습니다!</b> 새 지배자: ${esc(result.liberation.dominant_nickname)}` : '') + `</div>`;
           if (result.xp_gain) handleXpGain(result.xp_gain);
           openNeighborhoodModal(n.id);
         } catch (err) {
-          document.getElementById('nbActionResult').innerHTML = `<div class="nb-result-box lose">${err.message}</div>`;
+          document.getElementById('nbActionResult').innerHTML = `<div class="nb-result-box lose">${esc(err.message)}</div>`;
           contributeBtn.disabled = false;
         }
       });
@@ -1651,7 +1651,7 @@
       </div>`;
       openNeighborhoodModal(targetId);
     } catch (err) {
-      box.innerHTML = `<div class="nb-result-box lose">${err.message}</div>`;
+      box.innerHTML = `<div class="nb-result-box lose">${esc(err.message)}</div>`;
     }
   }
 
@@ -1688,11 +1688,11 @@
       container.innerHTML = `
         <div class="map-post-detail">
           <div class="mp-author">
-            <span class="profile-link" data-open-profile="${post.author_id}">${post.author_nickname}</span>
+            <span class="profile-link" data-open-profile="${post.author_id}">${esc(post.author_nickname)}</span>
             <span class="badge">${rankLabel}</span>
             ${tickerBadgesHtml(post.author_tickers.join(','))}
           </div>
-          <div class="mp-body">${post.body}</div>
+          <div class="mp-body">${esc(post.body)}</div>
           ${authToken && currentUser && currentUser.id !== post.author_id ? mapPostVoteButtonsHtml(post) : ''}
         </div>`;
       container.querySelectorAll('[data-mp-vote]').forEach((btn) => {
@@ -1707,7 +1707,7 @@
         });
       });
     } catch (err) {
-      container.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+      container.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -1797,13 +1797,17 @@
 
   function regionName(regionId){
     const r = regionsData.find(r => r.id === regionId);
-    return r ? r.name : '알 수 없음';
+    return esc(r ? r.name : '알 수 없음'); // HTML 템플릿에서만 쓰인다
   }
 
   // GA4 이벤트 전송 — 스크립트가 아직 안 붙어있으면(측정 ID 미설정) 조용히 아무것도 안 함.
   function gaEvent(name, params) {
     if (typeof gtag === 'function') gtag('event', name, params || {});
   }
+
+  // innerHTML에 서버 문자열을 넣을 때는 반드시 이걸 거친다(닉네임·본문·지역명·에러 등).
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   async function apiRequest(path, options = {}) {
     const res = await fetch(`${API_BASE}${path}`, {
@@ -1961,7 +1965,7 @@
         <div class="profile-info">
           <div class="char-name-row">
             <span>
-              <span class="char-name">${currentUser.nickname}</span>
+              <span class="char-name">${esc(currentUser.nickname)}</span>
               / ${regionName(currentUser.region_id)} 국가 /
               ${dominanceBadge}<span class="badge">${rankLabel}</span>
             </span>
@@ -1972,7 +1976,7 @@
           </div>
           <div class="xp-bar-wrap" id="xpBarWrap">
             <div class="xp-bar-top">
-              <span class="xp-level-badge" id="xpLevelBadge">Lv.${xpLevel}${equippedTitle ? ' · ' + equippedTitle.name : ''}</span>
+              <span class="xp-level-badge" id="xpLevelBadge">Lv.${xpLevel}${esc(equippedTitle ? ' · ' + equippedTitle.name : '')}</span>
               <span class="xp-bar-label" id="xpBarLabel">${xpLabel}</span>
             </div>
             <div class="xp-bar-track"><div class="xp-bar-fill" id="xpBarFill" style="width:${xpPct}%;"></div></div>
@@ -2025,7 +2029,7 @@
     const isLogin = mode === 'login';
     const isGoogleProfile = mode === 'google-profile';
     const showNicknameAndMap = !isLogin; // signup, google-profile 둘 다 필요
-    const regionOptions = regionsData.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+    const regionOptions = regionsData.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join('');
 
     const authModalContent = document.getElementById('authModalContent');
     authModalContent.innerHTML = `
@@ -2040,13 +2044,13 @@
         ${showNicknameAndMap ? `
         <div class="auth-field">
           <label>닉네임</label>
-          <input type="text" name="nickname" required maxlength="20" value="${googleProfile?.suggestedNickname || ''}" />
+          <input type="text" name="nickname" required maxlength="20" value="${esc(googleProfile?.suggestedNickname || '')}" />
         </div>
         <div class="auth-field">
           <label>소속 국가 — 지도에서 찍거나 목록에서 선택하세요</label>
           <div id="signupMap" style="height:220px; border:1px solid var(--line);"></div>
           <select name="region_id" required style="margin-top:8px;">${regionOptions}</select>
-          <div class="picked-region-badge" id="signupMapPicked">${regionsData[0] ? '선택한 국가 · ' + regionsData[0].name : '지역 정보를 불러오는 중...'}</div>
+          <div class="picked-region-badge" id="signupMapPicked">${esc(regionsData[0] ? '선택한 국가 · ' + regionsData[0].name : '지역 정보를 불러오는 중...')}</div>
         </div>` : ''}
         ${!isGoogleProfile ? `
         <div class="auth-field">
@@ -2229,8 +2233,8 @@
         <div class="issue-row" data-toggle-issue="${t.id}">
           <span class="issue-row-index">${String(i + 1).padStart(2, '0')}</span>
           <div class="issue-row-body">
-            <div class="issue-row-title">"${t.title}"</div>
-            <div class="issue-row-meta">${t.region_name} · 참여 ${t.participant_count}명 · 추천 ${t.total_upvotes}</div>
+            <div class="issue-row-title">"${esc(t.title)}"</div>
+            <div class="issue-row-meta">${esc(t.region_name)} · 참여 ${t.participant_count}명 · 추천 ${t.total_upvotes}</div>
             <div class="issue-bar"><div class="issue-bar-fill" style="width:${Math.round(t.participant_count / maxParticipants * 100)}%"></div></div>
           </div>
           <svg class="issue-row-caret" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -2275,7 +2279,7 @@
       const argsHtml = sortedArgs.length
         ? sortedArgs.map(a => `
           <div class="arg-item">
-            <div class="arg-meta"><span><span class="profile-link" data-open-profile="${a.author_id}">${a.author_nickname}</span>${tickerBadgesHtml(a.tickers_csv)} · ${stanceLabel[a.stance] || a.stance}</span></div>
+            <div class="arg-meta"><span><span class="profile-link" data-open-profile="${a.author_id}">${esc(a.author_nickname)}</span>${tickerBadgesHtml(a.tickers_csv)} · ${stanceLabel[a.stance] || a.stance}</span></div>
             ${argContentHtml(a.title, a.body)}
             ${currentUser && currentUser.id !== a.author_id ? reactionButtonsHtml('argument', a.id, a.upvotes, a.downvotes, a.laugh_count) : ''}
           </div>`).join('')
@@ -2284,9 +2288,9 @@
       dropdown.innerHTML = `
         <div class="issue-dropdown-author">
           <span class="avatar-link" data-open-profile="${thread.author_id}">${characterAvatarInnerHtml(authorEquipped, 26)}</span>
-          <span class="profile-link" data-open-profile="${thread.author_id}">${thread.author_nickname}</span>
+          <span class="profile-link" data-open-profile="${thread.author_id}">${esc(thread.author_nickname)}</span>
         </div>
-        ${thread.body ? `<div class="thread-body-text" style="margin-bottom:12px;">${thread.body}</div>` : ''}
+        ${thread.body ? `<div class="thread-body-text" style="margin-bottom:12px;">${esc(thread.body)}</div>` : ''}
         ${currentUser && currentUser.id !== thread.author_id ? reactionButtonsHtml('thread', thread.id, thread.thread_upvotes, thread.thread_downvotes, thread.thread_laugh_count) : ''}
         <div class="thread-side-title" style="margin-top:16px;">다른 의견들</div>
         ${argsHtml}
@@ -2298,7 +2302,7 @@
       });
       attachReactionHandlers(dropdown);
     } catch (err) {
-      dropdown.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+      dropdown.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -2321,7 +2325,7 @@
     el.innerHTML = notable.map(r => `
       <div class="dispute-item region-link" data-open-region="${r.id}">
         <div class="dispute-item-top">
-          <span class="dispute-region">${r.name}</span>
+          <span class="dispute-region">${esc(r.name)}</span>
           <span style="display:flex; align-items:center;">
             <span class="dispute-flag">
               <svg viewBox="0 0 24 24" fill="none"><path d="M4 3v18M4 4h13l-3 4 3 4H4" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -2375,11 +2379,11 @@
       const data = await apiRequest('/hall-of-fame');
       const rulers = data.top_rulers.length
         ? data.top_rulers.slice(0, 5).map(r => `
-          <div class="dispute-item"><span class="dispute-region">${r.nickname} · ${r.region_name}</span><span class="issue-meta">${r.streak_days}일 재위</span></div>`).join('')
+          <div class="dispute-item"><span class="dispute-region">${esc(r.nickname)} · ${esc(r.region_name)}</span><span class="issue-meta">${r.streak_days}일 재위</span></div>`).join('')
         : '<div class="issue-meta">기록 없음</div>';
       const prophets = data.top_prophets.length
         ? data.top_prophets.slice(0, 5).map(p => `
-          <div class="dispute-item"><span class="dispute-region">${p.nickname} · ${p.region_name}</span><span class="issue-meta">명성 ${p.reputation}</span></div>`).join('')
+          <div class="dispute-item"><span class="dispute-region">${esc(p.nickname)} · ${esc(p.region_name)}</span><span class="issue-meta">명성 ${p.reputation}</span></div>`).join('')
         : '<div class="issue-meta">기록 없음</div>';
       el.innerHTML = `
         <div class="lists-row">
@@ -2404,7 +2408,7 @@
       const religionItems = religions.length
         ? religions.map(r => `
           <div class="dispute-item">
-            <span class="dispute-region">${r.name} <span class="stat-label">(신자 ${r.member_count})</span></span>
+            <span class="dispute-region">${esc(r.name)} <span class="stat-label">(신자 ${r.member_count})</span></span>
             <button class="mini-btn" data-join="religion" data-id="${r.id}">가입</button>
           </div>`).join('')
         : '<div class="issue-meta">아직 창설된 종교가 없습니다.</div>';
@@ -2412,7 +2416,7 @@
       const partyItems = parties.length
         ? parties.map(p => `
           <div class="dispute-item">
-            <span class="dispute-region">${p.name} <span class="stat-label">(당원 ${p.member_count})</span></span>
+            <span class="dispute-region">${esc(p.name)} <span class="stat-label">(당원 ${p.member_count})</span></span>
             <button class="mini-btn" data-join="party" data-id="${p.id}">가입</button>
           </div>`).join('')
         : '<div class="issue-meta">아직 창당된 정당이 없습니다.</div>';
@@ -2440,7 +2444,7 @@
         });
       });
     } catch (err) {
-      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -2469,12 +2473,12 @@
           : '<span class="issue-meta">전투 개설 대기중</span>';
       } else if (battle.status === 'open') {
         actionHtml = `
-          <div class="issue-meta">${battle.title} · 참여 ${battle.participant_count ?? ''}명</div>
-          <button class="mini-btn" data-battle-choice="attacker" data-war="${w.id}">${battle.option_attacker}</button>
-          <button class="mini-btn" data-battle-choice="defender" data-war="${w.id}">${battle.option_defender}</button>
+          <div class="issue-meta">${esc(battle.title)} · 참여 ${battle.participant_count ?? ''}명</div>
+          <button class="mini-btn" data-battle-choice="attacker" data-war="${w.id}">${esc(battle.option_attacker)}</button>
+          <button class="mini-btn" data-battle-choice="defender" data-war="${w.id}">${esc(battle.option_defender)}</button>
           <button class="mini-btn" data-battle-argue="${w.id}">논증 등록</button>`;
       } else {
-        actionHtml = `<span class="issue-meta">전투 종료 · 승리: ${battle.winner_side === 'attacker' ? battle.option_attacker : battle.option_defender}</span>`;
+        actionHtml = `<span class="issue-meta">전투 종료 · 승리: ${esc(battle.winner_side === 'attacker' ? battle.option_attacker : battle.option_defender)}</span>`;
       }
     }
 
@@ -2593,7 +2597,7 @@
       const declareBlock = dominanceStatus ? `
         <div style="display:flex; gap:6px; margin-bottom:10px;">
           <select id="warTargetRegion">
-            ${regionsData.filter(r => r.id !== currentUser.region_id).map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
+            ${regionsData.filter(r => r.id !== currentUser.region_id).map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join('')}
           </select>
           <button class="mini-btn" id="declareWarBtn">선전포고</button>
         </div>` : '';
@@ -2624,7 +2628,7 @@
       attachCongressActionHandlers(el);
       attachWarActionHandlers(el);
     } catch (err) {
-      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -2638,7 +2642,7 @@
   function renderThreadForm(targetElId = 'threadFormContent', formId = 'threadForm', presetRegionId = null) {
     const el = document.getElementById(targetElId);
     const regionOptions = regionsData
-      .map(r => `<option value="${r.id}" ${presetRegionId === r.id ? 'selected' : ''}>${r.name}</option>`)
+      .map(r => `<option value="${r.id}" ${presetRegionId === r.id ? 'selected' : ''}>${esc(r.name)}</option>`)
       .join('');
     el.innerHTML = `
       <form class="thread-form" id="${formId}">
@@ -2684,8 +2688,8 @@
       const conversations = await apiRequest('/messages/conversations');
       el.innerHTML = conversations.length
         ? conversations.map(c => `
-          <button class="msg-conv-item" data-open-conv="${c.user_id}" data-nickname="${c.nickname}">
-            <span>${c.nickname} <span class="msg-conv-preview">${c.last_message || ''}</span></span>
+          <button class="msg-conv-item" data-open-conv="${c.user_id}" data-nickname="${esc(c.nickname)}">
+            <span>${esc(c.nickname)} <span class="msg-conv-preview">${esc(c.last_message || '')}</span></span>
             ${c.unread_count > 0 ? `<span class="msg-conv-unread">${c.unread_count}</span>` : ''}
           </button>`).join('')
         : '<div class="issue-meta">주고받은 쪽지가 없습니다. Hot Issue의 발의자 이름 옆 "쪽지" 버튼으로 시작해보세요.</div>';
@@ -2694,7 +2698,7 @@
         btn.addEventListener('click', () => openConversation(btn.dataset.openConv, btn.dataset.nickname));
       });
     } catch (err) {
-      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+      el.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -2702,7 +2706,7 @@
     const el = document.getElementById('messagesContent');
     el.innerHTML = `
       <button class="logout-link" id="msgBackBtn">‹ 목록으로</button>
-      <div class="section-sub" style="margin-top:6px;">${nickname}</div>
+      <div class="section-sub" style="margin-top:6px;">${esc(nickname)}</div>
       <div class="msg-chat-box" id="msgChatBox"><div class="loading-text">불러오는 중...</div></div>
       <div class="msg-send-row">
         <input type="text" id="msgInput" placeholder="쪽지 내용을 입력하세요">
@@ -2715,7 +2719,7 @@
       const history = await apiRequest(`/messages/${userId}`);
       const box = document.getElementById('msgChatBox');
       box.innerHTML = history.length
-        ? history.map(m => `<div class="msg-bubble ${m.sender_id === currentUser.id ? 'mine' : 'theirs'}">${m.body}</div>`).join('')
+        ? history.map(m => `<div class="msg-bubble ${m.sender_id === currentUser.id ? 'mine' : 'theirs'}">${esc(m.body)}</div>`).join('')
         : '<div class="issue-meta">아직 대화가 없습니다.</div>';
       box.scrollTop = box.scrollHeight;
       // 상대가 보낸 것 중 안 읽은 쪽지를 읽음 처리
@@ -2836,7 +2840,7 @@
 
   // 논증/대댓글 본문 — title이 있으면(=논증) 제목을 굵게, 없으면(=논제 자체 설명) 본문만 표시.
   function argContentHtml(title, body) {
-    return `${title ? `<div class="arg-title">${title}</div>` : ''}${body ? `<div class="arg-body">${body}</div>` : ''}`;
+    return `${title ? `<div class="arg-title">${esc(title)}</div>` : ''}${body ? `<div class="arg-body">${esc(body)}</div>` : ''}`;
   }
 
   // 숫자가 바뀌었다는 걸 보여주는 pop 애니메이션 — 같은 값이 연달아 와도 reflow로 매번 처음부터 재생.
@@ -2907,8 +2911,8 @@
     const itemsHtml = replies.length
       ? replies.map(r => `
         <div class="reply-item">
-          <div class="reply-meta">${r.author_nickname}</div>
-          <div class="arg-body">${r.body}</div>
+          <div class="reply-meta">${esc(r.author_nickname)}</div>
+          <div class="arg-body">${esc(r.body)}</div>
           ${currentUser && currentUser.id !== r.author_id ? reactionButtonsHtml('reply', r.id, r.upvotes, r.downvotes, r.laugh_count) : ''}
         </div>`).join('')
       : '<div class="issue-meta">아직 답글이 없습니다.</div>';
@@ -2960,7 +2964,7 @@
       // 무대(stage) 말풍선 내용 — 기본은 논제 자체, 사이드에서 의견을 클릭하면 그 사람 것으로 바뀐다.
       function stageBubbleHtml(label, tickersCsv, title, body, targetType, targetId, upvotes, downvotes, laughCount, authorId) {
         return `
-          <div class="thread-stage-label"><span class="profile-link" data-open-profile="${authorId}">${label}</span>${tickerBadgesHtml(tickersCsv)}</div>
+          <div class="thread-stage-label"><span class="profile-link" data-open-profile="${authorId}">${esc(label)}</span>${tickerBadgesHtml(tickersCsv)}</div>
           ${argContentHtml(title, body)}
           ${currentUser && currentUser.id !== authorId ? reactionButtonsHtml(targetType, targetId, upvotes, downvotes, laughCount) : ''}
         `;
@@ -2991,8 +2995,8 @@
         ? sortedArgs.map(a => `
           <div class="arg-item" data-arg-id="${a.id}">
             <div class="arg-meta">
-              <span><span class="profile-link" data-open-profile="${a.author_id}">${a.author_nickname}</span>${tickerBadgesHtml(a.tickers_csv)} · ${STANCE_LABEL[a.stance] || a.stance}
-                ${currentUser && currentUser.id !== a.author_id ? `<button class="logout-link" data-open-conv-quick="${a.author_id}" data-nickname="${a.author_nickname}">쪽지</button>` : ''}
+              <span><span class="profile-link" data-open-profile="${a.author_id}">${esc(a.author_nickname)}</span>${tickerBadgesHtml(a.tickers_csv)} · ${STANCE_LABEL[a.stance] || a.stance}
+                ${currentUser && currentUser.id !== a.author_id ? `<button class="logout-link" data-open-conv-quick="${a.author_id}" data-nickname="${esc(a.author_nickname)}">쪽지</button>` : ''}
               </span>
             </div>
             ${argContentHtml(a.title, a.body)}
@@ -3034,7 +3038,7 @@
                 <span>참여 ${thread.participant_count ?? 0}명</span>
               </div>
             </div>
-            ${thread.body ? `<div class="thread-body-text" id="threadStageDesc">${thread.body}</div>` : ''}
+            ${thread.body ? `<div class="thread-body-text" id="threadStageDesc">${esc(thread.body)}</div>` : ''}
             ${currentUser ? `
               <form class="thread-form" id="argForm" style="margin-top:14px;">
                 <select name="stance"><option value="pro">찬성</option><option value="con">반대</option><option value="other">기타</option></select>
@@ -3089,7 +3093,7 @@
           try {
             const replies = await apiRequest(`/arguments/${argId}/replies`);
             renderReplyList(list, argId, replies);
-          } catch (err) { list.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`; }
+          } catch (err) { list.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`; }
         });
       });
 
@@ -3109,7 +3113,7 @@
         });
       }
     } catch (err) {
-      content.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+      content.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -3152,7 +3156,7 @@
         <div class="profile-card-top">
           <div class="profile-avatar" style="width:56px; height:56px;">${characterAvatarInnerHtml(equippedItems, 46)}</div>
           <div>
-            <div class="char-name" style="font-size:19px;">${profile.nickname}</div>
+            <div class="char-name" style="font-size:19px;">${esc(profile.nickname)}</div>
             <div class="profile-stats-line" style="margin-top:6px;">
               <span class="badge">${rankLabel}</span>
               ${isRuler ? `<span class="badge">지배자</span>` : ''}
@@ -3160,12 +3164,12 @@
           </div>
         </div>
         <div class="profile-card-stats">
-          <div class="charter-row"><span>소속 국가</span><span>${profile.region_name || '-'}</span></div>
+          <div class="charter-row"><span>소속 국가</span><span>${esc(profile.region_name || '-')}</span></div>
           <div class="charter-row"><span>명성치</span><span>${profile.reputation}</span></div>
           <div class="charter-row"><span>팔로워</span><span>${profile.follower_count}명</span></div>
-          <div class="charter-row"><span>정당</span><span>${profile.party ? profile.party.name : '없음'}</span></div>
-          <div class="charter-row"><span>종교</span><span>${profile.religion ? profile.religion.name : '없음'}</span></div>
-          ${isRuler ? `<div class="charter-row"><span>지배 지역</span><span>${profile.dominance_regions.map(r => r.name).join(', ')}</span></div>` : ''}
+          <div class="charter-row"><span>정당</span><span>${esc(profile.party ? profile.party.name : '없음')}</span></div>
+          <div class="charter-row"><span>종교</span><span>${esc(profile.religion ? profile.religion.name : '없음')}</span></div>
+          ${isRuler ? `<div class="charter-row"><span>지배 지역</span><span>${profile.dominance_regions.map(r => esc(r.name)).join(', ')}</span></div>` : ''}
         </div>
         ${canFollow ? `<button class="mini-btn" id="profileFollowBtn" style="margin-top:14px;">팔로우</button>` : ''}
       `;
@@ -3181,7 +3185,7 @@
         });
       }
     } catch (err) {
-      profileModalContent.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+      profileModalContent.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -3239,8 +3243,8 @@
       const threadsHtml = sortedThreads.length
         ? sortedThreads.slice(0, 4).map(t => `
           <div class="region-hot-item" data-open-thread="${t.id}">
-            <div class="region-hot-title">"${t.title}"</div>
-            <div class="issue-meta"><span class="profile-link" data-open-profile="${t.author_id}">${t.author_nickname}</span>${t.author_region_name ? ' · ' + t.author_region_name : ''} / 참여 ${t.participant_count}명 / 추천 ${Math.round(t.thread_upvotes)} 비추천 ${Math.round(t.thread_downvotes)} 바보 ${Math.round(t.thread_laugh_count)}</div>
+            <div class="region-hot-title">"${esc(t.title)}"</div>
+            <div class="issue-meta"><span class="profile-link" data-open-profile="${t.author_id}">${esc(t.author_nickname)}</span>${t.author_region_name ? ' · ' + t.author_region_name : ''} / 참여 ${t.participant_count}명 / 추천 ${Math.round(t.thread_upvotes)} 비추천 ${Math.round(t.thread_downvotes)} 바보 ${Math.round(t.thread_laugh_count)}</div>
           </div>`).join('')
         : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
 
@@ -3248,12 +3252,12 @@
         <div class="region-widget-top">
           <div class="region-widget-left">
             <div class="region-hero">
-              <span class="section-title" style="font-size:20px;">${region.name} 국가</span>
+              <span class="section-title" style="font-size:20px;">${esc(region.name)} 국가</span>
               <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>
               ${region.is_trending ? '<span class="trending-badge">지금 뜨는 지역</span>' : ''}
             </div>
             <div class="region-widget-stats">소속인원: ${region.population}명 &nbsp; 전쟁현황: ${activeWars.length ? `전쟁 중(${activeWars.length})` : '평시'}</div>
-            <div class="region-widget-stats">지배정당: ${ruler && ruler.party_name ? ruler.party_name : '없음'} &nbsp; 국교: ${ruler && ruler.religion_name ? ruler.religion_name : '없음'}</div>
+            <div class="region-widget-stats">지배정당: ${esc(ruler && ruler.party_name ? ruler.party_name : '없음')} &nbsp; 국교: ${esc(ruler && ruler.religion_name ? ruler.religion_name : '없음')}</div>
           </div>
           <div class="region-widget-ruler">
             <div class="region-widget-ruler-label">지배자</div>
@@ -3263,7 +3267,7 @@
                 <path d="M8 8.8 Q12 6.3 16 8.8 M9.2 8.8 L6.5 14.2 M14.8 8.8 L17.5 14.2 M12 8.6 L12 15 M12 15 L8.3 22 M12 15 L15.7 22" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
               </svg>
             </div>
-            <div class="region-widget-ruler-name">${ruler ? ruler.nickname + (ruler.status === 'tyrant' ? ' (폭군)' : '') : '없음'}</div>
+            <div class="region-widget-ruler-name">${esc(ruler ? ruler.nickname + (ruler.status === 'tyrant' ? ' (폭군)' : '') : '없음')}</div>
           </div>
         </div>
         <div class="region-section">
@@ -3284,7 +3288,7 @@
         goToRegionPage(regionId);
       });
     } catch (err) {
-      content.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${err.message}</div>`;
+      content.innerHTML = `<div class="issue-meta">불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -3317,14 +3321,14 @@
 
       const statusKey = region.status === 'dominant' ? 'dominant' : (region.status === 'contested' ? 'contested' : 'dispute');
       document.getElementById('regionPageTitle').innerHTML =
-        `${region.name} 국가 <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>${region.is_trending ? ' <span class="trending-badge">지금 뜨는 지역</span>' : ''}`;
+        `${esc(region.name)} 국가 <span class="region-status-badge ${statusKey}">${REGION_STATUS_LABEL[statusKey] || '분쟁 지역'}</span>${region.is_trending ? ' <span class="trending-badge">지금 뜨는 지역</span>' : ''}`;
 
       const ruler = dominance.ruler;
       document.getElementById('regionPageStats').innerHTML = `
         <div class="region-stat"><span class="region-stat-label">인구</span><span class="region-stat-value">${region.population}</span></div>
-        <div class="region-stat"><span class="region-stat-label">지배자</span><span class="region-stat-value" style="font-size:15px;">${ruler ? ruler.nickname + (ruler.status === 'tyrant' ? ' (폭군)' : '') : '없음'}</span></div>
-        <div class="region-stat"><span class="region-stat-label">지배정당</span><span class="region-stat-value" style="font-size:15px;">${ruler && ruler.party_name ? ruler.party_name : '없음'}</span></div>
-        <div class="region-stat"><span class="region-stat-label">국교</span><span class="region-stat-value" style="font-size:15px;">${ruler && ruler.religion_name ? ruler.religion_name : '없음'}</span></div>
+        <div class="region-stat"><span class="region-stat-label">지배자</span><span class="region-stat-value" style="font-size:15px;">${esc(ruler ? ruler.nickname + (ruler.status === 'tyrant' ? ' (폭군)' : '') : '없음')}</span></div>
+        <div class="region-stat"><span class="region-stat-label">지배정당</span><span class="region-stat-value" style="font-size:15px;">${esc(ruler && ruler.party_name ? ruler.party_name : '없음')}</span></div>
+        <div class="region-stat"><span class="region-stat-label">국교</span><span class="region-stat-value" style="font-size:15px;">${esc(ruler && ruler.religion_name ? ruler.religion_name : '없음')}</span></div>
       `;
 
       // 팔로워 기반 점령 — 본인 소속 지역이고, 아직 그 지역 지배자가 본인이 아니면 노출.
@@ -3356,8 +3360,8 @@
       document.getElementById('regionPageHotList').innerHTML = sortedThreads.length
         ? sortedThreads.map(t => `
           <div class="region-hot-item" data-open-thread="${t.id}">
-            <div class="region-hot-title">"${t.title}"</div>
-            <div class="issue-meta"><span class="profile-link" data-open-profile="${t.author_id}">${t.author_nickname}</span>${t.author_region_name ? ' · ' + t.author_region_name : ''} / 참여 ${t.participant_count}명 / 추천 ${Math.round(t.thread_upvotes)} 비추천 ${Math.round(t.thread_downvotes)} 바보 ${Math.round(t.thread_laugh_count)}</div>
+            <div class="region-hot-title">"${esc(t.title)}"</div>
+            <div class="issue-meta"><span class="profile-link" data-open-profile="${t.author_id}">${esc(t.author_nickname)}</span>${t.author_region_name ? ' · ' + t.author_region_name : ''} / 참여 ${t.participant_count}명 / 추천 ${Math.round(t.thread_upvotes)} 비추천 ${Math.round(t.thread_downvotes)} 바보 ${Math.round(t.thread_laugh_count)}</div>
           </div>`).join('')
         : '<div class="issue-meta">아직 등록된 논제가 없습니다.</div>';
       document.getElementById('regionPageHotList').querySelectorAll('[data-open-thread]').forEach(item => {

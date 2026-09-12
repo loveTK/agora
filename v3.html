@@ -118,6 +118,9 @@
   let neighborhoods = [];
   const markersById = {};
 
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
   async function apiRequest(path, options = {}) {
     const res = await fetch(`${API_BASE}${path}`, {
       ...options,
@@ -181,7 +184,7 @@
       const list = document.getElementById('mapFallbackList');
       list.innerHTML = neighborhoods.map((n) => `
         <div data-open="${n.id}" style="padding:12px 14px; border:1px solid rgba(255,255,255,0.15); margin-bottom:8px; cursor:pointer;">
-          <b>${n.region_name} · ${n.name}</b> — ${n.status === 'npc' ? 'NPC' : (n.dominant_nickname || '점령됨')} · ${n.total_points}pt
+          <b>${esc(n.region_name)} · ${esc(n.name)}</b> — ${n.status === 'npc' ? 'NPC' : (n.dominant_nickname || '점령됨')} · ${n.total_points}pt
         </div>`).join('');
       list.querySelectorAll('[data-open]').forEach((el) => el.addEventListener('click', () => openDetail(el.dataset.open)));
     }
@@ -200,8 +203,8 @@
     el.innerHTML = `
       <h3>내 동 요약</h3>
       <div class="mine-row"><span>지배 중인 동</span><span>${mine.length}개</span></div>
-      ${mine.slice(0, 5).map((n) => `<div class="mine-row"><span>${n.region_name} · ${n.name}</span><span>${n.total_points}pt</span></div>`).join('')}
-      ${resisting.length ? `<h3 style="margin-top:12px;">저항 진행 중</h3>` + resisting.slice(0, 3).map((n) => `<div class="mine-row"><span>${n.region_name} · ${n.name}</span><span>${n.my_resistance_points}pt</span></div>`).join('') : ''}
+      ${mine.slice(0, 5).map((n) => `<div class="mine-row"><span>${esc(n.region_name)} · ${esc(n.name)}</span><span>${n.total_points}pt</span></div>`).join('')}
+      ${resisting.length ? `<h3 style="margin-top:12px;">저항 진행 중</h3>` + resisting.slice(0, 3).map((n) => `<div class="mine-row"><span>${esc(n.region_name)} · ${esc(n.name)}</span><span>${n.my_resistance_points}pt</span></div>`).join('') : ''}
     `;
   }
 
@@ -227,7 +230,7 @@
       const n = await apiRequest(`/neighborhoods/${id}`);
       renderDetail(n);
     } catch (err) {
-      detailContent.innerHTML = `<div>불러오지 못했습니다: ${err.message}</div>`;
+      detailContent.innerHTML = `<div>불러오지 못했습니다: ${esc(err.message)}</div>`;
     }
   }
 
@@ -241,7 +244,7 @@
       const canAttackFromHere = iDominateAdj && n.status !== 'npc' && !alreadyMine;
       return `
         <div class="adj-row">
-          <div><div class="adj-name">${adj.name}</div><div class="adj-status">${adj.status === 'npc' ? 'NPC' : '점령됨'}</div></div>
+          <div><div class="adj-name">${esc(adj.name)}</div><div class="adj-status">${adj.status === 'npc' ? 'NPC' : '점령됨'}</div></div>
           ${canAttackFromHere
             ? `<button class="act" data-attack-from="${adj.id}">여기서 공격</button>`
             : `<span class="adj-status">${iDominateAdj && n.status === 'npc' ? '기여로만 해방 가능' : ''}</span>`}
@@ -249,17 +252,17 @@
     }).join('') || '<div class="adj-status">등록된 인접 동이 없습니다.</div>';
 
     detailContent.innerHTML = `
-      <h2>${n.name}</h2>
-      <div class="modal-sub">${n.region_name} 소속</div>
-      <span class="status-pill ${n.status}">${statusLabel}</span>
+      <h2>${esc(n.name)}</h2>
+      <div class="modal-sub">${esc(n.region_name)} 소속</div>
+      <span class="status-pill ${n.status}">${esc(statusLabel)}</span>
       ${n.status === 'npc' ? `<span class="status-pill npc">난이도 ${n.npc_difficulty}</span>` : ''}
 
-      <div class="stat-row"><span>지배자</span><span>${n.dominant_nickname || '없음(NPC)'}</span></div>
+      <div class="stat-row"><span>지배자</span><span>${esc(n.dominant_nickname || '없음(NPC)')}</span></div>
       <div class="stat-row"><span>누적 기여 포인트</span><span>${n.total_points}${n.status === 'npc' ? ` / ${n.npc_difficulty}` : ''}</span></div>
       ${n.my_resistance_points != null ? `<div class="stat-row"><span>내 저항 포인트</span><span>${n.my_resistance_points} / ${n.resistance_threshold}</span></div>` : ''}
 
       <div class="section-label">기여 상위</div>
-      ${n.top_contributors.length ? n.top_contributors.map((c) => `<div class="contrib-row"><span>${c.nickname}</span><span>${c.total_points}pt</span></div>`).join('') : '<div class="adj-status">아직 기여 기록이 없습니다.</div>'}
+      ${n.top_contributors.length ? n.top_contributors.map((c) => `<div class="contrib-row"><span>${esc(c.nickname)}</span><span>${c.total_points}pt</span></div>`).join('') : '<div class="adj-status">아직 기여 기록이 없습니다.</div>'}
 
       ${authToken ? `<button class="act act-gold contribute-btn" id="contributeBtn">이 동에 기여하기 (+포인트)</button>` : `<div class="signed-out-note" style="margin-top:14px;"><a href="https://myagora.xyz/">로그인하면 기여/공격에 참여할 수 있어요 →</a></div>`}
 
@@ -279,11 +282,11 @@
           const result = await apiRequest(`/neighborhoods/${n.id}/contribute`, { method: 'POST' });
           const box = document.getElementById('actionResult');
           box.innerHTML = `<div class="result-box win">+${result.points_awarded}pt 기여! 누적 ${result.total_points}pt` +
-            (result.liberation ? `<br><b>해방되었습니다!</b> 새 지배자: ${result.liberation.dominant_nickname}` : '') + `</div>`;
+            (result.liberation ? `<br><b>해방되었습니다!</b> 새 지배자: ${esc(result.liberation.dominant_nickname)}` : '') + `</div>`;
           await loadNeighborhoods();
           openDetail(n.id);
         } catch (err) {
-          document.getElementById('actionResult').innerHTML = `<div class="result-box lose">${err.message}</div>`;
+          document.getElementById('actionResult').innerHTML = `<div class="result-box lose">${esc(err.message)}</div>`;
           contributeBtn.disabled = false;
         }
       });
@@ -311,7 +314,7 @@
       await loadNeighborhoods();
       openDetail(targetId);
     } catch (err) {
-      box.innerHTML = `<div class="result-box lose">${err.message}</div>`;
+      box.innerHTML = `<div class="result-box lose">${esc(err.message)}</div>`;
     }
   }
 
