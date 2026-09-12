@@ -5,10 +5,12 @@ const { randomUUID } = require("crypto");
 const { OAuth2Client } = require("google-auth-library");
 const { db } = require("../db");
 const { JWT_SECRET } = require("../middleware/authMiddleware");
+const { rateLimit } = require("../middleware/rateLimit");
 const { belligerenceTier } = require("../services/belligerence");
 const { levelProgress } = require("../services/experience");
 
 const router = express.Router();
+const authLimit = rateLimit({ max: 10, windowMs: 15 * 60 * 1000 }); // IP당 15분 10회 — 브루트포스 차단
 
 // 서버 .env에 GOOGLE_CLIENT_ID가 없으면 구글 로그인 자체를 꺼둔다(프론트도 버튼을 안 그림) —
 // 설정 전에는 그냥 없는 기능처럼 동작하게 해서 반쪽짜리 기능이 배포되지 않게 함.
@@ -40,7 +42,7 @@ function toAuthUser(user) {
 
 // POST /auth/signup
 // body: { email, password, nickname, region_id }
-router.post("/signup", (req, res) => {
+router.post("/signup", authLimit, (req, res) => {
   const { email, password, nickname, region_id } = req.body || {};
 
   if (!email || !password || !nickname || !region_id) {
@@ -94,7 +96,7 @@ router.post("/signup", (req, res) => {
 
 // POST /auth/login
 // body: { email, password }
-router.post("/login", (req, res) => {
+router.post("/login", authLimit, (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password) {
     return res.status(400).json({ error: "email, password는 필수입니다." });
@@ -118,7 +120,7 @@ router.get("/google-client-id", (req, res) => {
 // body: { credential, nickname?, region_id? }
 // 구글 신원확인(credential)만 먼저 검증 — 이미 있는 이메일이면 바로 로그인, 처음 보는
 // 이메일인데 nickname/region_id가 없으면 needs_profile:true로 알려주고, 있으면 그걸로 가입시킨다.
-router.post("/google", async (req, res) => {
+router.post("/google", authLimit, async (req, res) => {
   if (!googleClient) {
     return res.status(503).json({ error: "구글 로그인이 아직 설정되지 않았습니다." });
   }

@@ -43,6 +43,7 @@ regenerateSitemap(); // 배포/재시작 시점 기준으로 sitemap.xml을 최�
 regenerateArchive(); // 논제 아카이브 페이지도 같은 시점에 최신 목록으로 다시 씀
 
 const app = express();
+app.set("trust proxy", 1); // nginx 뒤 — X-Forwarded-For 첫 홉을 req.ip로
 app.use(cors());
 app.use(express.json());
 
