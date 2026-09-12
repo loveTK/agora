@@ -1,7 +1,8 @@
 // PANGAEA 2단계 시드 — 국가(regions) 아래에 광역(provinces)과 구(neighborhoods)를 깐다.
-// 한국은 실제 17개 시·도와 시·군·구 전부, 미국·중국·일본 등 14개국은 실제 광역(주/성/현) 이름을
-// 쓰고, 나머지 국가는 면적 등급에 따라 중부·북부·동부… 광역과 중구·동구… 구를 수도 주변에 생성한다.
-// 좌표는 전부 지도에 점을 찍기 위한 장식값이며(실제 행정 경계 아님), 국경·영유권 표기 의도가 없다.
+// 한국은 실제 17개 시·도와 시·군·구 전부, 미국·중국·일본 등 14개국은 손으로 고른 광역(주/성/현),
+// 나머지 221개국은 Natural Earth admin-1 실좌표(data/admin1.json, scripts/gen-admin1.js로 생성)를 쓴다.
+// 데이터가 없는 소수 속령만 면적 등급에 따라 중부·북부… 광역을 수도 주변에 생성한다.
+// 좌표는 지도에 점을 찍기 위한 값이며(실제 행정 경계 아님), 국경·영유권 표기 의도가 없다.
 //
 // 멱등성: 광역이 하나라도 있는 국가는 건드리지 않는다. 광역 없이 남은 예전 영토(국가당 3곳짜리
 // "수도권/내륙/연안"과 도시 시드의 동)는 유저 기록이 하나도 없으면 지우고, 있으면 수도 광역 밑으로
@@ -10,6 +11,9 @@ const { randomUUID } = require("crypto");
 const { db } = require("./db");
 const { COUNTRIES } = require("./seedCountries");
 const { nearestProvinceId, invalidateProvinceCache } = require("./services/provinceLookup");
+// Natural Earth admin-1 실좌표(REAL에 없는 국가). 광역당 구 3개 — 광역이 실제 수(튀르키예 81 등)라 5개면 과밀.
+const ADMIN1 = require("./data/admin1.json");
+const ADMIN1_DISTRICTS = 3;
 
 const DISTRICT_ORDER = ["중구", "동구", "남구", "서구", "북구"];
 const DISTRICT_OFFSET = { 중구: [0, 0], 동구: [0, 1], 남구: [-1, 0], 서구: [0, -1], 북구: [1, 0] };
@@ -296,13 +300,14 @@ const wrapLng = (lng) => ((((lng + 180) % 360) + 360) % 360) - 180;
 const lngScale = (lat) => Math.min(2.5, 1 / Math.max(0.35, Math.cos((lat * Math.PI) / 180)));
 
 function buildPlan(countryName, lat, lng) {
-  const real = REAL[countryName];
+  const real = REAL[countryName] || ADMIN1[countryName];
   if (real) {
+    const order = REAL[countryName] ? DISTRICT_ORDER : DISTRICT_ORDER.slice(0, ADMIN1_DISTRICTS);
     return real.provinces.map((p, i) => {
       const prov = Array.isArray(p) ? { name: p[0], lat: p[1], lng: p[2] } : p;
       const districts = prov.districts
         ? prov.districts.map(([name, dlat, dlng]) => ({ name: `${prov.name} ${name}`, lat: dlat, lng: dlng }))
-        : DISTRICT_ORDER.map((d) => {
+        : order.map((d) => {
             const [a, b] = DISTRICT_OFFSET[d];
             return {
               name: `${prov.name} ${d}`,
@@ -347,6 +352,8 @@ function seedProvincesIfMissing() {
   const unknownTier = Object.keys(TIER_OF).filter((n) => !COUNTRIES.some(([name]) => name === n));
   if (unknownTier.length) console.warn(`[seed-provinces] COUNTRIES에 없는 등급 이름: ${unknownTier.join(", ")}`);
 
+  const retired = retireProceduralProvinces();
+
   const tx = db.transaction(() => {
     for (const [countryName, lat, lng] of COUNTRIES) {
       const region = findRegion.get(countryName);
@@ -377,13 +384,54 @@ function seedProvincesIfMissing() {
   });
   tx();
 
-  const legacy = retireOrRehomeLegacy();
   invalidateProvinceCache();
+  const legacy = retireOrRehomeLegacy();
   const backfilled = backfillPostProvinces();
 
   console.log(
-    `[seed-provinces] 광역 ${newProvinces}곳 / 구 ${newDistricts}곳 추가 · 예전 영토 삭제 ${legacy.removed} / 이전 ${legacy.rehomed} · 기록 광역 배정 ${backfilled}`
+    `[seed-provinces] 광역 ${newProvinces}곳 / 구 ${newDistricts}곳 추가 · 절차생성 광역 교체 ${retired} · 예전 영토 삭제 ${legacy.removed} / 이전 ${legacy.rehomed} · 기록 광역 배정 ${backfilled}`
   );
+}
+
+// 실좌표 데이터가 생긴 국가의 절차생성 광역(중부/북부…)을 걷어낸다. 손 안 탄 구는 지우고, 기록 있는 구는
+// province_id를 비워 retireOrRehomeLegacy가 가장 가까운 새 광역으로 옮기게 한다. 반환: 교체한 국가 수.
+function retireProceduralProvinces() {
+  const procedural = new Set(PROVINCE_ORDER);
+  const provincesOf = db.prepare("SELECT p.id, p.name FROM provinces p JOIN regions r ON r.id = p.region_id WHERE r.name = ?");
+  const districtsOf = db.prepare("SELECT id, status, dominant_user_id FROM neighborhoods WHERE province_id = ?");
+  const touched = db.prepare(
+    `SELECT EXISTS(SELECT 1 FROM neighborhood_contributions WHERE neighborhood_id = ?)
+         OR EXISTS(SELECT 1 FROM neighborhood_attacks WHERE target_neighborhood_id = ? OR from_neighborhood_id = ?)
+         OR EXISTS(SELECT 1 FROM neighborhood_resistance WHERE neighborhood_id = ?)
+         OR EXISTS(SELECT 1 FROM neighborhood_founders WHERE neighborhood_id = ?)
+         OR EXISTS(SELECT 1 FROM neighborhood_season_champions WHERE neighborhood_id = ?) AS touched`
+  );
+  const deleteAdjacency = db.prepare("DELETE FROM neighborhood_adjacency WHERE neighborhood_id = ? OR adjacent_neighborhood_id = ?");
+  const deleteDistrict = db.prepare("DELETE FROM neighborhoods WHERE id = ?");
+  const orphanDistrict = db.prepare("UPDATE neighborhoods SET province_id = NULL WHERE id = ?");
+  const orphanPosts = db.prepare("UPDATE map_posts SET province_id = NULL WHERE province_id = ?");
+  const deleteProvince = db.prepare("DELETE FROM provinces WHERE id = ?");
+
+  let countries = 0;
+  const tx = db.transaction(() => {
+    for (const countryName of Object.keys(ADMIN1)) {
+      const provs = provincesOf.all(countryName);
+      if (!provs.length || !provs.every((p) => procedural.has(p.name))) continue;
+      for (const p of provs) {
+        for (const d of districtsOf.all(p.id)) {
+          const keep = d.status !== "npc" || d.dominant_user_id || touched.get(d.id, d.id, d.id, d.id, d.id, d.id).touched;
+          if (keep) { orphanDistrict.run(d.id); continue; }
+          deleteAdjacency.run(d.id, d.id);
+          deleteDistrict.run(d.id);
+        }
+        orphanPosts.run(p.id);
+        deleteProvince.run(p.id);
+      }
+      countries++;
+    }
+  });
+  tx();
+  return countries;
 }
 
 // 광역이 없는 예전 영토 처리. 유저 기록이 하나도 없는 행은 장식일 뿐이므로 지우고, 기록이 있으면
@@ -391,7 +439,7 @@ function seedProvincesIfMissing() {
 function retireOrRehomeLegacy() {
   const rows = db
     .prepare(
-      `SELECT n.id, n.name, n.status, n.dominant_user_id, r.name AS region_name, n.parent_region_id
+      `SELECT n.id, n.name, n.status, n.dominant_user_id, n.lat, n.lng, r.name AS region_name, n.parent_region_id
        FROM neighborhoods n JOIN regions r ON r.id = n.parent_region_id
        WHERE n.province_id IS NULL`
     )
@@ -413,6 +461,7 @@ function retireOrRehomeLegacy() {
     `SELECT p.id, p.region_id FROM provinces p JOIN regions r ON r.id = p.region_id
      WHERE r.name = ? AND (p.name = ? OR (? IS NULL AND p.is_capital = 1)) LIMIT 1`
   );
+  const provinceById = db.prepare("SELECT id, region_id FROM provinces WHERE id = ?");
   const firstDistrict = db.prepare("SELECT id FROM neighborhoods WHERE province_id = ? ORDER BY rowid LIMIT 1");
   const rehome = db.prepare("UPDATE neighborhoods SET province_id = ?, parent_region_id = ? WHERE id = ?");
   const insertAdjacency = db.prepare(
@@ -430,8 +479,16 @@ function retireOrRehomeLegacy() {
         removed++;
         continue;
       }
-      const [country, provinceName] = LEGACY_CITY_HOME[n.region_name] || [n.region_name, null];
-      const home = capitalProvince.get(country, provinceName, provinceName);
+      // 같은 나라 안에서 가장 가까운 광역이 있으면 거기로, 없으면(도시 시드 등) 수도 광역으로.
+      let home = null;
+      if (n.lat != null && n.lng != null) {
+        const near = provinceById.get(nearestProvinceId(n.lat, n.lng) || "");
+        if (near && near.region_id === n.parent_region_id) home = near;
+      }
+      if (!home) {
+        const [country, provinceName] = LEGACY_CITY_HOME[n.region_name] || [n.region_name, null];
+        home = capitalProvince.get(country, provinceName, provinceName);
+      }
       if (!home) continue; // 갈 곳이 없으면 그대로 둔다 — 지우는 것보다 남기는 쪽이 안전하다
       rehome.run(home.id, home.region_id, n.id);
       const anchor = firstDistrict.get(home.id);
