@@ -1373,5 +1373,955 @@
   "en": "<div class=\"result-box {n}\"> {n}<br> My Attack {n} vs Defense {n}{n} </div>",
   "ja": "<div class=\"result-box {n}\"> {n}<br> 自分の攻撃力 {n} vs 防御力 {n}{n} </div>",
   "zh": "<div class=\"result-box {n}\"> {n}<br> 我的攻击力 {n} vs 防御力 {n}{n} </div>"
+ },
+ "AGORA — 당신의 개소리를 증명하라 · 실시간 정치 토론 광장": {
+  "en": "AGORA — Prove Your Bullshit · Real-Time Political Debate Arena",
+  "ja": "AGORA — お前のたわごとを証明せよ · リアルタイム政治討論広場",
+  "zh": "AGORA — 证明你的胡说八道 · 实时政治辩论广场"
+ },
+ "황당해도 좋다, 논리만 있다면. {n}개 국가가 매일 여론으로 겨루는 실시간 정치 토론 광장에서 당신의 개소리를 증명하세요.": {
+  "en": "Absurd is fine, as long as it's logical. Prove your bullshit in a real-time political debate arena where {n} nations compete daily through public opinion.",
+  "ja": "突飛でも構わない、論理さえあれば。{n}か国が毎日世論で競うリアルタイム政治討論広場で、あなたのたわごとを証明しよう。",
+  "zh": "荒诞也无妨，只要有逻辑。在{n}个国家每天以舆论较量的实时政治辩论广场上，证明你的胡说八道吧。"
+ },
+ "대시보드": {
+  "en": "Dashboard",
+  "ja": "ダッシュボード",
+  "zh": "仪表盘"
+ },
+ "상점": {
+  "en": "Shop",
+  "ja": "ショップ",
+  "zh": "商店"
+ },
+ "인벤토리": {
+  "en": "Inventory",
+  "ja": "インベントリ",
+  "zh": "背包"
+ },
+ "관리자페이지": {
+  "en": "Admin Page",
+  "ja": "管理者ページ",
+  "zh": "管理员页面"
+ },
+ "불러오는 중...": {
+  "en": "Loading...",
+  "ja": "読み込み中...",
+  "zh": "加载中..."
+ },
+ "당신의": {
+  "en": "Prove your",
+  "ja": "あなたの",
+  "zh": "证明你的"
+ },
+ "개소리": {
+  "en": "bullshit",
+  "ja": "たわごと",
+  "zh": "胡说八道"
+ },
+ "를 증명하라": {
+  "en": "right here.",
+  "ja": "を証明せよ",
+  "zh": "吧"
+ },
+ "황당해도 좋다. 논리만 있다면.": {
+  "en": "Absurd is fine. As long as it's logical.",
+  "ja": "突飛でも構わない。論理さえあれば。",
+  "zh": "荒诞也无妨。只要有逻辑。"
+ },
+ "추천 · 비추천 · 국회 승인투표로 갈리는 지배권. 판정은 사람이 아니라 논증의 총합이 내린다.": {
+  "en": "Rulership decided by Upvotes · Downvotes · Congress approval votes. Judgment is rendered not by a person, but by the sum of Arguments.",
+  "ja": "推薦 · 非推薦 · 議会承認投票で決まる支配権。判定を下すのは人ではなく、論証の総和だ。",
+  "zh": "推荐 · 反对 · 议会批准投票决定统治权。裁决不由个人做出，而由论证的总和决定。"
+ },
+ "실시간 판정 진행중": {
+  "en": "Live Judgment in Progress",
+  "ja": "リアルタイム判定進行中",
+  "zh": "实时裁决进行中"
+ },
+ "국가 동시 접전": {
+  "en": "Nations Battling Simultaneously",
+  "ja": "か国が同時交戦中",
+  "zh": "个国家同时交战"
+ },
+ "실시간 채팅": {
+  "en": "Live Chat",
+  "ja": "リアルタイムチャット",
+  "zh": "实时聊天"
+ },
+ "V{n} · 동단위 정복": {
+  "en": "V{n} · Neighborhood Conquest",
+  "ja": "V{n} · 町単位征服",
+  "zh": "V{n} · 街区征服"
+ },
+ "실시간 동단위 정복 현황": {
+  "en": "Live Neighborhood Conquest Status",
+  "ja": "リアルタイム町単位征服状況",
+  "zh": "实时街区征服状况"
+ },
+ "+ 논제 등록": {
+  "en": "+ Add Agenda",
+  "ja": "+ 議題登録",
+  "zh": "+ 登记议题"
+ },
+ "📍 글쓰기 모드": {
+  "en": "📍 Write Mode",
+  "ja": "📍 書き込みモード",
+  "zh": "📍 写作模式"
+ },
+ "주요 논쟁 · Hot Issue": {
+  "en": "Major Debates · Hot Issue",
+  "ja": "主要論争 · Hot Issue",
+  "zh": "主要争论 · Hot Issue"
+ },
+ "인기순": {
+  "en": "Popular",
+  "ja": "人気順",
+  "zh": "热门"
+ },
+ "최신순": {
+  "en": "Newest",
+  "ja": "新着順",
+  "zh": "最新"
+ },
+ "내 지역": {
+  "en": "My Region",
+  "ja": "自分の地域",
+  "zh": "我的地区"
+ },
+ "논제 등록": {
+  "en": "Add Agenda",
+  "ja": "議題登録",
+  "zh": "登记议题"
+ },
+ "로그인하면 논제를 등록할 수 있습니다.": {
+  "en": "Log in to post an Agenda.",
+  "ja": "ログインすると議題を登録できます。",
+  "zh": "登录后即可登记议题。"
+ },
+ "쪽지함": {
+  "en": "Messages",
+  "ja": "メッセージボックス",
+  "zh": "私信箱"
+ },
+ "로그인하면 쪽지함을 볼 수 있습니다.": {
+  "en": "Log in to view your messages.",
+  "ja": "ログインするとメッセージボックスを見られます。",
+  "zh": "登录后即可查看私信箱。"
+ },
+ "주요 분쟁 지역": {
+  "en": "Major Disputed Regions",
+  "ja": "主要紛争地域",
+  "zh": "主要争议地区"
+ },
+ "세력 · 종교 / 정당": {
+  "en": "Factions · Religion / Party",
+  "ja": "勢力 · 宗教 / 政党",
+  "zh": "势力 · 宗教 / 政党"
+ },
+ "로그인하면 종교·정당 목록을 볼 수 있습니다.": {
+  "en": "Log in to view Religions and Parties.",
+  "ja": "ログインすると宗教・政党の一覧を見られます。",
+  "zh": "登录后即可查看宗教·政党列表。"
+ },
+ "전쟁": {
+  "en": "War",
+  "ja": "戦争",
+  "zh": "战争"
+ },
+ "로그인하면 소속 지역의 전쟁 현황을 볼 수 있습니다.": {
+  "en": "Log in to view the War status of your region.",
+  "ja": "ログインすると所属地域の戦争状況を見られます。",
+  "zh": "登录后即可查看所属地区的战争状况。"
+ },
+ "명예의 전당": {
+  "en": "Hall of Fame",
+  "ja": "殿堂",
+  "zh": "名人堂"
+ },
+ "전부 무료 · 착용 조건 없음": {
+  "en": "All free · No equip requirements",
+  "ja": "すべて無料 · 装備条件なし",
+  "zh": "全部免费 · 无装备条件"
+ },
+ "보유중인 아이템": {
+  "en": "Owned Items",
+  "ja": "所持アイテム",
+  "zh": "拥有的道具"
+ },
+ "신고 검토 및 콘텐츠 조치": {
+  "en": "Report Review & Content Actions",
+  "ja": "通報の審査とコンテンツ対応",
+  "zh": "举报审核与内容处理"
+ },
+ "로 직접 링크 가능 -->": {
+  "en": "direct link available -->",
+  "ja": "へ直接リンク可能 -->",
+  "zh": "可直接链接 -->"
+ },
+ "지도": {
+  "en": "Map",
+  "ja": "地図",
+  "zh": "地图"
+ },
+ "이 지역의 Hot 논쟁": {
+  "en": "Hot Debates in This Region",
+  "ja": "この地域のHot論争",
+  "zh": "本地区的Hot争论"
+ },
+ "동 이름으로 검색": {
+  "en": "Search by neighborhood name",
+  "ja": "町名で検索",
+  "zh": "按街区名搜索"
+ },
+ "망토": {
+  "en": "Cape",
+  "ja": "マント",
+  "zh": "披风"
+ },
+ "무기": {
+  "en": "Weapon",
+  "ja": "武器",
+  "zh": "武器"
+ },
+ "모자": {
+  "en": "Hat",
+  "ja": "帽子",
+  "zh": "帽子"
+ },
+ "얼굴": {
+  "en": "Face",
+  "ja": "顔",
+  "zh": "面部"
+ },
+ "상의": {
+  "en": "Top",
+  "ja": "トップス",
+  "zh": "上衣"
+ },
+ "바지": {
+  "en": "Pants",
+  "ja": "パンツ",
+  "zh": "裤子"
+ },
+ "신발": {
+  "en": "Shoes",
+  "ja": "靴",
+  "zh": "鞋子"
+ },
+ "방패": {
+  "en": "Shield",
+  "ja": "盾",
+  "zh": "盾牌"
+ },
+ "장신구": {
+  "en": "Jewelry",
+  "ja": "装身具",
+  "zh": "首饰"
+ },
+ "안경": {
+  "en": "Glasses",
+  "ja": "メガネ",
+  "zh": "眼镜"
+ },
+ "이펙트": {
+  "en": "Effect",
+  "ja": "エフェクト",
+  "zh": "特效"
+ },
+ "배경": {
+  "en": "Background",
+  "ja": "背景",
+  "zh": "背景"
+ },
+ "칭호": {
+  "en": "Title",
+  "ja": "称号",
+  "zh": "称号"
+ },
+ "스핑크스": {
+  "en": "Sphinx",
+  "ja": "スフィンクス",
+  "zh": "斯芬克斯"
+ },
+ "승자에게 씌워지던 월계관. 논쟁에서 이긴 자의 표식.": {
+  "en": "The laurel wreath once placed on victors. The mark of one who won the debate.",
+  "ja": "勝者に授けられた月桂冠。論争に勝った者の証。",
+  "zh": "曾为胜者加冕的月桂冠。辩论获胜者的标志。"
+ },
+ "철학자라면 응당 갖춰야 할 위엄있는 수염.": {
+  "en": "A dignified beard every philosopher ought to have.",
+  "ja": "哲学者なら当然備えるべき威厳ある髭。",
+  "zh": "哲学家理应拥有的威严胡须。"
+ },
+ "고대 아고라를 거닐던 시민의 기본 복장, 키톤.": {
+  "en": "The chiton, everyday garb of citizens who strolled the ancient agora.",
+  "ja": "古代アゴラを歩いた市民の基本装束、キトン。",
+  "zh": "漫步古代阿哥拉的公民基本服饰——希顿。"
+ },
+ "정강이를 감싸는 가죽 각반. 실용적이고 튼튼하다.": {
+  "en": "Leather greaves that wrap the shins. Practical and sturdy.",
+  "ja": "すねを覆う革の脚絆。実用的で頑丈だ。",
+  "zh": "包裹小腿的皮革护胫。实用而结实。"
+ },
+ "먼 길도 마다 않는 가죽 샌들.": {
+  "en": "Leather sandals that never shy away from a long road.",
+  "ja": "遠い道のりも厭わない革のサンダル。",
+  "zh": "不惧长途的皮革凉鞋。"
+ },
+ "중장보병의 상징, 호플론 방패. 논쟁도 방어가 먼저다.": {
+  "en": "The hoplon shield, symbol of the hoplite. In debate too, defense comes first.",
+  "ja": "重装歩兵の象徴、ホプロンの盾。論争もまず防御から。",
+  "zh": "重装步兵的象征——霍普隆盾。辩论也要先守后攻。"
+ },
+ "평화와 지혜를 뜻하는 올리브 가지 브로치.": {
+  "en": "An olive branch brooch signifying peace and wisdom.",
+  "ja": "平和と知恵を意味するオリーブの枝のブローチ。",
+  "zh": "象征和平与智慧的橄榄枝胸针。"
+ },
+ "작은 글씨의 논증도 놓치지 않는 둥근테 안경.": {
+  "en": "Round-rimmed glasses that never miss even the finest-print Argument.",
+  "ja": "小さな文字の論証も見逃さない丸縁メガネ。",
+  "zh": "连小字论证也不放过的圆框眼镜。"
+ },
+ "탁월한 언변에만 허락되는 은은한 빛무리.": {
+  "en": "A soft halo granted only to exceptional eloquence.",
+  "ja": "卓越した弁舌にのみ許される淡い光輪。",
+  "zh": "唯有卓越口才方可拥有的柔和光晕。"
+ },
+ "아고라를 둘러싼 신전 기둥을 배경으로.": {
+  "en": "With the temple columns surrounding the agora as your backdrop.",
+  "ja": "アゴラを囲む神殿の柱を背景に。",
+  "zh": "以环绕阿哥拉的神殿石柱为背景。"
+ },
+ "없음": {
+  "en": "None",
+  "ja": "なし",
+  "zh": "无"
+ },
+ "현재 지배자 재위 중": {
+  "en": "Current Ruler in reign",
+  "ja": "現在の支配者が在位中",
+  "zh": "当前统治者在位中"
+ },
+ "해당 종교 소속": {
+  "en": "Member of this Religion",
+  "ja": "該当宗教に所属",
+  "zh": "隶属该宗教"
+ },
+ "해당 정당 소속": {
+  "en": "Member of this Party",
+  "ja": "該当政党に所属",
+  "zh": "隶属该政党"
+ },
+ "논전사": {
+  "en": "Debate Warrior",
+  "ja": "論戦士",
+  "zh": "辩论战士"
+ },
+ "정예 논전사": {
+  "en": "Elite Debate Warrior",
+  "ja": "精鋭論戦士",
+  "zh": "精英辩论战士"
+ },
+ "수락 투표중": {
+  "en": "Acceptance vote in progress",
+  "ja": "受諾投票中",
+  "zh": "接受投票中"
+ },
+ "전투 진행중": {
+  "en": "Battle in progress",
+  "ja": "戦闘進行中",
+  "zh": "战斗进行中"
+ },
+ "회피(부결)": {
+  "en": "Evaded (Rejected)",
+  "ja": "回避(否決)",
+  "zh": "回避(否决)"
+ },
+ "성립 불가": {
+  "en": "Cannot be established",
+  "ja": "成立不可",
+  "zh": "无法成立"
+ },
+ "국회 승인투표중": {
+  "en": "Congress approval vote in progress",
+  "ja": "議会承認投票中",
+  "zh": "议会批准投票中"
+ },
+ "승인 → 선포됨": {
+  "en": "Approved → Declared",
+  "ja": "承認 → 宣布済み",
+  "zh": "批准 → 已宣战"
+ },
+ "국회 부결": {
+  "en": "Rejected by Congress",
+  "ja": "議会否決",
+  "zh": "议会否决"
+ },
+ "지역 데이터를 불러오지 못했습니다:": {
+  "en": "Failed to load region data:",
+  "ja": "地域データを読み込めませんでした:",
+  "zh": "无法加载地区数据:"
+ },
+ "<div class=\"issue-meta\">채팅을 불러오지 못했습니다.</div>": {
+  "en": "<div class=\"issue-meta\">Failed to load chat.</div>",
+  "ja": "<div class=\"issue-meta\">チャットを読み込めませんでした。</div>",
+  "zh": "<div class=\"issue-meta\">无法加载聊天。</div>"
+ },
+ "<div class=\"chat-signed-out\">로그인하면 채팅에 참여할 수 있습니다.</div>": {
+  "en": "<div class=\"chat-signed-out\">Log in to join the chat.</div>",
+  "ja": "<div class=\"chat-signed-out\">ログインするとチャットに参加できます。</div>",
+  "zh": "<div class=\"chat-signed-out\">登录后即可参与聊天。</div>"
+ },
+ "방금 전": {
+  "en": "Just now",
+  "ja": "たった今",
+  "zh": "刚刚"
+ },
+ "{n}분 전": {
+  "en": "{n}m ago",
+  "ja": "{n}分前",
+  "zh": "{n}分钟前"
+ },
+ "{n}시간 전": {
+  "en": "{n}h ago",
+  "ja": "{n}時間前",
+  "zh": "{n}小时前"
+ },
+ "{n}일 전": {
+  "en": "{n}d ago",
+  "ja": "{n}日前",
+  "zh": "{n}天前"
+ },
+ "<div class=\"loading-text\">불러오는 중...</div>": {
+  "en": "<div class=\"loading-text\">Loading...</div>",
+  "ja": "<div class=\"loading-text\">読み込み中...</div>",
+  "zh": "<div class=\"loading-text\">加载中...</div>"
+ },
+ "<button type=\"button\" class=\"mini-btn shop-filter-btn {n}\" data-filter=\"{n}\">{n}</button>": {
+  "en": "<button type=\"button\" class=\"mini-btn shop-filter-btn {n}\" data-filter=\"{n}\">{n}</button>",
+  "ja": "<button type=\"button\" class=\"mini-btn shop-filter-btn {n}\" data-filter=\"{n}\">{n}</button>",
+  "zh": "<button type=\"button\" class=\"mini-btn shop-filter-btn {n}\" data-filter=\"{n}\">{n}</button>"
+ },
+ "<div class=\"issue-meta\">불러오지 못했습니다: {n}</div>": {
+  "en": "<div class=\"issue-meta\">Failed to load: {n}</div>",
+  "ja": "<div class=\"issue-meta\">読み込めませんでした: {n}</div>",
+  "zh": "<div class=\"issue-meta\">加载失败: {n}</div>"
+ },
+ "<div class=\"loading-text\">로그인하면 보유 아이템을 볼 수 있습니다.</div>": {
+  "en": "<div class=\"loading-text\">Log in to view your items.</div>",
+  "ja": "<div class=\"loading-text\">ログインすると所持アイテムを見られます。</div>",
+  "zh": "<div class=\"loading-text\">登录后即可查看拥有的道具。</div>"
+ },
+ "<div class=\"loading-text\">보유한 아이템이 없습니다.</div>": {
+  "en": "<div class=\"loading-text\">You don't own any items.</div>",
+  "ja": "<div class=\"loading-text\">所持アイテムがありません。</div>",
+  "zh": "<div class=\"loading-text\">没有拥有的道具。</div>"
+ },
+ "<div class=\"shop-item inv-grid-item {n}\" data-select-item=\"{n}\"> {n} <div class=\"shop-item-icon\">{n}</div> <div class=\"shop-item-name\">{n}</div> <div class=\"shop-item-slot\">{n}</div> </div>": {
+  "en": "<div class=\"shop-item inv-grid-item {n}\" data-select-item=\"{n}\"> {n} <div class=\"shop-item-icon\">{n}</div> <div class=\"shop-item-name\">{n}</div> <div class=\"shop-item-slot\">{n}</div> </div>",
+  "ja": "<div class=\"shop-item inv-grid-item {n}\" data-select-item=\"{n}\"> {n} <div class=\"shop-item-icon\">{n}</div> <div class=\"shop-item-name\">{n}</div> <div class=\"shop-item-slot\">{n}</div> </div>",
+  "zh": "<div class=\"shop-item inv-grid-item {n}\" data-select-item=\"{n}\"> {n} <div class=\"shop-item-icon\">{n}</div> <div class=\"shop-item-name\">{n}</div> <div class=\"shop-item-slot\">{n}</div> </div>"
+ },
+ "착용중": {
+  "en": "Equipped",
+  "ja": "装備中",
+  "zh": "已装备"
+ },
+ "착용가능": {
+  "en": "Equippable",
+  "ja": "装備可能",
+  "zh": "可装备"
+ },
+ "로그인에 실패했습니다.": {
+  "en": "Login failed.",
+  "ja": "ログインに失敗しました。",
+  "zh": "登录失败。"
+ },
+ "조회에 실패했습니다.": {
+  "en": "Lookup failed.",
+  "ja": "照会に失敗しました。",
+  "zh": "查询失败。"
+ },
+ "<div class=\"section-sub\">대기중인 신고 {n}건</div> ${reports.length === {n} ? '<div class=\"loading-text\">처리할 신고가 없습니다.</div>' : reports.map(r =>": {
+  "en": "<div class=\"section-sub\">{n} pending reports</div> ${reports.length === {n} ? '<div class=\"loading-text\">No reports to handle.</div>' : reports.map(r =>",
+  "ja": "<div class=\"section-sub\">保留中の通報 {n}件</div> ${reports.length === {n} ? '<div class=\"loading-text\">処理する通報がありません。</div>' : reports.map(r =>",
+  "zh": "<div class=\"section-sub\">待处理举报 {n}条</div> ${reports.length === {n} ? '<div class=\"loading-text\">没有需要处理的举报。</div>' : reports.map(r =>"
+ },
+ ").join('')} <button type=\"button\" class=\"logout-link\" id=\"adminLogoutBtn\" style=\"margin-top:{n}px;\">관리자 로그아웃</button>": {
+  "en": ").join('')} <button type=\"button\" class=\"logout-link\" id=\"adminLogoutBtn\" style=\"margin-top:{n}px;\">Admin Logout</button>",
+  "ja": ").join('')} <button type=\"button\" class=\"logout-link\" id=\"adminLogoutBtn\" style=\"margin-top:{n}px;\">管理者ログアウト</button>",
+  "zh": ").join('')} <button type=\"button\" class=\"logout-link\" id=\"adminLogoutBtn\" style=\"margin-top:{n}px;\">管理员登出</button>"
+ },
+ "처리에 실패했습니다.": {
+  "en": "Action failed.",
+  "ja": "処理に失敗しました。",
+  "zh": "处理失败。"
+ },
+ "Leaflet을 불러오지 못해 지도를 표시할 수 없습니다.": {
+  "en": "Could not load Leaflet, so the map cannot be displayed.",
+  "ja": "Leafletを読み込めなかったため、地図を表示できません。",
+  "zh": "无法加载Leaflet，因此无法显示地图。"
+ },
+ "지도를 탭하면 움직일 수 있어요": {
+  "en": "Tap the map to move it",
+  "ja": "地図をタップすると動かせます",
+  "zh": "点按地图即可移动"
+ },
+ "동단위 정복 데이터를 불러오지 못했습니다.": {
+  "en": "Failed to load neighborhood conquest data.",
+  "ja": "町単位征服データを読み込めませんでした。",
+  "zh": "无法加载街区征服数据。"
+ },
+ "NPC {n} · 점령됨 {n} · 내 지배 {n}": {
+  "en": "NPC {n} · Occupied {n} · My Rule {n}",
+  "ja": "NPC {n} · 占領済み {n} · 自分の支配 {n}",
+  "zh": "NPC {n} · 已占领 {n} · 我的统治 {n}"
+ },
+ "<div class=\"nb-adj-row\"> <div><div>{n}</div><div class=\"nb-adj-status\">{n}</div></div> ${canAttackFromHere ?": {
+  "en": "<div class=\"nb-adj-row\"> <div><div>{n}</div><div class=\"nb-adj-status\">{n}</div></div> ${canAttackFromHere ?",
+  "ja": "<div class=\"nb-adj-row\"> <div><div>{n}</div><div class=\"nb-adj-status\">{n}</div></div> ${canAttackFromHere ?",
+  "zh": "<div class=\"nb-adj-row\"> <div><div>{n}</div><div class=\"nb-adj-status\">{n}</div></div> ${canAttackFromHere ?"
+ },
+ "<div class=\"nb-adj-status\">등록된 인접 동이 없습니다.</div>": {
+  "en": "<div class=\"nb-adj-status\">No adjacent neighborhoods registered.</div>",
+  "ja": "<div class=\"nb-adj-status\">登録された隣接町がありません。</div>",
+  "zh": "<div class=\"nb-adj-status\">没有已登记的相邻街区。</div>"
+ },
+ ": ''} </div> <div class=\"nb-stat-row\"><span>지배자</span><span>{n}</span></div> <div class=\"nb-stat-row\"><span>누적 기여 포인트</span><span>{n}${n.status === 'npc' ?": {
+  "en": ": ''} </div> <div class=\"nb-stat-row\"><span>Ruler</span><span>{n}</span></div> <div class=\"nb-stat-row\"><span>Total Contribution Points</span><span>{n}${n.status === 'npc' ?",
+  "ja": ": ''} </div> <div class=\"nb-stat-row\"><span>支配者</span><span>{n}</span></div> <div class=\"nb-stat-row\"><span>累計貢献ポイント</span><span>{n}${n.status === 'npc' ?",
+  "zh": ": ''} </div> <div class=\"nb-stat-row\"><span>统治者</span><span>{n}</span></div> <div class=\"nb-stat-row\"><span>累计贡献点数</span><span>{n}${n.status === 'npc' ?"
+ },
+ ": ''} <div class=\"nb-section-label\">기여 상위</div> ${(n.top_contributors || []).length ? n.top_contributors.map(c =>": {
+  "en": ": ''} <div class=\"nb-section-label\">Top Contributors</div> ${(n.top_contributors || []).length ? n.top_contributors.map(c =>",
+  "ja": ": ''} <div class=\"nb-section-label\">貢献上位</div> ${(n.top_contributors || []).length ? n.top_contributors.map(c =>",
+  "zh": ": ''} <div class=\"nb-section-label\">贡献排行</div> ${(n.top_contributors || []).length ? n.top_contributors.map(c =>"
+ },
+ ").join('') : '<div class=\"nb-adj-status\">아직 기여 기록이 없습니다.</div>'} ${currentUser ?": {
+  "en": ").join('') : '<div class=\"nb-adj-status\">No Contribution records yet.</div>'} ${currentUser ?",
+  "ja": ").join('') : '<div class=\"nb-adj-status\">まだ貢献記録がありません。</div>'} ${currentUser ?",
+  "zh": ").join('') : '<div class=\"nb-adj-status\">暂无贡献记录。</div>'} ${currentUser ?"
+ },
+ ": ''} <div class=\"nb-section-label\">인접 동</div> {n} <div id=\"nbActionResult\"></div>": {
+  "en": ": ''} <div class=\"nb-section-label\">Adjacent Neighborhoods</div> {n} <div id=\"nbActionResult\"></div>",
+  "ja": ": ''} <div class=\"nb-section-label\">隣接町</div> {n} <div id=\"nbActionResult\"></div>",
+  "zh": ": ''} <div class=\"nb-section-label\">相邻街区</div> {n} <div id=\"nbActionResult\"></div>"
+ },
+ "<div class=\"nb-result-box win\">+{n}pt 기여! 누적 {n}pt": {
+  "en": "<div class=\"nb-result-box win\">+{n}pt Contributed! Total {n}pt",
+  "ja": "<div class=\"nb-result-box win\">+{n}pt 貢献！累計 {n}pt",
+  "zh": "<div class=\"nb-result-box win\">+{n}pt 贡献！累计 {n}pt"
+ },
+ "<div class=\"loading-text\">공격 중...</div>": {
+  "en": "<div class=\"loading-text\">Attacking...</div>",
+  "ja": "<div class=\"loading-text\">攻撃中...</div>",
+  "zh": "<div class=\"loading-text\">攻击中...</div>"
+ },
+ "<div class=\"nb-result-box {n}\"> {n}<br> 내 공격력 {n} vs 방어력 {n}{n} </div>": {
+  "en": "<div class=\"nb-result-box {n}\"> {n}<br> My Attack {n} vs Defense {n}{n} </div>",
+  "ja": "<div class=\"nb-result-box {n}\"> {n}<br> 自分の攻撃力 {n} vs 防御力 {n}{n} </div>",
+  "zh": "<div class=\"nb-result-box {n}\"> {n}<br> 我的攻击力 {n} vs 防御力 {n}{n} </div>"
+ },
+ "지도 게시글을 불러오지 못했습니다:": {
+  "en": "Failed to load map posts:",
+  "ja": "地図の投稿を読み込めませんでした:",
+  "zh": "无法加载地图帖子:"
+ },
+ "<div class=\"map-post-form\"> <textarea maxlength=\"{n}\" placeholder=\"이 위치에 남길 글을 적어주세요 ({n}자 이내)\"></textarea> <button type=\"button\" class=\"mini-btn\" id=\"mapPostSubmitBtn\">등록</button> </div>": {
+  "en": "<div class=\"map-post-form\"> <textarea maxlength=\"{n}\" placeholder=\"Write something to leave at this spot (up to {n} characters)\"></textarea> <button type=\"button\" class=\"mini-btn\" id=\"mapPostSubmitBtn\">Post</button> </div>",
+  "ja": "<div class=\"map-post-form\"> <textarea maxlength=\"{n}\" placeholder=\"この場所に残す文章を書いてください（{n}文字以内）\"></textarea> <button type=\"button\" class=\"mini-btn\" id=\"mapPostSubmitBtn\">登録</button> </div>",
+  "zh": "<div class=\"map-post-form\"> <textarea maxlength=\"{n}\" placeholder=\"写下要留在此处的内容（{n}字以内）\"></textarea> <button type=\"button\" class=\"mini-btn\" id=\"mapPostSubmitBtn\">发布</button> </div>"
+ },
+ "지도에 글을 남겼습니다.": {
+  "en": "Your post was left on the map.",
+  "ja": "地図に文章を残しました。",
+  "zh": "已在地图上留言。"
+ },
+ "글쓰기 모드 끄기": {
+  "en": "Exit Write Mode",
+  "ja": "書き込みモードを終了",
+  "zh": "关闭写作模式"
+ },
+ "지도를 클릭해 글을 남기세요": {
+  "en": "Click the map to leave a post",
+  "ja": "地図をクリックして文章を残そう",
+  "zh": "点击地图留言"
+ },
+ "로그인 후 이용할 수 있습니다.": {
+  "en": "Available after logging in.",
+  "ja": "ログイン後に利用できます。",
+  "zh": "登录后即可使用。"
+ },
+ "알 수 없음": {
+  "en": "Unknown",
+  "ja": "不明",
+  "zh": "未知"
+ },
+ "레벨 업! Lv.{n}": {
+  "en": "Level Up! Lv.{n}",
+  "ja": "レベルアップ！Lv.{n}",
+  "zh": "升级！Lv.{n}"
+ },
+ "<a href=\"#\" class=\"nav-auth-link\" id=\"navAuthLink\">로그인 / 회원가입</a>": {
+  "en": "<a href=\"#\" class=\"nav-auth-link\" id=\"navAuthLink\">Log in / Sign up</a>",
+  "ja": "<a href=\"#\" class=\"nav-auth-link\" id=\"navAuthLink\">ログイン / 会員登録</a>",
+  "zh": "<a href=\"#\" class=\"nav-auth-link\" id=\"navAuthLink\">登录 / 注册</a>"
+ },
+ "<span class=\"badge\" style=\"background:var(--black); color:var(--white);\">폭군</span>": {
+  "en": "<span class=\"badge\" style=\"background:var(--black); color:var(--white);\">Tyrant</span>",
+  "ja": "<span class=\"badge\" style=\"background:var(--black); color:var(--white);\">暴君</span>",
+  "zh": "<span class=\"badge\" style=\"background:var(--black); color:var(--white);\">暴君</span>"
+ },
+ "<span class=\"badge\">지배자</span>": {
+  "en": "<span class=\"badge\">Ruler</span>",
+  "ja": "<span class=\"badge\">支配者</span>",
+  "zh": "<span class=\"badge\">统治者</span>"
+ },
+ "<span class=\"stat-label\">없음</span>": {
+  "en": "<span class=\"stat-label\">None</span>",
+  "ja": "<span class=\"stat-label\">なし</span>",
+  "zh": "<span class=\"stat-label\">无</span>"
+ },
+ "망토로 쓸 이미지 URL을 입력하세요 (본인이 만들어 이미 호스팅해둔 이미지 주소)": {
+  "en": "Enter the image URL to use as your cape (an image you made and already host yourself)",
+  "ja": "マントに使う画像URLを入力してください（自分で作成し、既にホスティング済みの画像アドレス）",
+  "zh": "请输入用作披风的图片URL（您自己制作并已托管的图片地址）"
+ },
+ "망토가 등록되어 인벤토리에 추가되었습니다. 인벤토리에서 착용해보세요.": {
+  "en": "Your cape has been registered and added to your Inventory. Equip it from your Inventory.",
+  "ja": "マントが登録され、インベントリに追加されました。インベントリから装備してみましょう。",
+  "zh": "披风已登记并添加到背包。请在背包中装备。"
+ },
+ "쪽지": {
+  "en": "Message",
+  "ja": "メッセージ",
+  "zh": "私信"
+ },
+ "선택한 국가 ·": {
+  "en": "Selected nation ·",
+  "ja": "選択した国家 ·",
+  "zh": "所选国家 ·"
+ },
+ "지역 정보를 불러오는 중...": {
+  "en": "Loading region info...",
+  "ja": "地域情報を読み込み中...",
+  "zh": "正在加载地区信息..."
+ },
+ "({n}자 이상)": {
+  "en": "({n}+ characters)",
+  "ja": "({n}文字以上)",
+  "zh": "({n}字以上)"
+ },
+ ": ''} <div class=\"auth-error\" id=\"authError\" style=\"display:none;\"></div> <button type=\"submit\" class=\"auth-submit\" id=\"authSubmit\">{n}</button> </form> ${!isGoogleProfile ?": {
+  "en": ": ''} <div class=\"auth-error\" id=\"authError\" style=\"display:none;\"></div> <button type=\"submit\" class=\"auth-submit\" id=\"authSubmit\">{n}</button> </form> ${!isGoogleProfile ?",
+  "ja": ": ''} <div class=\"auth-error\" id=\"authError\" style=\"display:none;\"></div> <button type=\"submit\" class=\"auth-submit\" id=\"authSubmit\">{n}</button> </form> ${!isGoogleProfile ?",
+  "zh": ": ''} <div class=\"auth-error\" id=\"authError\" style=\"display:none;\"></div> <button type=\"submit\" class=\"auth-submit\" id=\"authSubmit\">{n}</button> </form> ${!isGoogleProfile ?"
+ },
+ "처리 중...": {
+  "en": "Processing...",
+  "ja": "処理中...",
+  "zh": "处理中..."
+ },
+ "로그인": {
+  "en": "Log in",
+  "ja": "ログイン",
+  "zh": "登录"
+ },
+ "시작하기": {
+  "en": "Get Started",
+  "ja": "はじめる",
+  "zh": "开始"
+ },
+ "가입하고 시작하기": {
+  "en": "Sign up & Get Started",
+  "ja": "登録してはじめる",
+  "zh": "注册并开始"
+ },
+ "구글 로그인에 실패했습니다:": {
+  "en": "Google login failed:",
+  "ja": "Googleログインに失敗しました:",
+  "zh": "Google登录失败:"
+ },
+ "<div class=\"issue-meta\">불러오지 못했습니다.</div>": {
+  "en": "<div class=\"issue-meta\">Failed to load.</div>",
+  "ja": "<div class=\"issue-meta\">読み込めませんでした。</div>",
+  "zh": "<div class=\"issue-meta\">加载失败。</div>"
+ },
+ "마감임박순": {
+  "en": "Ending Soon",
+  "ja": "締切間近順",
+  "zh": "即将截止"
+ },
+ "<div class=\"issue-meta\">로그인하면 내 지역 논제만 볼 수 있습니다.</div>": {
+  "en": "<div class=\"issue-meta\">Log in to see only Agendas from your region.</div>",
+  "ja": "<div class=\"issue-meta\">ログインすると自分の地域の議題だけを見られます。</div>",
+  "zh": "<div class=\"issue-meta\">登录后即可只查看我的地区的议题。</div>"
+ },
+ "<div class=\"issue-meta\">아직 등록된 논제가 없습니다.</div>": {
+  "en": "<div class=\"issue-meta\">No Agendas posted yet.</div>",
+  "ja": "<div class=\"issue-meta\">まだ登録された議題がありません。</div>",
+  "zh": "<div class=\"issue-meta\">暂无登记的议题。</div>"
+ },
+ "찬성": {
+  "en": "For",
+  "ja": "賛成",
+  "zh": "赞成"
+ },
+ "반대": {
+  "en": "Against",
+  "ja": "反対",
+  "zh": "反对"
+ },
+ "기타": {
+  "en": "Other",
+  "ja": "その他",
+  "zh": "其他"
+ },
+ "<div class=\"issue-meta\">아직 등록된 의견이 없습니다.</div>": {
+  "en": "<div class=\"issue-meta\">No opinions posted yet.</div>",
+  "ja": "<div class=\"issue-meta\">まだ登録された意見がありません。</div>",
+  "zh": "<div class=\"issue-meta\">暂无发表的意见。</div>"
+ },
+ ": ''} {n} <div class=\"thread-side-title\" style=\"margin-top:{n}px;\">다른 의견들</div> {n} <button type=\"button\" class=\"mini-btn\" style=\"margin-top:{n}px;\" data-open-thread-full=\"{n}\">전체 보기 →</button>": {
+  "en": ": ''} {n} <div class=\"thread-side-title\" style=\"margin-top:{n}px;\">Other Opinions</div> {n} <button type=\"button\" class=\"mini-btn\" style=\"margin-top:{n}px;\" data-open-thread-full=\"{n}\">View All →</button>",
+  "ja": ": ''} {n} <div class=\"thread-side-title\" style=\"margin-top:{n}px;\">他の意見</div> {n} <button type=\"button\" class=\"mini-btn\" style=\"margin-top:{n}px;\" data-open-thread-full=\"{n}\">すべて見る →</button>",
+  "zh": ": ''} {n} <div class=\"thread-side-title\" style=\"margin-top:{n}px;\">其他意见</div> {n} <button type=\"button\" class=\"mini-btn\" style=\"margin-top:{n}px;\" data-open-thread-full=\"{n}\">查看全部 →</button>"
+ },
+ "<div class=\"issue-meta\">현재 분쟁 중인 지역이 없습니다.</div>": {
+  "en": "<div class=\"issue-meta\">No regions currently in dispute.</div>",
+  "ja": "<div class=\"issue-meta\">現在紛争中の地域はありません。</div>",
+  "zh": "<div class=\"issue-meta\">当前没有争议中的地区。</div>"
+ },
+ "<div class=\"dispute-stat\">정보를 불러오지 못했습니다.</div>": {
+  "en": "<div class=\"dispute-stat\">Failed to load info.</div>",
+  "ja": "<div class=\"dispute-stat\">情報を読み込めませんでした。</div>",
+  "zh": "<div class=\"dispute-stat\">无法加载信息。</div>"
+ },
+ "<div class=\"dispute-item\"><span class=\"dispute-region\">{n} · {n}</span><span class=\"issue-meta\">{n}일 재위</span></div>": {
+  "en": "<div class=\"dispute-item\"><span class=\"dispute-region\">{n} · {n}</span><span class=\"issue-meta\">{n} days in reign</span></div>",
+  "ja": "<div class=\"dispute-item\"><span class=\"dispute-region\">{n} · {n}</span><span class=\"issue-meta\">在位{n}日</span></div>",
+  "zh": "<div class=\"dispute-item\"><span class=\"dispute-region\">{n} · {n}</span><span class=\"issue-meta\">在位{n}天</span></div>"
+ },
+ "<div class=\"issue-meta\">기록 없음</div>": {
+  "en": "<div class=\"issue-meta\">No records</div>",
+  "ja": "<div class=\"issue-meta\">記録なし</div>",
+  "zh": "<div class=\"issue-meta\">无记录</div>"
+ },
+ "<div class=\"dispute-item\"><span class=\"dispute-region\">{n} · {n}</span><span class=\"issue-meta\">명성 {n}</span></div>": {
+  "en": "<div class=\"dispute-item\"><span class=\"dispute-region\">{n} · {n}</span><span class=\"issue-meta\">Reputation {n}</span></div>",
+  "ja": "<div class=\"dispute-item\"><span class=\"dispute-region\">{n} · {n}</span><span class=\"issue-meta\">名声 {n}</span></div>",
+  "zh": "<div class=\"dispute-item\"><span class=\"dispute-region\">{n} · {n}</span><span class=\"issue-meta\">声望 {n}</span></div>"
+ },
+ "<div class=\"lists-row\"> <div><div class=\"section-sub\">역대 최장 재위 지배자</div>{n}</div> <div><div class=\"section-sub\">현재 선지자 랭킹</div>{n}</div> </div>": {
+  "en": "<div class=\"lists-row\"> <div><div class=\"section-sub\">Longest-Reigning Rulers of All Time</div>{n}</div> <div><div class=\"section-sub\">Current Prophet Ranking</div>{n}</div> </div>",
+  "ja": "<div class=\"lists-row\"> <div><div class=\"section-sub\">歴代最長在位の支配者</div>{n}</div> <div><div class=\"section-sub\">現在の預言者ランキング</div>{n}</div> </div>",
+  "zh": "<div class=\"lists-row\"> <div><div class=\"section-sub\">历代最长在位统治者</div>{n}</div> <div><div class=\"section-sub\">当前先知排名</div>{n}</div> </div>"
+ },
+ "<div class=\"dispute-item\"> <span class=\"dispute-region\">{n} <span class=\"stat-label\">(신자 {n})</span></span> <button class=\"mini-btn\" data-join=\"religion\" data-id=\"{n}\">가입</button> </div>": {
+  "en": "<div class=\"dispute-item\"> <span class=\"dispute-region\">{n} <span class=\"stat-label\">(Believers {n})</span></span> <button class=\"mini-btn\" data-join=\"religion\" data-id=\"{n}\">Join</button> </div>",
+  "ja": "<div class=\"dispute-item\"> <span class=\"dispute-region\">{n} <span class=\"stat-label\">(信者 {n})</span></span> <button class=\"mini-btn\" data-join=\"religion\" data-id=\"{n}\">加入</button> </div>",
+  "zh": "<div class=\"dispute-item\"> <span class=\"dispute-region\">{n} <span class=\"stat-label\">(信徒 {n})</span></span> <button class=\"mini-btn\" data-join=\"religion\" data-id=\"{n}\">加入</button> </div>"
+ },
+ "<div class=\"issue-meta\">아직 창설된 종교가 없습니다.</div>": {
+  "en": "<div class=\"issue-meta\">No Religions founded yet.</div>",
+  "ja": "<div class=\"issue-meta\">まだ創設された宗教がありません。</div>",
+  "zh": "<div class=\"issue-meta\">暂无创立的宗教。</div>"
+ },
+ "<div class=\"dispute-item\"> <span class=\"dispute-region\">{n} <span class=\"stat-label\">(당원 {n})</span></span> <button class=\"mini-btn\" data-join=\"party\" data-id=\"{n}\">가입</button> </div>": {
+  "en": "<div class=\"dispute-item\"> <span class=\"dispute-region\">{n} <span class=\"stat-label\">(Members {n})</span></span> <button class=\"mini-btn\" data-join=\"party\" data-id=\"{n}\">Join</button> </div>",
+  "ja": "<div class=\"dispute-item\"> <span class=\"dispute-region\">{n} <span class=\"stat-label\">(党員 {n})</span></span> <button class=\"mini-btn\" data-join=\"party\" data-id=\"{n}\">加入</button> </div>",
+  "zh": "<div class=\"dispute-item\"> <span class=\"dispute-region\">{n} <span class=\"stat-label\">(党员 {n})</span></span> <button class=\"mini-btn\" data-join=\"party\" data-id=\"{n}\">加入</button> </div>"
+ },
+ "<div class=\"issue-meta\">아직 창당된 정당이 없습니다.</div>": {
+  "en": "<div class=\"issue-meta\">No Parties founded yet.</div>",
+  "ja": "<div class=\"issue-meta\">まだ結成された政党がありません。</div>",
+  "zh": "<div class=\"issue-meta\">暂无创建的政党。</div>"
+ },
+ "가입되었습니다.": {
+  "en": "Joined.",
+  "ja": "加入しました。",
+  "zh": "已加入。"
+ },
+ "<button class=\"mini-btn\" data-war-vote=\"accept\" data-war=\"{n}\">수락 찬성</button> <button class=\"mini-btn\" data-war-vote=\"reject\" data-war=\"{n}\">수락 반대</button>": {
+  "en": "<button class=\"mini-btn\" data-war-vote=\"accept\" data-war=\"{n}\">Vote to Accept</button> <button class=\"mini-btn\" data-war-vote=\"reject\" data-war=\"{n}\">Vote to Reject</button>",
+  "ja": "<button class=\"mini-btn\" data-war-vote=\"accept\" data-war=\"{n}\">受諾に賛成</button> <button class=\"mini-btn\" data-war-vote=\"reject\" data-war=\"{n}\">受諾に反対</button>",
+  "zh": "<button class=\"mini-btn\" data-war-vote=\"accept\" data-war=\"{n}\">赞成接受</button> <button class=\"mini-btn\" data-war-vote=\"reject\" data-war=\"{n}\">反对接受</button>"
+ },
+ "<button class=\"mini-btn\" data-war-battle-open=\"{n}\">전투 개설</button>": {
+  "en": "<button class=\"mini-btn\" data-war-battle-open=\"{n}\">Open Battle</button>",
+  "ja": "<button class=\"mini-btn\" data-war-battle-open=\"{n}\">戦闘開設</button>",
+  "zh": "<button class=\"mini-btn\" data-war-battle-open=\"{n}\">开设战斗</button>"
+ },
+ "<span class=\"issue-meta\">전투 개설 대기중</span>": {
+  "en": "<span class=\"issue-meta\">Waiting for battle to open</span>",
+  "ja": "<span class=\"issue-meta\">戦闘開設待ち</span>",
+  "zh": "<span class=\"issue-meta\">等待开设战斗</span>"
+ },
+ "<span class=\"issue-meta\">전투 종료 · 승리: {n}</span>": {
+  "en": "<span class=\"issue-meta\">Battle over · Winner: {n}</span>",
+  "ja": "<span class=\"issue-meta\">戦闘終了 · 勝利: {n}</span>",
+  "zh": "<span class=\"issue-meta\">战斗结束 · 胜利: {n}</span>"
+ },
+ "전투 논제를 입력하세요": {
+  "en": "Enter the battle Agenda",
+  "ja": "戦闘の議題を入力してください",
+  "zh": "请输入战斗议题"
+ },
+ "공격측 주장(선택지)을 입력하세요": {
+  "en": "Enter the attacker's claim (option)",
+  "ja": "攻撃側の主張（選択肢）を入力してください",
+  "zh": "请输入攻击方的主张（选项）"
+ },
+ "방어측 주장(선택지)을 입력하세요": {
+  "en": "Enter the defender's claim (option)",
+  "ja": "防御側の主張（選択肢）を入力してください",
+  "zh": "请输入防守方的主张（选项）"
+ },
+ "진영을 선택했습니다.": {
+  "en": "Side selected.",
+  "ja": "陣営を選択しました。",
+  "zh": "已选择阵营。"
+ },
+ "논증 내용을 입력하세요": {
+  "en": "Enter your Argument",
+  "ja": "論証の内容を入力してください",
+  "zh": "请输入论证内容"
+ },
+ "논증이 등록되었습니다.": {
+  "en": "Your Argument has been posted.",
+  "ja": "論証が登録されました。",
+  "zh": "论证已登记。"
+ },
+ "<button class=\"mini-btn\" data-congress-vote=\"accept\" data-congress=\"{n}\">찬성</button> <button class=\"mini-btn\" data-congress-vote=\"reject\" data-congress=\"{n}\">반대</button>": {
+  "en": "<button class=\"mini-btn\" data-congress-vote=\"accept\" data-congress=\"{n}\">For</button> <button class=\"mini-btn\" data-congress-vote=\"reject\" data-congress=\"{n}\">Against</button>",
+  "ja": "<button class=\"mini-btn\" data-congress-vote=\"accept\" data-congress=\"{n}\">賛成</button> <button class=\"mini-btn\" data-congress-vote=\"reject\" data-congress=\"{n}\">反対</button>",
+  "zh": "<button class=\"mini-btn\" data-congress-vote=\"accept\" data-congress=\"{n}\">赞成</button> <button class=\"mini-btn\" data-congress-vote=\"reject\" data-congress=\"{n}\">反对</button>"
+ },
+ ").join('')} </select> <button class=\"mini-btn\" id=\"declareWarBtn\">선전포고</button> </div>": {
+  "en": ").join('')} </select> <button class=\"mini-btn\" id=\"declareWarBtn\">Declare War</button> </div>",
+  "ja": ").join('')} </select> <button class=\"mini-btn\" id=\"declareWarBtn\">宣戦布告</button> </div>",
+  "zh": ").join('')} </select> <button class=\"mini-btn\" id=\"declareWarBtn\">宣战</button> </div>"
+ },
+ "<div class=\"issue-meta\">진행 중인 전쟁이 없습니다.</div>": {
+  "en": "<div class=\"issue-meta\">No Wars in progress.</div>",
+  "ja": "<div class=\"issue-meta\">進行中の戦争はありません。</div>",
+  "zh": "<div class=\"issue-meta\">没有进行中的战争。</div>"
+ },
+ "국회력(당원 {n}명)이 높아 자기 지역 정당원 승인투표가 먼저 필요합니다.": {
+  "en": "Congress power is high ({n} Party members), so an approval vote by Party members in your region is required first.",
+  "ja": "議会力（党員{n}名）が高いため、先に自地域の政党員による承認投票が必要です。",
+  "zh": "议会力量较高（党员{n}名），需先由本地区党员进行批准投票。"
+ },
+ "선전포고했습니다.": {
+  "en": "War declared.",
+  "ja": "宣戦布告しました。",
+  "zh": "已宣战。"
+ },
+ "논제가 등록되었습니다.": {
+  "en": "Agenda posted.",
+  "ja": "議題が登録されました。",
+  "zh": "议题已登记。"
+ },
+ "<div class=\"issue-meta\">주고받은 쪽지가 없습니다. Hot Issue의 발의자 이름 옆 \"쪽지\" 버튼으로 시작해보세요.</div>": {
+  "en": "<div class=\"issue-meta\">No messages yet. Start one with the \"Message\" button next to a proposer's name in Hot Issue.</div>",
+  "ja": "<div class=\"issue-meta\">やり取りしたメッセージがありません。Hot Issueの発議者名の横にある「メッセージ」ボタンから始めてみましょう。</div>",
+  "zh": "<div class=\"issue-meta\">暂无往来私信。请通过Hot Issue中提议者名字旁的\"私信\"按钮开始。</div>"
+ },
+ "<div class=\"issue-meta\">아직 대화가 없습니다.</div>": {
+  "en": "<div class=\"issue-meta\">No conversations yet.</div>",
+  "ja": "<div class=\"issue-meta\">まだ会話がありません。</div>",
+  "zh": "<div class=\"issue-meta\">暂无对话。</div>"
+ },
+ "{n} AGORA에서 이 논제에 찬성 또는 반대 논증을 남기고 투표에 참여해보세요. 다양한 시각의 의견을 확인해보세요.": {
+  "en": "{n} Leave an Argument for or against this Agenda on AGORA and join the vote. Explore opinions from diverse perspectives.",
+  "ja": "{n} AGORAでこの議題に賛成または反対の論証を残し、投票に参加しよう。様々な視点の意見をチェックしよう。",
+  "zh": "{n} 在AGORA上为该议题留下赞成或反对的论证并参与投票。看看来自不同视角的意见。"
+ },
+ "익명": {
+  "en": "Anonymous",
+  "ja": "匿名",
+  "zh": "匿名"
+ },
+ "<div class=\"issue-meta\">아직 답글이 없습니다.</div>": {
+  "en": "<div class=\"issue-meta\">No replies yet.</div>",
+  "ja": "<div class=\"issue-meta\">まだ返信がありません。</div>",
+  "zh": "<div class=\"issue-meta\">暂无回复。</div>"
+ },
+ "<form class=\"reply-form-mini\" data-reply-form=\"{n}\"> <input name=\"body\" placeholder=\"답글을 입력하세요\" required maxlength=\"{n}\"> <button type=\"submit\" class=\"mini-btn\">등록</button> </form>": {
+  "en": "<form class=\"reply-form-mini\" data-reply-form=\"{n}\"> <input name=\"body\" placeholder=\"Write a reply\" required maxlength=\"{n}\"> <button type=\"submit\" class=\"mini-btn\">Post</button> </form>",
+  "ja": "<form class=\"reply-form-mini\" data-reply-form=\"{n}\"> <input name=\"body\" placeholder=\"返信を入力してください\" required maxlength=\"{n}\"> <button type=\"submit\" class=\"mini-btn\">登録</button> </form>",
+  "zh": "<form class=\"reply-form-mini\" data-reply-form=\"{n}\"> <input name=\"body\" placeholder=\"请输入回复\" required maxlength=\"{n}\"> <button type=\"submit\" class=\"mini-btn\">发布</button> </form>"
+ },
+ ": ''} </span> </div> {n} {n} <div><button class=\"reply-toggle\" data-toggle-replies=\"{n}\">답글</button></div> <div class=\"reply-list\" id=\"replyList-{n}\" hidden></div> </div>": {
+  "en": ": ''} </span> </div> {n} {n} <div><button class=\"reply-toggle\" data-toggle-replies=\"{n}\">Reply</button></div> <div class=\"reply-list\" id=\"replyList-{n}\" hidden></div> </div>",
+  "ja": ": ''} </span> </div> {n} {n} <div><button class=\"reply-toggle\" data-toggle-replies=\"{n}\">返信</button></div> <div class=\"reply-list\" id=\"replyList-{n}\" hidden></div> </div>",
+  "zh": ": ''} </span> </div> {n} {n} <div><button class=\"reply-toggle\" data-toggle-replies=\"{n}\">回复</button></div> <div class=\"reply-list\" id=\"replyList-{n}\" hidden></div> </div>"
+ },
+ "<div class=\"issue-meta\">아직 등록된 논증이 없습니다.</div>": {
+  "en": "<div class=\"issue-meta\">No Arguments posted yet.</div>",
+  "ja": "<div class=\"issue-meta\">まだ登録された論証がありません。</div>",
+  "zh": "<div class=\"issue-meta\">暂无登记的论证。</div>"
+ },
+ "타이틀": {
+  "en": "Title",
+  "ja": "タイトル",
+  "zh": "标题"
+ },
+ "설명을 입력하세요": {
+  "en": "Enter a description",
+  "ja": "説明を入力してください",
+  "zh": "请输入说明"
+ },
+ ": ''} </div> <div class=\"thread-side\"> <div class=\"thread-side-title\">다른 의견들 · 활성화 순</div> <div class=\"thread-side-list\" id=\"threadModalArgs\">{n}</div> </div> </div>": {
+  "en": ": ''} </div> <div class=\"thread-side\"> <div class=\"thread-side-title\">Other Opinions · By Activity</div> <div class=\"thread-side-list\" id=\"threadModalArgs\">{n}</div> </div> </div>",
+  "ja": ": ''} </div> <div class=\"thread-side\"> <div class=\"thread-side-title\">他の意見 · 活性順</div> <div class=\"thread-side-list\" id=\"threadModalArgs\">{n}</div> </div> </div>",
+  "zh": ": ''} </div> <div class=\"thread-side\"> <div class=\"thread-side-title\">其他意见 · 按活跃度</div> <div class=\"thread-side-list\" id=\"threadModalArgs\">{n}</div> </div> </div>"
+ },
+ "<div class=\"issue-meta\">불러오는 중...</div>": {
+  "en": "<div class=\"issue-meta\">Loading...</div>",
+  "ja": "<div class=\"issue-meta\">読み込み中...</div>",
+  "zh": "<div class=\"issue-meta\">加载中...</div>"
+ },
+ "팔로우 완료": {
+  "en": "Followed",
+  "ja": "フォロー完了",
+  "zh": "已关注"
+ },
+ "유저ID": {
+  "en": "User ID",
+  "ja": "ユーザーID",
+  "zh": "用户ID"
+ },
+ "지배 확정": {
+  "en": "Rule Confirmed",
+  "ja": "支配確定",
+  "zh": "统治确定"
+ },
+ "판정 진행중": {
+  "en": "Judgment in Progress",
+  "ja": "判定進行中",
+  "zh": "裁决进行中"
+ },
+ "<div class=\"loading-text\">로그인하면 논제를 등록할 수 있습니다.</div>": {
+  "en": "<div class=\"loading-text\">Log in to post an Agenda.</div>",
+  "ja": "<div class=\"loading-text\">ログインすると議題を登録できます。</div>",
+  "zh": "<div class=\"loading-text\">登录后即可登记议题。</div>"
+ },
+ "{n} 국가 <span class=\"region-status-badge {n}\">{n}</span>{n}": {
+  "en": "{n} Nation <span class=\"region-status-badge {n}\">{n}</span>{n}",
+  "ja": "{n} 国家 <span class=\"region-status-badge {n}\">{n}</span>{n}",
+  "zh": "{n} 国家 <span class=\"region-status-badge {n}\">{n}</span>{n}"
+ },
+ "지역을 점령했습니다! 당신이 새로운 지배자입니다.": {
+  "en": "Region captured! You are the new Ruler.",
+  "ja": "地域を占領しました！あなたが新しい支配者です。",
+  "zh": "已占领地区！你是新的统治者。"
+ },
+ "불러오지 못했습니다:": {
+  "en": "Failed to load:",
+  "ja": "読み込めませんでした:",
+  "zh": "加载失败:"
  }
 }
