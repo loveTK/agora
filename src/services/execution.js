@@ -20,12 +20,12 @@ function executeIfRuler(thread) {
   if (!dominanceRow) return null;
 
   const cooldownUntil = db
-    .prepare("SELECT date('now', '+' || ? || ' days') AS d")
+    .prepare("SELECT (current_date + (? || ' days')::interval)::date AS d")
     .get(REVIVAL_COOLDOWN_DAYS).d;
 
   const tx = db.transaction(() => {
     db.prepare(
-      `UPDATE dominance_history SET ended_at = datetime('now'), ended_reason = 'executed'
+      `UPDATE dominance_history SET ended_at = now(), ended_reason = 'executed'
        WHERE region_id = ? AND user_id = ? AND ended_at IS NULL`
     ).run(thread.region_id, thread.author_id);
 
@@ -43,7 +43,7 @@ function executeIfRuler(thread) {
     } else {
       db.prepare(
         `INSERT INTO dominance_candidates (id, user_id, region_id, streak_days, last_counted_date, cooldown_until)
-         VALUES (?, ?, ?, 0, date('now'), ?)`
+         VALUES (?, ?, ?, 0, current_date, ?)`
       ).run(randomUUID(), thread.author_id, thread.region_id, cooldownUntil);
     }
 

@@ -14,7 +14,7 @@ const NEIGHBORHOOD_CONTRIBUTION_BRIGADE_THRESHOLD = 5;
 function flagOnce(type, detail) {
   const recentDup = db
     .prepare(
-      "SELECT id FROM abuse_flags WHERE type = ? AND detail = ? AND created_at >= datetime('now', '-1 hour')"
+      "SELECT id FROM abuse_flags WHERE type = ? AND detail = ? AND created_at >= (now() + interval '-1 hour')"
     )
     .get(type, detail);
   if (recentDup) return;
@@ -26,7 +26,7 @@ function checkVoteBrigading(argumentId, ip) {
   const count = db
     .prepare(
       `SELECT COUNT(DISTINCT voter_id) AS count FROM votes
-       WHERE argument_id = ? AND ip = ? AND created_at >= datetime('now', '-1 day')`
+       WHERE argument_id = ? AND ip = ? AND created_at >= (now() + interval '-1 day')`
     )
     .get(argumentId, ip).count;
   if (count >= VOTE_BRIGADE_THRESHOLD) {
@@ -39,7 +39,7 @@ function checkFollowBrigading(followeeId, ip) {
   const count = db
     .prepare(
       `SELECT COUNT(DISTINCT follower_id) AS count FROM follows
-       WHERE followee_id = ? AND ip = ? AND created_at >= datetime('now', '-1 day')`
+       WHERE followee_id = ? AND ip = ? AND created_at >= (now() + interval '-1 day')`
     )
     .get(followeeId, ip).count;
   if (count >= FOLLOW_BRIGADE_THRESHOLD) {
@@ -52,7 +52,7 @@ function checkJoinBrigading(table, idColumn, targetId, ip) {
   const count = db
     .prepare(
       `SELECT COUNT(*) AS count FROM ${table}
-       WHERE ${idColumn} = ? AND ip = ? AND joined_at >= datetime('now', '-1 day')`
+       WHERE ${idColumn} = ? AND ip = ? AND joined_at >= (now() + interval '-1 day')`
     )
     .get(targetId, ip).count;
   if (count >= JOIN_BRIGADE_THRESHOLD) {
@@ -68,7 +68,7 @@ function checkNeighborhoodContributionBrigading(neighborhoodId, ip) {
   const count = db
     .prepare(
       `SELECT COUNT(DISTINCT user_id) AS count FROM neighborhood_contributions
-       WHERE neighborhood_id = ? AND ip = ? AND created_at >= datetime('now', '-1 day')`
+       WHERE neighborhood_id = ? AND ip = ? AND created_at >= (now() + interval '-1 day')`
     )
     .get(neighborhoodId, ip).count;
   if (count >= NEIGHBORHOOD_CONTRIBUTION_BRIGADE_THRESHOLD) {

@@ -40,7 +40,7 @@ function declareWar(attackerUserId, defenderRegionId) {
   const recentAny = db
     .prepare(
       `SELECT id FROM wars WHERE attacker_region_id = ?
-       AND created_at >= datetime('now', ?)`
+       AND created_at >= (now() + ?::interval)`
     )
     .get(attackerRegionId, `-${DECLARE_COOLDOWN_DAYS} days`);
   if (recentAny) {
@@ -50,7 +50,7 @@ function declareWar(attackerUserId, defenderRegionId) {
   const recentSameTarget = db
     .prepare(
       `SELECT id FROM wars WHERE attacker_region_id = ? AND defender_region_id = ?
-       AND created_at >= datetime('now', ?)`
+       AND created_at >= (now() + ?::interval)`
     )
     .get(attackerRegionId, defenderRegionId, `-${SAME_TARGET_COOLDOWN_DAYS} days`);
   if (recentSameTarget) {
@@ -72,7 +72,7 @@ function declareWar(attackerUserId, defenderRegionId) {
 
   const id = randomUUID();
   const deadline = db
-    .prepare("SELECT datetime('now', ?) AS d")
+    .prepare("SELECT (now() + ?::interval) AS d")
     .get(`+${VOTE_WINDOW_HOURS} hours`).d;
 
   db.prepare(
@@ -128,26 +128,26 @@ function resolveWarIfReady(warId) {
   if (!tally.quorum_met) return null;
 
   if (tally.accept_ratio >= APPROVAL_RATIO) {
-    db.prepare("UPDATE wars SET status = 'accepted', resolved_at = datetime('now') WHERE id = ?").run(warId);
+    db.prepare("UPDATE wars SET status = 'accepted', resolved_at = now() WHERE id = ?").run(warId);
     return { ...tally, status: "accepted" };
   }
 
   // 회피(부결): 방어측 지배자 명성 하락 + 방어측 지역에 굴복 상태 부여
   const tx = db.transaction(() => {
-    db.prepare("UPDATE wars SET status = 'avoided', resolved_at = datetime('now') WHERE id = ?").run(warId);
+    db.prepare("UPDATE wars SET status = 'avoided', resolved_at = now() WHERE id = ?").run(warId);
 
     const defenderDominance = db
       .prepare("SELECT * FROM dominance WHERE region_id = ?")
       .get(war.defender_region_id);
     if (defenderDominance) {
-      db.prepare("UPDATE users SET reputation = MAX(0, reputation - ?) WHERE id = ?").run(
+      db.prepare("UPDATE users SET reputation = GREATEST(0, reputation - ?) WHERE id = ?").run(
         AVOIDANCE_RULER_PENALTY,
         defenderDominance.user_id
       );
     }
 
     const submissionUntil = db
-      .prepare("SELECT datetime('now', ?) AS d")
+      .prepare("SELECT (now() + ?::interval) AS d")
       .get(`+${SUBMISSION_DAYS} days`).d;
     db.prepare("UPDATE regions SET submission_until = ? WHERE id = ?").run(
       submissionUntil,
@@ -163,10 +163,10 @@ function resolveWarIfReady(warId) {
 // (패널티 없음 — 재선포 쿨다운만 정상적으로 다시 적용됨)
 function settleExpiredWars() {
   const expired = db
-    .prepare("SELECT id FROM wars WHERE status = 'voting' AND vote_deadline < datetime('now')")
+    .prepare("SELECT id FROM wars WHERE status = 'voting' AND vote_deadline < now()")
     .all();
   for (const w of expired) {
-    db.prepare("UPDATE wars SET status = 'void', resolved_at = datetime('now') WHERE id = ?").run(w.id);
+    db.prepare("UPDATE wars SET status = 'void', resolved_at = now() WHERE id = ?").run(w.id);
   }
   return expired.length;
 }

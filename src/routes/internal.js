@@ -63,7 +63,7 @@ router.patch("/reports/:id", (req, res) => {
   if (!report) return res.status(404).json({ error: "신고 내역을 찾을 수 없습니다." });
 
   db.prepare(
-    "UPDATE reports SET status = ?, reviewer_note = ?, reviewed_at = datetime('now') WHERE id = ?"
+    "UPDATE reports SET status = ?, reviewer_note = ?, reviewed_at = now() WHERE id = ?"
   ).run(status, reviewer_note || null, req.params.id);
 
   if (report.target_type !== "user") {
@@ -95,7 +95,7 @@ router.post("/payments/:sessionId/confirm", (req, res) => {
   }
 
   db.prepare(
-    "UPDATE payment_sessions SET status = 'confirmed', confirmed_at = datetime('now') WHERE id = ?"
+    "UPDATE payment_sessions SET status = 'confirmed', confirmed_at = now() WHERE id = ?"
   ).run(session.id);
   db.prepare("UPDATE items SET payment_status = 'paid' WHERE id = ?").run(session.item_id);
 

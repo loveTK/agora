@@ -34,7 +34,7 @@ function toggleThreadVote(userId, threadId, voteType) {
   const todayCount = db
     .prepare(
       `SELECT COUNT(*) AS count FROM thread_votes
-       WHERE voter_id = ? AND date(created_at) = date('now')`
+       WHERE voter_id = ? AND created_at::date = current_date`
     )
     .get(userId).count;
   if (todayCount >= DAILY_THREAD_VOTE_LIMIT) {
@@ -57,7 +57,7 @@ function toggleThreadVote(userId, threadId, voteType) {
       db.prepare("DELETE FROM thread_votes WHERE id = ?").run(existing.id);
       return "cancelled";
     }
-    db.prepare("UPDATE thread_votes SET vote_type = ?, created_at = datetime('now') WHERE id = ?").run(
+    db.prepare("UPDATE thread_votes SET vote_type = ?, created_at = now() WHERE id = ?").run(
       voteType,
       existing.id
     );

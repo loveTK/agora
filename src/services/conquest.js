@@ -29,7 +29,7 @@ function attemptFollowerConquest(regionId, userId) {
   const tx = db.transaction(() => {
     if (existingDominance) {
       db.prepare(
-        `UPDATE dominance_history SET ended_at = datetime('now'), ended_reason = 'conquered'
+        `UPDATE dominance_history SET ended_at = now(), ended_reason = 'conquered'
          WHERE region_id = ? AND user_id = ? AND ended_at IS NULL`
       ).run(regionId, existingDominance.user_id);
       db.prepare("DELETE FROM dominance WHERE id = ?").run(existingDominance.id);

@@ -25,7 +25,7 @@ router.get("/", (req, res) => {
               (SELECT COUNT(*) FROM arguments a
                  JOIN threads t ON t.id = a.thread_id
                  WHERE t.region_id = regions.id
-                   AND a.created_at >= datetime('now', '-1 hour')) AS recent_argument_count
+                   AND a.created_at >= (now() + interval '-1 hour')) AS recent_argument_count
        FROM regions ORDER BY name`
     )
     .all();
@@ -51,7 +51,7 @@ router.get("/:id", (req, res) => {
     .prepare(
       `SELECT COUNT(*) AS count FROM arguments a
        JOIN threads t ON t.id = a.thread_id
-       WHERE t.region_id = ? AND a.created_at >= datetime('now', '-1 hour')`
+       WHERE t.region_id = ? AND a.created_at >= (now() + interval '-1 hour')`
     )
     .get(req.params.id).count;
 

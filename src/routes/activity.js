@@ -38,22 +38,22 @@ router.get("/today-top", (req, res) => {
     .prepare(
       `SELECT user_id, SUM(cnt) AS activity_count FROM (
          SELECT author_id AS user_id, COUNT(*) AS cnt FROM threads
-           WHERE hidden = 0 AND date(created_at) = date('now') GROUP BY author_id
+           WHERE hidden = 0 AND created_at::date = current_date GROUP BY author_id
          UNION ALL
          SELECT author_id AS user_id, COUNT(*) AS cnt FROM arguments
-           WHERE date(created_at) = date('now') GROUP BY author_id
+           WHERE created_at::date = current_date GROUP BY author_id
          UNION ALL
          SELECT voter_id AS user_id, COUNT(*) AS cnt FROM votes
-           WHERE date(created_at) = date('now') GROUP BY voter_id
+           WHERE created_at::date = current_date GROUP BY voter_id
          UNION ALL
          SELECT voter_id AS user_id, COUNT(*) AS cnt FROM thread_votes
-           WHERE date(created_at) = date('now') GROUP BY voter_id
+           WHERE created_at::date = current_date GROUP BY voter_id
          UNION ALL
          SELECT voter_id AS user_id, COUNT(*) AS cnt FROM reply_votes
-           WHERE date(created_at) = date('now') GROUP BY voter_id
+           WHERE created_at::date = current_date GROUP BY voter_id
          UNION ALL
          SELECT user_id, COUNT(*) AS cnt FROM laugh_reactions
-           WHERE date(created_at) = date('now') GROUP BY user_id
+           WHERE created_at::date = current_date GROUP BY user_id
        ) combined
        GROUP BY user_id
        ORDER BY activity_count DESC

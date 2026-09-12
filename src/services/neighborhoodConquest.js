@@ -22,7 +22,7 @@ function getRecentPoints(neighborhoodId, days) {
   return db
     .prepare(
       `SELECT COALESCE(SUM(points), 0) AS total FROM neighborhood_contributions
-       WHERE neighborhood_id = ? AND created_at >= datetime('now', '-' || ? || ' days')`
+       WHERE neighborhood_id = ? AND created_at >= now() - (? || ' days')::interval`
     )
     .get(neighborhoodId, days).total;
 }
@@ -33,7 +33,7 @@ function getTopContributors(neighborhoodId, limit = 5) {
       `SELECT c.user_id, u.nickname, SUM(c.points) AS total_points
        FROM neighborhood_contributions c JOIN users u ON u.id = c.user_id
        WHERE c.neighborhood_id = ?
-       GROUP BY c.user_id
+       GROUP BY c.user_id, u.nickname
        ORDER BY total_points DESC
        LIMIT ?`
     )
@@ -84,7 +84,7 @@ function recordContribution(neighborhoodId, userId, ip) {
   const todayCount = db
     .prepare(
       `SELECT COUNT(*) AS count FROM neighborhood_contributions
-       WHERE user_id = ? AND created_at >= datetime('now', '-1 day')`
+       WHERE user_id = ? AND created_at >= (now() + interval '-1 day')`
     )
     .get(userId).count;
   if (todayCount >= DAILY_CONTRIBUTION_LIMIT) {
@@ -123,7 +123,7 @@ function attemptAttack(targetId, userId, fromNeighborhoodId, ip) {
   const todayAttacks = db
     .prepare(
       `SELECT COUNT(*) AS count FROM neighborhood_attacks
-       WHERE attacker_id = ? AND created_at >= datetime('now', '-1 day')`
+       WHERE attacker_id = ? AND created_at >= (now() + interval '-1 day')`
     )
     .get(userId).count;
   if (todayAttacks >= DAILY_ATTACK_LIMIT) {

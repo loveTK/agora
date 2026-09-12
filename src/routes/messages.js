@@ -100,7 +100,7 @@ router.patch("/:id/read", requireAuth, (req, res) => {
     return res.status(403).json({ error: "본인이 받은 쪽지만 읽음 처리할 수 있습니다." });
   }
   if (!message.read_at) {
-    db.prepare("UPDATE messages SET read_at = datetime('now') WHERE id = ?").run(req.params.id);
+    db.prepare("UPDATE messages SET read_at = now() WHERE id = ?").run(req.params.id);
   }
   res.json({ id: req.params.id, read_at: db.prepare("SELECT read_at FROM messages WHERE id = ?").get(req.params.id).read_at });
 });

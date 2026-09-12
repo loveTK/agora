@@ -33,7 +33,7 @@ function toggleLaugh(userId, targetType, targetId) {
   const todayCount = db
     .prepare(
       `SELECT COUNT(*) AS count FROM laugh_reactions
-       WHERE user_id = ? AND date(created_at) = date('now')`
+       WHERE user_id = ? AND created_at::date = current_date`
     )
     .get(userId).count;
   if (todayCount >= DAILY_LAUGH_LIMIT) {

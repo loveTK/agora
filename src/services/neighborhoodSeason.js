@@ -56,7 +56,7 @@ function settleSeason() {
     db.prepare("DELETE FROM neighborhood_resistance").run();
     db.prepare("DELETE FROM neighborhood_attacks").run();
 
-    db.prepare("UPDATE neighborhood_seasons SET ended_at = datetime('now') WHERE id = ?").run(season.id);
+    db.prepare("UPDATE neighborhood_seasons SET ended_at = now() WHERE id = ?").run(season.id);
     db.prepare("INSERT INTO neighborhood_seasons (id) VALUES (?)").run(randomUUID());
   });
   tx();

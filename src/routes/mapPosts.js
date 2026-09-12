@@ -54,7 +54,7 @@ router.post("/", requireAuth, (req, res) => {
 
   const todayCount = db
     .prepare(
-      `SELECT COUNT(*) AS count FROM map_posts WHERE author_id = ? AND date(created_at) = date('now')`
+      `SELECT COUNT(*) AS count FROM map_posts WHERE author_id = ? AND created_at::date = current_date`
     )
     .get(req.userId).count;
   if (todayCount >= DAILY_MAP_POST_LIMIT) {
@@ -156,7 +156,7 @@ router.post("/:id/vote", requireAuth, (req, res) => {
   const todayCount = db
     .prepare(
       `SELECT COUNT(*) AS count FROM map_post_votes
-       WHERE voter_id = ? AND date(created_at) = date('now')`
+       WHERE voter_id = ? AND created_at::date = current_date`
     )
     .get(req.userId).count;
   if (todayCount >= DAILY_MAP_POST_VOTE_LIMIT) {
@@ -177,14 +177,14 @@ router.post("/:id/vote", requireAuth, (req, res) => {
   // 셋 다 0 미만으로는 내려가지 않는다(기존 votes.js/laughReaction.js와 동일 원칙).
   const applyAuthorEffect = (type, delta) => {
     if (type === "up") {
-      db.prepare("UPDATE users SET reputation = MAX(0, reputation + ?) WHERE id = ?").run(delta, post.author_id);
+      db.prepare("UPDATE users SET reputation = GREATEST(0, reputation + ?) WHERE id = ?").run(delta, post.author_id);
     } else if (type === "down") {
-      db.prepare("UPDATE users SET downvotes_received = MAX(0, downvotes_received + ?) WHERE id = ?").run(
+      db.prepare("UPDATE users SET downvotes_received = GREATEST(0, downvotes_received + ?) WHERE id = ?").run(
         delta,
         post.author_id
       );
     } else {
-      db.prepare("UPDATE users SET fool_score = MAX(0, fool_score + ?) WHERE id = ?").run(delta, post.author_id);
+      db.prepare("UPDATE users SET fool_score = GREATEST(0, fool_score + ?) WHERE id = ?").run(delta, post.author_id);
     }
   };
 
@@ -206,7 +206,7 @@ router.post("/:id/vote", requireAuth, (req, res) => {
     }
 
     db.prepare(
-      "UPDATE map_post_votes SET vote_type = ?, weight = ?, created_at = datetime('now') WHERE id = ?"
+      "UPDATE map_post_votes SET vote_type = ?, weight = ?, created_at = now() WHERE id = ?"
     ).run(vote_type, weight, existing.id);
     applyDelta(existing.vote_type, -existing.weight);
     applyAuthorEffect(existing.vote_type, -existing.weight);
@@ -259,7 +259,7 @@ router.post("/:id/comments", requireAuth, (req, res) => {
   const todayCount = db
     .prepare(
       `SELECT COUNT(*) AS count FROM map_post_comments
-       WHERE author_id = ? AND date(created_at) = date('now')`
+       WHERE author_id = ? AND created_at::date = current_date`
     )
     .get(req.userId).count;
   if (todayCount >= DAILY_MAP_POST_COMMENT_LIMIT) {

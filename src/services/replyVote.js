@@ -30,7 +30,7 @@ function toggleReplyVote(userId, replyId, voteType) {
   const todayCount = db
     .prepare(
       `SELECT COUNT(*) AS count FROM reply_votes
-       WHERE voter_id = ? AND date(created_at) = date('now')`
+       WHERE voter_id = ? AND created_at::date = current_date`
     )
     .get(userId).count;
   if (todayCount >= DAILY_REPLY_VOTE_LIMIT) {
@@ -53,7 +53,7 @@ function toggleReplyVote(userId, replyId, voteType) {
       db.prepare("DELETE FROM reply_votes WHERE id = ?").run(existing.id);
       return "cancelled";
     }
-    db.prepare("UPDATE reply_votes SET vote_type = ?, created_at = datetime('now') WHERE id = ?").run(
+    db.prepare("UPDATE reply_votes SET vote_type = ?, created_at = now() WHERE id = ?").run(
       voteType,
       existing.id
     );

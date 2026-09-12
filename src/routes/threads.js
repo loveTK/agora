@@ -66,7 +66,7 @@ router.post("/", requireAuth, (req, res) => {
   const todayCount = db
     .prepare(
       `SELECT COUNT(*) AS count FROM threads
-       WHERE author_id = ? AND date(created_at) = date('now')`
+       WHERE author_id = ? AND created_at::date = current_date`
     )
     .get(req.userId).count;
 
@@ -211,7 +211,7 @@ router.get("/:id/arguments", (req, res) => {
       `SELECT a.*, u.nickname AS author_nickname,
               (SELECT COALESCE(SUM(weight), 0) FROM laugh_reactions
                  WHERE target_type = 'argument' AND target_id = a.id) AS laugh_count,
-              (SELECT GROUP_CONCAT(DISTINCT ticker) FROM user_tickers
+              (SELECT string_agg(DISTINCT ticker, ',') FROM user_tickers
                  WHERE user_id = a.author_id) AS tickers_csv
        FROM arguments a JOIN users u ON u.id = a.author_id
        WHERE a.thread_id = ? AND a.hidden = 0
@@ -249,7 +249,7 @@ router.post("/:id/judgment-vote", requireAuth, (req, res) => {
   const todayCount = db
     .prepare(
       `SELECT COUNT(*) AS count FROM judgment_votes
-       WHERE voter_id = ? AND date(created_at) = date('now')`
+       WHERE voter_id = ? AND created_at::date = current_date`
     )
     .get(req.userId).count;
   if (todayCount >= DAILY_JUDGMENT_VOTE_LIMIT) {

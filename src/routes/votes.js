@@ -36,7 +36,7 @@ router.post("/:id/vote", requireAuth, (req, res) => {
   const todayVoteActions = db
     .prepare(
       `SELECT COUNT(*) AS count FROM votes
-       WHERE voter_id = ? AND date(created_at) = date('now')`
+       WHERE voter_id = ? AND created_at::date = current_date`
     )
     .get(req.userId).count;
   if (todayVoteActions >= DAILY_VOTE_LIMIT) {
@@ -56,7 +56,7 @@ router.post("/:id/vote", requireAuth, (req, res) => {
   // 전쟁 회피로 "굴복 상태"에 놓인 지역의 지배자는 명성 획득(양수 델타)만 막힌다(S11) — 손실은 그대로 반영.
   const applyReputationDelta = (delta) => {
     if (delta > 0 && isReputationGainBlocked(arg.author_id)) return;
-    db.prepare("UPDATE users SET reputation = MAX(0, reputation + ?) WHERE id = ?").run(delta, arg.author_id);
+    db.prepare("UPDATE users SET reputation = GREATEST(0, reputation + ?) WHERE id = ?").run(delta, arg.author_id);
   };
 
   // 영향력(문화 루트, S13): 이 논증이 달린 논제가 작성자 소속 지역이 아닌 "타 지역"의 논제라면,
@@ -69,14 +69,14 @@ router.post("/:id/vote", requireAuth, (req, res) => {
   // (가중치 반영, 0 미만으로는 내려가지 않음). refreshTyrantStatus는 트랜잭션 밖에서 마지막에 호출한다.
   const applyDownvotesReceivedDelta = (delta) =>
     db
-      .prepare("UPDATE users SET downvotes_received = MAX(0, downvotes_received + ?) WHERE id = ?")
+      .prepare("UPDATE users SET downvotes_received = GREATEST(0, downvotes_received + ?) WHERE id = ?")
       .run(delta, arg.author_id);
 
   // 지지자 수치(명성) 적립: 추천 버튼을 누르는 행위 자체도 투표자 본인에게 +1 (기획 합의사항).
   // 가중치 없이 정수 1로 고정 — 콘텐츠 품질과 무관하게 "참여" 자체에 대한 보상이기 때문.
   const applyVoterReputationDelta = (delta) =>
     db
-      .prepare("UPDATE users SET reputation = MAX(0, reputation + ?) WHERE id = ?")
+      .prepare("UPDATE users SET reputation = GREATEST(0, reputation + ?) WHERE id = ?")
       .run(delta, req.userId);
 
   const tx = db.transaction(() => {
@@ -105,7 +105,7 @@ router.post("/:id/vote", requireAuth, (req, res) => {
 
     // 다른 타입으로 변경
     db.prepare(
-      "UPDATE votes SET vote_type = ?, weight = ?, created_at = datetime('now'), ip = ? WHERE id = ?"
+      "UPDATE votes SET vote_type = ?, weight = ?, created_at = now(), ip = ? WHERE id = ?"
     ).run(vote_type, weight, req.ip, existing.id);
     applyDelta(existing.vote_type === "up" ? "upvotes" : "downvotes", -existing.weight);
     applyDelta(vote_type === "up" ? "upvotes" : "downvotes", weight);

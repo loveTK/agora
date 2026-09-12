@@ -52,7 +52,7 @@ function baseProvinceRows() {
          SELECT x.province_id, COUNT(*) AS comments
          FROM map_post_comments c JOIN map_posts x ON x.id = c.post_id GROUP BY x.province_id
        ) mc ON mc.province_id = p.id
-       GROUP BY p.id`
+       GROUP BY p.id, r.id, mp.posts, mc.comments`
     )
     .all();
 
@@ -60,21 +60,21 @@ function baseProvinceRows() {
   const contrib = countBy(
     `SELECT x.province_id AS pid, COUNT(*) AS c FROM neighborhood_contributions c
      JOIN neighborhoods x ON x.id = c.neighborhood_id
-     WHERE c.created_at >= datetime('now', '-1 day') GROUP BY x.province_id`
+     WHERE c.created_at >= (now() + interval '-1 day') GROUP BY x.province_id`
   );
   const attacks = countBy(
     `SELECT x.province_id AS pid, COUNT(*) AS c FROM neighborhood_attacks a
      JOIN neighborhoods x ON x.id = a.target_neighborhood_id
-     WHERE a.created_at >= datetime('now', '-1 day') GROUP BY x.province_id`
+     WHERE a.created_at >= (now() + interval '-1 day') GROUP BY x.province_id`
   );
   const posts = countBy(
     `SELECT province_id AS pid, COUNT(*) AS c FROM map_posts
-     WHERE created_at >= datetime('now', '-1 day') GROUP BY province_id`
+     WHERE created_at >= (now() + interval '-1 day') GROUP BY province_id`
   );
   const comments = countBy(
     `SELECT x.province_id AS pid, COUNT(*) AS c FROM map_post_comments c
      JOIN map_posts x ON x.id = c.post_id
-     WHERE c.created_at >= datetime('now', '-1 day') GROUP BY x.province_id`
+     WHERE c.created_at >= (now() + interval '-1 day') GROUP BY x.province_id`
   );
   for (const r of rows) {
     // 공격은 판이 뒤집히는 사건이라 가중치를 높게, 기록은 사람이 모이는 신호라 기여보다 조금 높게.
@@ -156,8 +156,8 @@ router.get("/search", (req, res) => {
        FROM neighborhoods n
        JOIN regions r ON r.id = n.parent_region_id
        LEFT JOIN provinces p ON p.id = n.province_id
-       WHERE n.name LIKE ? ESCAPE '\\' OR p.name LIKE ? ESCAPE '\\' OR r.name LIKE ? ESCAPE '\\'
-       ORDER BY (n.name LIKE ? ESCAPE '\\') DESC, (p.name LIKE ? ESCAPE '\\') DESC, r.name, n.name
+       WHERE n.name ILIKE ? ESCAPE '\\' OR p.name ILIKE ? ESCAPE '\\' OR r.name ILIKE ? ESCAPE '\\'
+       ORDER BY (n.name ILIKE ? ESCAPE '\\') DESC, (p.name ILIKE ? ESCAPE '\\') DESC, r.name, n.name
        LIMIT 20`
     )
     .all(contains, contains, contains, prefix, prefix);

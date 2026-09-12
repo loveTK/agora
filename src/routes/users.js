@@ -95,7 +95,7 @@ router.patch("/me/region", requireAuth, (req, res) => {
   const tx = db.transaction(() => {
     db.prepare(
       `UPDATE users
-       SET region_id = ?, region_changed_at = datetime('now'), rank = 'citizen', reputation = 0
+       SET region_id = ?, region_changed_at = now(), rank = 'citizen', reputation = 0
        WHERE id = ?`
     ).run(region_id, req.userId);
 

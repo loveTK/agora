@@ -12,7 +12,7 @@ const RULER_STREAK_REQUIRED = 3; // 3일 연속 무패 시 지배자 등극 (V1:
 // streak이 7에 도달하고 해당 지역에 아직 지배자가 없으면 그 유저가 지배자로 등극한다.
 // 단, 환생 쿨다운(cooldown_until) 중인 후보는 streak 요건을 채웠어도 등극할 수 없다(S7).
 function settleDominance() {
-  const today = db.prepare("SELECT date('now') AS d").get().d;
+  const today = db.prepare("SELECT current_date AS d").get().d;
 
   const survivors = db
     .prepare(
@@ -51,7 +51,7 @@ function settleDominance() {
   const ready = db
     .prepare(
       `SELECT * FROM dominance_candidates
-       WHERE streak_days >= ? AND (cooldown_until IS NULL OR cooldown_until <= date('now'))`
+       WHERE streak_days >= ? AND (cooldown_until IS NULL OR cooldown_until <= current_date)`
     )
     .all(RULER_STREAK_REQUIRED);
 

@@ -38,7 +38,7 @@ function requestWarDeclaration(attackerUserId, defenderRegionId) {
 
   const id = randomUUID();
   const deadline = db
-    .prepare("SELECT datetime('now', ?) AS d")
+    .prepare("SELECT (now() + ?::interval) AS d")
     .get(`+${APPROVAL_VOTE_WINDOW_HOURS} hours`).d;
 
   db.prepare(
@@ -95,19 +95,19 @@ function settleApproval(approval, tally) {
     if (result.error) {
       // 승인은 됐지만(예: 그 사이 쿨다운 등으로) 실제 선포가 막히면 부결과 동일하게 처리하고 사유를 남긴다.
       db.prepare(
-        "UPDATE congress_approvals SET status = 'rejected', resolved_at = datetime('now') WHERE id = ?"
+        "UPDATE congress_approvals SET status = 'rejected', resolved_at = now() WHERE id = ?"
       ).run(approval.id);
       return { ...tally, status: "rejected", reason: result.error };
     }
     db.prepare(
-      "UPDATE congress_approvals SET status = 'approved', war_id = ?, resolved_at = datetime('now') WHERE id = ?"
+      "UPDATE congress_approvals SET status = 'approved', war_id = ?, resolved_at = now() WHERE id = ?"
     ).run(result.war.id, approval.id);
     return { ...tally, status: "approved", war: result.war };
   }
 
   // 부결: 국회가 막은 것이므로 지배자에게 별도 페널티 없음(16.2절)
   db.prepare(
-    "UPDATE congress_approvals SET status = 'rejected', resolved_at = datetime('now') WHERE id = ?"
+    "UPDATE congress_approvals SET status = 'rejected', resolved_at = now() WHERE id = ?"
   ).run(approval.id);
   return { ...tally, status: "rejected" };
 }
@@ -115,7 +115,7 @@ function settleApproval(approval, tally) {
 // 배치(하루 1회 전제): 데드라인이 지났는데도 미확정인 승인투표를 확정한다.
 function settleExpiredApprovals() {
   const expired = db
-    .prepare("SELECT * FROM congress_approvals WHERE status = 'voting' AND vote_deadline < datetime('now')")
+    .prepare("SELECT * FROM congress_approvals WHERE status = 'voting' AND vote_deadline < now()")
     .all();
   const settled = [];
   for (const approval of expired) {

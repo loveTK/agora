@@ -28,7 +28,7 @@ function createBattle(war, founderUserId, { title, option_attacker, option_defen
   }
 
   const id = randomUUID();
-  const deadline = db.prepare("SELECT datetime('now', ?) AS d").get(`+${BATTLE_WINDOW_HOURS} hours`).d;
+  const deadline = db.prepare("SELECT (now() + ?::interval) AS d").get(`+${BATTLE_WINDOW_HOURS} hours`).d;
   db.prepare(
     `INSERT INTO war_battles (id, war_id, title, option_attacker, option_defender, deadline)
      VALUES (?, ?, ?, ?, ?, ?)`
@@ -64,8 +64,8 @@ function applyAbsorptionAndIncentives(war, battle, winnerSide) {
 
   const tx = db.transaction(() => {
     // 패배 지역: 점령 상태 부여
-    const occupiedUntil = db.prepare("SELECT datetime('now', ?) AS d").get(`+${OCCUPATION_DAYS} days`).d;
-    const threadBanUntil = db.prepare("SELECT datetime('now', ?) AS d").get(`+${THREAD_BAN_DAYS} days`).d;
+    const occupiedUntil = db.prepare("SELECT (now() + ?::interval) AS d").get(`+${OCCUPATION_DAYS} days`).d;
+    const threadBanUntil = db.prepare("SELECT (now() + ?::interval) AS d").get(`+${THREAD_BAN_DAYS} days`).d;
     db.prepare("UPDATE regions SET occupied_until = ?, thread_ban_until = ? WHERE id = ?").run(
       occupiedUntil,
       threadBanUntil,
@@ -76,7 +76,7 @@ function applyAbsorptionAndIncentives(war, battle, winnerSide) {
     const loserDominance = db.prepare("SELECT * FROM dominance WHERE region_id = ?").get(loserRegionId);
     if (loserDominance) {
       db.prepare(
-        `UPDATE dominance_history SET ended_at = datetime('now'), ended_reason = 'conquered'
+        `UPDATE dominance_history SET ended_at = now(), ended_reason = 'conquered'
          WHERE region_id = ? AND user_id = ? AND ended_at IS NULL`
       ).run(loserRegionId, loserDominance.user_id);
       db.prepare("DELETE FROM dominance WHERE id = ?").run(loserDominance.id);
@@ -120,7 +120,7 @@ function resolveBattle(battleId) {
   const winnerSide = tally.attacker_upvotes > tally.defender_upvotes ? "attacker" : "defender";
 
   db.prepare(
-    "UPDATE war_battles SET status = 'settled', winner_side = ?, settled_at = datetime('now') WHERE id = ?"
+    "UPDATE war_battles SET status = 'settled', winner_side = ?, settled_at = now() WHERE id = ?"
   ).run(winnerSide, battleId);
 
   const war = db.prepare("SELECT * FROM wars WHERE id = ?").get(battle.war_id);
@@ -131,7 +131,7 @@ function resolveBattle(battleId) {
 
 function settleDueBattles() {
   const due = db
-    .prepare("SELECT id FROM war_battles WHERE status = 'open' AND deadline < datetime('now')")
+    .prepare("SELECT id FROM war_battles WHERE status = 'open' AND deadline < now()")
     .all();
   const results = [];
   for (const b of due) {

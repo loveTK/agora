@@ -462,7 +462,7 @@ function retireOrRehomeLegacy() {
      WHERE r.name = ? AND (p.name = ? OR (? IS NULL AND p.is_capital = 1)) LIMIT 1`
   );
   const provinceById = db.prepare("SELECT id, region_id FROM provinces WHERE id = ?");
-  const firstDistrict = db.prepare("SELECT id FROM neighborhoods WHERE province_id = ? ORDER BY rowid LIMIT 1");
+  const firstDistrict = db.prepare("SELECT id FROM neighborhoods WHERE province_id = ? ORDER BY id LIMIT 1");
   const rehome = db.prepare("UPDATE neighborhoods SET province_id = ?, parent_region_id = ? WHERE id = ?");
   const insertAdjacency = db.prepare(
     "INSERT OR IGNORE INTO neighborhood_adjacency (neighborhood_id, adjacent_neighborhood_id) VALUES (?, ?)"

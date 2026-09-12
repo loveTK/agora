@@ -14,7 +14,7 @@ sudo apt-get update -y
 sudo apt-get upgrade -y
 
 echo "== 2. Node.js 22 LTS 설치 =="
-# better-sqlite3 최신 버전이 Node >=22를 요구함(그 미만이면 DB 여는 순간 세그폴트 발생).
+# Node 22 LTS 고정.
 NODE_MAJOR="$(command -v node >/dev/null 2>&1 && node -e 'console.log(process.versions.node.split(".")[0])' || echo 0)"
 if [ "$NODE_MAJOR" -lt 22 ]; then
   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
@@ -23,8 +23,10 @@ fi
 node -v
 npm -v
 
-echo "== 3. better-sqlite3 네이티브 빌드 도구 설치 =="
-sudo apt-get install -y build-essential python3 git nginx
+echo "== 3. 빌드 도구 · nginx · PostgreSQL 설치 =="
+sudo apt-get install -y build-essential python3 git nginx postgresql
+sudo -u postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname='agora'" | grep -q 1 || sudo -u postgres psql -c "CREATE ROLE agora LOGIN PASSWORD 'change-me'"
+sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='agora'" | grep -q 1 || sudo -u postgres createdb -O agora agora
 
 echo "== 4. PM2 설치 =="
 sudo npm install -g pm2
@@ -45,7 +47,7 @@ mkdir -p "$APP_DIR/data"
 if [ ! -f "$APP_DIR/.env" ]; then
   cp .env.example .env
   # DB는 인스턴스의 영구 SSD(EBS 아님, Lightsail 기본 스토리지)에 저장됨 — Render 무료 티어와 달리 재시작해도 유지된다.
-  sed -i "s#^DB_PATH=.*#DB_PATH=$APP_DIR/data/agora.db#" .env
+  echo ">> .env의 DATABASE_URL 비밀번호를 위 CREATE ROLE과 맞출 것. 기존 SQLite 데이터는 node scripts/sqlite-to-pg.js data/agora.db 로 1회 이전"
   echo ">>> .env 생성됨. JWT_SECRET / ADMIN_TOKEN 값을 반드시 실제 운영 값으로 교체할 것: $APP_DIR/.env"
 fi
 

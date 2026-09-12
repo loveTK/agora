@@ -77,7 +77,7 @@ router.post("/signup", authLimit, (req, res) => {
     const recentSameIp = db
       .prepare(
         `SELECT COUNT(*) AS count FROM users
-         WHERE signup_ip = ? AND datetime(created_at) >= datetime('now', '-1 day')`
+         WHERE signup_ip = ? AND created_at >= (now() + interval '-1 day')`
       )
       .get(signupIp).count;
 
