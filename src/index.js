@@ -33,6 +33,7 @@ const chatRoutes = require("./routes/chat");
 const neighborhoodRoutes = require("./routes/neighborhoods"); // V3(동단위 정복) — 기존 V2 라우트와 완전히 별개
 const mapPostRoutes = require("./routes/mapPosts"); // 지도 자유 게시(맵 핀)
 const { requireAdmin } = require("./middleware/adminAuth");
+const { i18n } = require("./middleware/i18n");
 
 runMigrations();
 seedIfEmpty(); // Shell 접근이 안 되는 환경(Render 무료 티어 등)에서도 초기 데이터가 자동으로 채워지게 함
@@ -46,6 +47,7 @@ const app = express();
 app.set("trust proxy", 1); // nginx 뒤 — X-Forwarded-For 첫 홉을 req.ip로
 app.use(cors());
 app.use(express.json());
+app.use(i18n); // Accept-Language / ?lang= 에 맞춰 error·message 번역
 
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });

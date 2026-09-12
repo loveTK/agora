@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<script src="/i18n/i18n.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>AGORA V3 — 동단위 정복 (MVP)</title>
@@ -122,6 +123,7 @@
       ...options,
       headers: {
         'Content-Type': 'application/json',
+        "Accept-Language": window.LANG || "ko",
         ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         ...(options.headers || {}),
       },

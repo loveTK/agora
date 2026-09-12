@@ -33,6 +33,34 @@ const storage = {
 
 const RANK_LABEL: Record<string, string> = { citizen: '시민', supporter: '지지자', prophet: '선지자' };
 
+// 기기 언어 기준. 웹 i18n/messages.json과 같은 형식(한국어 원문이 키).
+const LANG = (Intl.DateTimeFormat().resolvedOptions().locale || 'ko').slice(0, 2);
+const T: Record<string, Record<string, string>> = {
+  '로그인': { en: 'Log in', ja: 'ログイン', zh: '登录' },
+  '회원가입': { en: 'Sign up', ja: '新規登録', zh: '注册' },
+  '닉네임': { en: 'Nickname', ja: 'ニックネーム', zh: '昵称' },
+  '소속 폴리스': { en: 'Home Polis', ja: '所属ポリス', zh: '所属城邦' },
+  '이메일': { en: 'Email', ja: 'メール', zh: '邮箱' },
+  '비밀번호': { en: 'Password', ja: 'パスワード', zh: '密码' },
+  ' (8자 이상)': { en: ' (8+ characters)', ja: '（8文字以上）', zh: '（8位以上）' },
+  '처리 중...': { en: 'Working...', ja: '処理中...', zh: '处理中...' },
+  '가입하고 시작하기': { en: 'Sign up & start', ja: '登録して始める', zh: '注册并开始' },
+  '명성 수치': { en: 'Reputation', ja: '名声', zh: '声望' },
+  '팔로워': { en: 'Followers', ja: 'フォロワー', zh: '粉丝' },
+  '로그아웃': { en: 'Log out', ja: 'ログアウト', zh: '退出登录' },
+  '주요 논쟁 · Hot Issue': { en: 'Hot Issues', ja: '主要な議論 · Hot Issue', zh: '热门议题 · Hot Issue' },
+  '불러오는 중...': { en: 'Loading...', ja: '読み込み中...', zh: '加载中...' },
+  '요청에 실패했습니다.': { en: 'Request failed.', ja: 'リクエストに失敗しました。', zh: '请求失败。' },
+  '알 수 없음': { en: 'Unknown', ja: '不明', zh: '未知' },
+  '시민': { en: 'Citizen', ja: '市民', zh: '公民' },
+  '지지자': { en: 'Supporter', ja: '支持者', zh: '支持者' },
+  '선지자': { en: 'Prophet', ja: '預言者', zh: '先知' },
+  '참여': { en: 'Participants', ja: '参加', zh: '参与' },
+  '명': { en: '', ja: '名', zh: '人' },
+  '추천': { en: 'Upvotes', ja: '推薦', zh: '推荐' },
+};
+const tr = (s: string) => T[s]?.[LANG] ?? s;
+
 type Region = { id: string; name: string; status: string };
 type User = {
   id: string;
@@ -55,12 +83,13 @@ async function apiRequest(path: string, token: string | null, options: RequestIn
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      'Accept-Language': LANG,
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
   });
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error || '요청에 실패했습니다.');
+  if (!res.ok) throw new Error(body.error || tr('요청에 실패했습니다.'));
   return body;
 }
 
@@ -109,7 +138,7 @@ export default function App() {
   }, [user]);
 
   function regionName(id: string) {
-    return regions.find((r) => r.id === id)?.name ?? '알 수 없음';
+    return regions.find((r) => r.id === id)?.name ?? tr('알 수 없음');
   }
 
   async function handleSubmit() {
@@ -165,18 +194,18 @@ export default function App() {
           <View style={styles.section}>
             <View style={styles.tabRow}>
               <Pressable onPress={() => setMode('login')}>
-                <Text style={[styles.tab, mode === 'login' && styles.tabActive]}>로그인</Text>
+                <Text style={[styles.tab, mode === 'login' && styles.tabActive]}>{tr('로그인')}</Text>
               </Pressable>
               <Pressable onPress={() => setMode('signup')}>
-                <Text style={[styles.tab, mode === 'signup' && styles.tabActive]}>회원가입</Text>
+                <Text style={[styles.tab, mode === 'signup' && styles.tabActive]}>{tr('회원가입')}</Text>
               </Pressable>
             </View>
 
             {mode === 'signup' && (
               <>
-                <Text style={styles.label}>닉네임</Text>
+                <Text style={styles.label}>{tr('닉네임')}</Text>
                 <TextInput style={styles.input} value={nickname} onChangeText={setNickname} />
-                <Text style={styles.label}>소속 폴리스</Text>
+                <Text style={styles.label}>{tr('소속 폴리스')}</Text>
                 <View style={styles.regionRow}>
                   {regions.map((r) => (
                     <Pressable
@@ -193,7 +222,7 @@ export default function App() {
               </>
             )}
 
-            <Text style={styles.label}>이메일</Text>
+            <Text style={styles.label}>{tr('이메일')}</Text>
             <TextInput
               style={styles.input}
               value={email}
@@ -201,14 +230,14 @@ export default function App() {
               autoCapitalize="none"
               keyboardType="email-address"
             />
-            <Text style={styles.label}>비밀번호{mode === 'signup' ? ' (8자 이상)' : ''}</Text>
+            <Text style={styles.label}>{tr('비밀번호')}{mode === 'signup' ? tr(' (8자 이상)') : ''}</Text>
             <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
 
             {!!error && <Text style={styles.error}>{error}</Text>}
 
             <Pressable style={styles.submit} onPress={handleSubmit} disabled={submitting}>
               <Text style={styles.submitText}>
-                {submitting ? '처리 중...' : mode === 'login' ? '로그인' : '가입하고 시작하기'}
+                {submitting ? tr('처리 중...') : mode === 'login' ? tr('로그인') : tr('가입하고 시작하기')}
               </Text>
             </Pressable>
           </View>
@@ -220,34 +249,34 @@ export default function App() {
                 <View>
                   <View style={styles.charNameRow}>
                     <Text style={styles.charName}>{user.nickname}</Text>
-                    <Text style={styles.badge}>{RANK_LABEL[user.rank] ?? user.rank}</Text>
+                    <Text style={styles.badge}>{tr(RANK_LABEL[user.rank] ?? user.rank)}</Text>
                   </View>
-                  <Text style={styles.meta}>소속 폴리스 · {regionName(user.region_id)}</Text>
+                  <Text style={styles.meta}>{tr('소속 폴리스')} · {regionName(user.region_id)}</Text>
                 </View>
               </View>
               <View style={styles.statRow}>
-                <Text style={styles.statLabel}>명성 수치</Text>
+                <Text style={styles.statLabel}>{tr('명성 수치')}</Text>
                 <Text style={styles.statValue}>{user.reputation ?? 0}</Text>
               </View>
               <View style={[styles.statRow, styles.statRowLast]}>
-                <Text style={styles.statLabel}>팔로워</Text>
+                <Text style={styles.statLabel}>{tr('팔로워')}</Text>
                 <Text style={styles.statValue}>{user.follower_count ?? 0}</Text>
               </View>
               <Pressable onPress={handleLogout}>
-                <Text style={styles.logout}>로그아웃</Text>
+                <Text style={styles.logout}>{tr('로그아웃')}</Text>
               </Pressable>
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>주요 논쟁 · Hot Issue</Text>
-              {hotIssues.length === 0 && <Text style={styles.meta}>불러오는 중...</Text>}
+              <Text style={styles.sectionTitle}>{tr('주요 논쟁 · Hot Issue')}</Text>
+              {hotIssues.length === 0 && <Text style={styles.meta}>{tr('불러오는 중...')}</Text>}
               {hotIssues.slice(0, 5).map((t, i) => (
                 <View key={t.id} style={[styles.issueItem, i === hotIssues.length - 1 && styles.noBorder]}>
                   <Text style={styles.issueNum}>{String(i + 1).padStart(2, '0')}</Text>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.issueText}>{t.title}</Text>
                     <Text style={styles.meta}>
-                      {t.region_name} · 참여 {t.participant_count}명 · 추천 {t.total_upvotes}
+                      {t.region_name} · {tr('참여')} {t.participant_count}{tr('명')} · {tr('추천')} {t.total_upvotes}
                     </Text>
                   </View>
                 </View>

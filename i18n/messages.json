@@ -1,0 +1,1377 @@
+{
+ "존재하지 않는 경로입니다.": {
+  "en": "Route not found.",
+  "ja": "存在しないパスです。",
+  "zh": "路径不存在。"
+ },
+ "AGORA 서버 실행 중 (HTTP + WebSocket) — http://localhost:{n}": {
+  "en": "AGORA server running (HTTP + WebSocket) — http://localhost:{n}",
+  "ja": "AGORAサーバー実行中 (HTTP + WebSocket) — http://localhost:{n}",
+  "zh": "AGORA 服务器运行中 (HTTP + WebSocket) — http://localhost:{n}"
+ },
+ "{n} env 필요 (.env.example 참고)": {
+  "en": "{n} env required (see .env.example)",
+  "ja": "{n} env が必要です (.env.example 参照)",
+  "zh": "需要 {n} env（参考 .env.example）"
+ },
+ "관리자 인증이 필요합니다.": {
+  "en": "Admin authentication required.",
+  "ja": "管理者認証が必要です。",
+  "zh": "需要管理员认证。"
+ },
+ "JWT_SECRET env 필요 (.env.example 참고)": {
+  "en": "JWT_SECRET env required (see .env.example)",
+  "ja": "JWT_SECRET env が必要です (.env.example 参照)",
+  "zh": "需要 JWT_SECRET env（参考 .env.example）"
+ },
+ "로그인이 필요합니다.": {
+  "en": "Login required.",
+  "ja": "ログインが必要です。",
+  "zh": "需要登录。"
+ },
+ "유효하지 않은 토큰입니다.": {
+  "en": "Invalid token.",
+  "ja": "無効なトークンです。",
+  "zh": "无效的令牌。"
+ },
+ "내 저항 포인트": {
+  "en": "My Resistance Points",
+  "ja": "自分の抵抗ポイント",
+  "zh": "我的抵抗点数"
+ },
+ "잠시 후 다시 시도하세요.": {
+  "en": "Please try again later.",
+  "ja": "しばらくしてから再試行してください。",
+  "zh": "请稍后再试。"
+ },
+ "실시간 활동": {
+  "en": "Live Activity",
+  "ja": "リアルタイム活動",
+  "zh": "实时动态"
+ },
+ "오늘의 Top 논객": {
+  "en": "Today's Top Debaters",
+  "ja": "今日のTop論客",
+  "zh": "今日Top辩手"
+ },
+ "ID 또는 비밀번호가 올바르지 않습니다.": {
+  "en": "Incorrect ID or password.",
+  "ja": "IDまたはパスワードが正しくありません。",
+  "zh": "ID或密码不正确。"
+ },
+ "email, password, nickname, region_id는 필수입니다.": {
+  "en": "email, password, nickname, and region_id are required.",
+  "ja": "email、password、nickname、region_idは必須です。",
+  "zh": "email、password、nickname、region_id 为必填项。"
+ },
+ "비밀번호는 {n}자 이상이어야 합니다.": {
+  "en": "Password must be at least {n} characters.",
+  "ja": "パスワードは{n}文字以上でなければなりません。",
+  "zh": "密码至少需要{n}个字符。"
+ },
+ "존재하지 않는 지역입니다.": {
+  "en": "Region does not exist.",
+  "ja": "存在しない地域です。",
+  "zh": "该地区不存在。"
+ },
+ "이미 가입된 이메일입니다.": {
+  "en": "This email is already registered.",
+  "ja": "すでに登録済みのメールアドレスです。",
+  "zh": "该邮箱已注册。"
+ },
+ "IP {n}에서 {n}시간 내 {n}건 가입": {
+  "en": "From IP {n} within {n} hours: {n} signups",
+  "ja": "IP {n}から{n}時間以内に{n}件の登録",
+  "zh": "来自IP {n}在{n}小时内注册{n}次"
+ },
+ "email, password는 필수입니다.": {
+  "en": "email and password are required.",
+  "ja": "email、passwordは必須です。",
+  "zh": "email、password 为必填项。"
+ },
+ "이메일 또는 비밀번호가 올바르지 않습니다.": {
+  "en": "Incorrect email or password.",
+  "ja": "メールアドレスまたはパスワードが正しくありません。",
+  "zh": "邮箱或密码不正确。"
+ },
+ "구글 로그인이 아직 설정되지 않았습니다.": {
+  "en": "Google login is not configured yet.",
+  "ja": "Googleログインはまだ設定されていません。",
+  "zh": "Google登录尚未配置。"
+ },
+ "credential은 필수입니다.": {
+  "en": "credential is required.",
+  "ja": "credentialは必須です。",
+  "zh": "credential 为必填项。"
+ },
+ "구글 인증에 실패했습니다.": {
+  "en": "Google authentication failed.",
+  "ja": "Google認証に失敗しました。",
+  "zh": "Google认证失败。"
+ },
+ "인증되지 않은 구글 이메일입니다.": {
+  "en": "Unverified Google email.",
+  "ja": "認証されていないGoogleメールアドレスです。",
+  "zh": "未验证的Google邮箱。"
+ },
+ "메시지 내용을 입력해주세요.": {
+  "en": "Please enter a message.",
+  "ja": "メッセージ内容を入力してください。",
+  "zh": "请输入消息内容。"
+ },
+ "메시지는 {n}자 이내로 작성해주세요.": {
+  "en": "Message must be {n} characters or fewer.",
+  "ja": "メッセージは{n}文字以内で入力してください。",
+  "zh": "消息不得超过{n}个字符。"
+ },
+ "부적절한 표현이 포함되어 있어 전송할 수 없습니다.": {
+  "en": "Cannot send: contains inappropriate language.",
+  "ja": "不適切な表現が含まれているため送信できません。",
+  "zh": "包含不当内容，无法发送。"
+ },
+ "너무 빠르게 전송하고 있습니다. 잠시 후 다시 시도해주세요.": {
+  "en": "You are sending too fast. Please try again later.",
+  "ja": "送信が速すぎます。しばらくしてから再試行してください。",
+  "zh": "发送过于频繁，请稍后再试。"
+ },
+ "승인 요청을 찾을 수 없습니다.": {
+  "en": "Approval request not found.",
+  "ja": "承認リクエストが見つかりません。",
+  "zh": "找不到审批请求。"
+ },
+ "verdict는 'accept' 또는 'reject'여야 합니다.": {
+  "en": "verdict must be 'accept' or 'reject'.",
+  "ja": "verdictは'accept'または'reject'でなければなりません。",
+  "zh": "verdict 必须为 'accept' 或 'reject'。"
+ },
+ "이미 종료된 투표입니다.": {
+  "en": "This vote has already ended.",
+  "ja": "すでに終了した投票です。",
+  "zh": "投票已结束。"
+ },
+ "선포측 지역 시민만 투표할 수 있습니다.": {
+  "en": "Only Citizens of the declaring region can vote.",
+  "ja": "宣戦側地域の市民のみ投票できます。",
+  "zh": "只有宣战方地区的公民可以投票。"
+ },
+ "정당원만 국회 승인 투표에 참여할 수 있습니다.": {
+  "en": "Only party members can vote in Congress approval.",
+  "ja": "党員のみ議会承認投票に参加できます。",
+  "zh": "只有党员可以参与议会批准投票。"
+ },
+ "이미 투표하셨습니다.": {
+  "en": "You have already voted.",
+  "ja": "すでに投票済みです。",
+  "zh": "您已投票。"
+ },
+ "status는 'reviewed', 'dismissed', 'actioned' 중 하나여야 합니다.": {
+  "en": "status must be one of 'reviewed', 'dismissed', or 'actioned'.",
+  "ja": "statusは'reviewed'、'dismissed'、'actioned'のいずれかでなければなりません。",
+  "zh": "status 必须为 'reviewed'、'dismissed' 或 'actioned' 之一。"
+ },
+ "신고 내역을 찾을 수 없습니다.": {
+  "en": "Report not found.",
+  "ja": "通報履歴が見つかりません。",
+  "zh": "找不到举报记录。"
+ },
+ "결제 세션을 찾을 수 없습니다.": {
+  "en": "Payment session not found.",
+  "ja": "決済セッションが見つかりません。",
+  "zh": "找不到支付会话。"
+ },
+ "아이템을 찾을 수 없습니다.": {
+  "en": "Item not found.",
+  "ja": "アイテムが見つかりません。",
+  "zh": "找不到物品。"
+ },
+ "아이템 창설자만 결제를 진행할 수 있습니다.": {
+  "en": "Only the item's creator can proceed with payment.",
+  "ja": "アイテムの創設者のみ決済を進められます。",
+  "zh": "只有物品创建者可以进行支付。"
+ },
+ "이미 결제되었거나 결제가 필요 없는 아이템입니다.": {
+  "en": "This item is already paid for or does not require payment.",
+  "ja": "すでに決済済みか、決済が不要なアイテムです。",
+  "zh": "该物品已支付或无需支付。"
+ },
+ "무료 아이템만 이 API로 받을 수 있습니다.": {
+  "en": "Only free items can be claimed via this API.",
+  "ja": "無料アイテムのみこのAPIで受け取れます。",
+  "zh": "此API仅可领取免费物品。"
+ },
+ "이미 보유한 아이템입니다.": {
+  "en": "You already own this item.",
+  "ja": "すでに所持しているアイテムです。",
+  "zh": "您已拥有该物品。"
+ },
+ "lat/lng가 올바르지 않습니다.": {
+  "en": "Invalid lat/lng.",
+  "ja": "lat/lngが正しくありません。",
+  "zh": "lat/lng 无效。"
+ },
+ "내용을 입력해주세요.": {
+  "en": "Please enter content.",
+  "ja": "内容を入力してください。",
+  "zh": "请输入内容。"
+ },
+ "내용은 {n}자 이내로 작성해주세요.": {
+  "en": "Content must be {n} characters or fewer.",
+  "ja": "内容は{n}文字以内で入力してください。",
+  "zh": "内容不得超过{n}个字符。"
+ },
+ "부적절한 표현이 포함되어 있어 등록할 수 없습니다.": {
+  "en": "Cannot post: contains inappropriate language.",
+  "ja": "不適切な表現が含まれているため登録できません。",
+  "zh": "包含不当内容，无法发布。"
+ },
+ "지도 게시글은 하루 {n}건까지만 등록할 수 있습니다. 내일 다시 시도해주세요.": {
+  "en": "You can post up to {n} map posts per day. Please try again tomorrow.",
+  "ja": "地図投稿は1日{n}件までです。明日再度お試しください。",
+  "zh": "地图帖子每天最多发布{n}条，请明天再试。"
+ },
+ "게시글을 찾을 수 없습니다.": {
+  "en": "Post not found.",
+  "ja": "投稿が見つかりません。",
+  "zh": "找不到帖子。"
+ },
+ "vote_type은 'up', 'down', 'fool' 중 하나여야 합니다.": {
+  "en": "vote_type must be one of 'up', 'down', or 'fool'.",
+  "ja": "vote_typeは'up'、'down'、'fool'のいずれかでなければなりません。",
+  "zh": "vote_type 必须为 'up'、'down' 或 'fool' 之一。"
+ },
+ "본인 게시글에는 반응할 수 없습니다.": {
+  "en": "You cannot react to your own post.",
+  "ja": "自分の投稿には反応できません。",
+  "zh": "不能对自己的帖子作出反应。"
+ },
+ "지도 게시글 반응은 하루 {n}회까지만 가능합니다.": {
+  "en": "Map post reactions are limited to {n} per day.",
+  "ja": "地図投稿への反応は1日{n}回までです。",
+  "zh": "地图帖子反应每天最多{n}次。"
+ },
+ "댓글은 {n}자 이내로 작성해주세요.": {
+  "en": "Comment must be {n} characters or fewer.",
+  "ja": "コメントは{n}文字以内で入力してください。",
+  "zh": "评论不得超过{n}个字符。"
+ },
+ "댓글은 하루 {n}건까지만 등록할 수 있습니다.": {
+  "en": "You can post up to {n} Comments per day.",
+  "ja": "コメントは1日{n}件までです。",
+  "zh": "评论每天最多发布{n}条。"
+ },
+ "receiver_id, body는 필수입니다.": {
+  "en": "receiver_id and body are required.",
+  "ja": "receiver_id、bodyは必須です。",
+  "zh": "receiver_id、body 为必填项。"
+ },
+ "본인에게는 쪽지를 보낼 수 없습니다.": {
+  "en": "You cannot send a message to yourself.",
+  "ja": "自分自身にはメッセージを送れません。",
+  "zh": "不能给自己发送私信。"
+ },
+ "쪽지는 {n}자 이내로 작성해주세요.": {
+  "en": "Message must be {n} characters or fewer.",
+  "ja": "メッセージは{n}文字以内で入力してください。",
+  "zh": "私信不得超过{n}个字符。"
+ },
+ "부적절한 표현이 포함되어 있어 보낼 수 없습니다.": {
+  "en": "Cannot send: contains inappropriate language.",
+  "ja": "不適切な表現が含まれているため送れません。",
+  "zh": "包含不当内容，无法发送。"
+ },
+ "받는 사람을 찾을 수 없습니다.": {
+  "en": "Recipient not found.",
+  "ja": "受信者が見つかりません。",
+  "zh": "找不到收件人。"
+ },
+ "(탈퇴한 유저)": {
+  "en": "(Deleted user)",
+  "ja": "(退会したユーザー)",
+  "zh": "(已注销用户)"
+ },
+ "쪽지를 찾을 수 없습니다.": {
+  "en": "Message not found.",
+  "ja": "メッセージが見つかりません。",
+  "zh": "找不到私信。"
+ },
+ "본인이 받은 쪽지만 읽음 처리할 수 있습니다.": {
+  "en": "You can only mark messages you received as read.",
+  "ja": "自分が受け取ったメッセージのみ既読にできます。",
+  "zh": "只能将自己收到的私信标记为已读。"
+ },
+ "bbox 형식은 s,w,n,e 입니다.": {
+  "en": "bbox format is s,w,n,e.",
+  "ja": "bboxの形式はs,w,n,eです。",
+  "zh": "bbox 格式为 s,w,n,e。"
+ },
+ "동을 찾을 수 없습니다.": {
+  "en": "District not found.",
+  "ja": "区が見つかりません。",
+  "zh": "找不到区。"
+ },
+ "어디서 출병할지": {
+  "en": "Where to deploy from",
+  "ja": "どこから出兵するか",
+  "zh": "从哪里出兵"
+ },
+ "기여했다": {
+  "en": "Contributed",
+  "ja": "貢献した",
+  "zh": "已贡献"
+ },
+ "정당명은 필수입니다.": {
+  "en": "Party name is required.",
+  "ja": "政党名は必須です。",
+  "zh": "政党名称为必填项。"
+ },
+ "강령은 필수입니다.": {
+  "en": "Platform is required.",
+  "ja": "綱領は必須です。",
+  "zh": "纲领为必填项。"
+ },
+ "정당 창설은 팔로워 {n}명 이상부터 가능합니다. (현재 {n}명 · 지배자는 조건 없이 창설 가능)": {
+  "en": "Founding a party requires at least {n} followers. (Currently {n} · Rulers can found one without conditions)",
+  "ja": "政党の創設はフォロワー{n}人以上から可能です。(現在{n}人 · 支配者は条件なしで創設可能)",
+  "zh": "创建政党需要至少{n}名关注者。（当前{n}名 · 统治者可无条件创建）"
+ },
+ "이미 존재하는 정당명입니다.": {
+  "en": "This party name already exists.",
+  "ja": "すでに存在する政党名です。",
+  "zh": "该政党名称已存在。"
+ },
+ "정당을 찾을 수 없습니다.": {
+  "en": "Party not found.",
+  "ja": "政党が見つかりません。",
+  "zh": "找不到政党。"
+ },
+ "뱃지": {
+  "en": "Badge",
+  "ja": "バッジ",
+  "zh": "徽章"
+ },
+ "design_asset_url은 필수입니다.": {
+  "en": "design_asset_url is required.",
+  "ja": "design_asset_urlは必須です。",
+  "zh": "design_asset_url 为必填项。"
+ },
+ "창설자만 아이템을 등록할 수 있습니다.": {
+  "en": "Only the founder can register items.",
+  "ja": "創設者のみアイテムを登録できます。",
+  "zh": "只有创建者可以登记物品。"
+ },
+ "지금 뜨는 지역": {
+  "en": "Trending Regions",
+  "ja": "今注目の地域",
+  "zh": "热门地区"
+ },
+ "지역을 찾을 수 없습니다.": {
+  "en": "Region not found.",
+  "ja": "地域が見つかりません。",
+  "zh": "找不到地区。"
+ },
+ "현재 이 지역의 지배자만 망토를 발급할 수 있습니다.": {
+  "en": "Only the current Ruler of this region can issue a cloak.",
+  "ja": "現在この地域の支配者のみマントを発行できます。",
+  "zh": "只有该地区当前的统治者可以颁发斗篷。"
+ },
+ "이미 이 재위 기간에 발급한 망토가 있습니다.": {
+  "en": "A cloak has already been issued during this reign.",
+  "ja": "この在位期間にすでに発行したマントがあります。",
+  "zh": "本次在位期间已颁发过斗篷。"
+ },
+ "사상 영향권": {
+  "en": "Ideological Sphere of Influence",
+  "ja": "思想影響圏",
+  "zh": "思想影响范围"
+ },
+ "종교명은 필수입니다.": {
+  "en": "Religion name is required.",
+  "ja": "宗教名は必須です。",
+  "zh": "宗教名称为必填项。"
+ },
+ "교리는 논제 {n}~{n}개로 구성해야 합니다.": {
+  "en": "Doctrine must consist of {n} to {n} Agendas.",
+  "ja": "教理は議題{n}〜{n}個で構成する必要があります。",
+  "zh": "教义须由{n}～{n}个议题组成。"
+ },
+ "종교 창설은 명성 {n} 이상부터 가능합니다. (현재 {n} · 지배자는 조건 없이 창설 가능)": {
+  "en": "Founding a religion requires Reputation of at least {n}. (Currently {n} · Rulers can found one without conditions)",
+  "ja": "宗教の創設は名声{n}以上から可能です。(現在{n} · 支配者は条件なしで創設可能)",
+  "zh": "创建宗教需要声望达到{n}以上。（当前{n} · 统治者可无条件创建）"
+ },
+ "이미 존재하는 종교명입니다.": {
+  "en": "This religion name already exists.",
+  "ja": "すでに存在する宗教名です。",
+  "zh": "该宗教名称已存在。"
+ },
+ "존재하지 않는 논제입니다: {n}": {
+  "en": "Agenda does not exist: {n}",
+  "ja": "存在しない議題です: {n}",
+  "zh": "议题不存在：{n}"
+ },
+ "본인이 작성한 논제만 교리로 지정할 수 있습니다.": {
+  "en": "Only Agendas you authored can be set as doctrine.",
+  "ja": "自分が作成した議題のみ教理に指定できます。",
+  "zh": "只能将自己创建的议题设为教义。"
+ },
+ "종교를 찾을 수 없습니다.": {
+  "en": "Religion not found.",
+  "ja": "宗教が見つかりません。",
+  "zh": "找不到宗教。"
+ },
+ "악세사리": {
+  "en": "Accessory",
+  "ja": "アクセサリー",
+  "zh": "饰品"
+ },
+ "{n}:{n} — 신고 {n}건 누적으로 자동 숨김": {
+  "en": "{n}:{n} — auto-hidden after {n} accumulated reports",
+  "ja": "{n}:{n} — 通報{n}件累積により自動非表示",
+  "zh": "{n}:{n} — 累计{n}次举报，已自动隐藏"
+ },
+ "target_type은 'thread', 'argument', 'user', 'message', 'chat_message' 중 하나여야 합니다.": {
+  "en": "target_type must be one of 'thread', 'argument', 'user', 'message', or 'chat_message'.",
+  "ja": "target_typeは'thread'、'argument'、'user'、'message'、'chat_message'のいずれかでなければなりません。",
+  "zh": "target_type 必须为 'thread'、'argument'、'user'、'message' 或 'chat_message' 之一。"
+ },
+ "target_id, reason은 필수입니다.": {
+  "en": "target_id and reason are required.",
+  "ja": "target_id、reasonは必須です。",
+  "zh": "target_id、reason 为必填项。"
+ },
+ "신고 대상을 찾을 수 없습니다.": {
+  "en": "Report target not found.",
+  "ja": "通報対象が見つかりません。",
+  "zh": "找不到举报对象。"
+ },
+ "region_id, title은 필수입니다.": {
+  "en": "region_id and title are required.",
+  "ja": "region_id、titleは必須です。",
+  "zh": "region_id、title 为必填项。"
+ },
+ "제목은 {n}자 이내로 작성해주세요.": {
+  "en": "Title must be {n} characters or fewer.",
+  "ja": "タイトルは{n}文字以内で入力してください。",
+  "zh": "标题不得超过{n}个字符。"
+ },
+ "부연 설명은 {n}자 이내로 작성해주세요.": {
+  "en": "Additional description must be {n} characters or fewer.",
+  "ja": "補足説明は{n}文字以内で入力してください。",
+  "zh": "补充说明不得超过{n}个字符。"
+ },
+ "점령 상태": {
+  "en": "Occupied",
+  "ja": "占領状態",
+  "zh": "占领状态"
+ },
+ "이 지역은 점령 상태로 신규 논제 등록이 제한되어 있습니다. (해제: {n})": {
+  "en": "This region is occupied; posting new Agendas is restricted. (Lifted: {n})",
+  "ja": "この地域は占領状態のため、新規議題の登録が制限されています。(解除: {n})",
+  "zh": "该地区处于占领状态，限制发布新议题。（解除：{n}）"
+ },
+ "논제는 하루 {n}개까지만 등록할 수 있습니다. 내일 다시 시도해주세요.": {
+  "en": "You can post up to {n} Agendas per day. Please try again tomorrow.",
+  "ja": "議題は1日{n}個までです。明日再度お試しください。",
+  "zh": "议题每天最多发布{n}个，请明天再试。"
+ },
+ "논제를 찾을 수 없습니다.": {
+  "en": "Agenda not found.",
+  "ja": "議題が見つかりません。",
+  "zh": "找不到议题。"
+ },
+ "stance는 'pro', 'con', 'other' 중 하나여야 합니다.": {
+  "en": "stance must be one of 'pro', 'con', or 'other'.",
+  "ja": "stanceは'pro'、'con'、'other'のいずれかでなければなりません。",
+  "zh": "stance 必须为 'pro'、'con' 或 'other' 之一。"
+ },
+ "논증 제목을 입력해주세요.": {
+  "en": "Please enter an Argument title.",
+  "ja": "論証のタイトルを入力してください。",
+  "zh": "请输入论证标题。"
+ },
+ "논증 내용을 입력해주세요.": {
+  "en": "Please enter Argument content.",
+  "ja": "論証の内容を入力してください。",
+  "zh": "请输入论证内容。"
+ },
+ "설명은 {n}자 이내로 작성해주세요.": {
+  "en": "Description must be {n} characters or fewer.",
+  "ja": "説明は{n}文字以内で入力してください。",
+  "zh": "说明不得超过{n}个字符。"
+ },
+ "이미 종료된 논제에는 논증을 등록할 수 없습니다.": {
+  "en": "Cannot post an Argument to a closed Agenda.",
+  "ja": "すでに終了した議題には論証を登録できません。",
+  "zh": "无法在已结束的议题中发布论证。"
+ },
+ "{n}시간 배치 정산": {
+  "en": "{n}-hour batch settlement",
+  "ja": "{n}時間バッチ精算",
+  "zh": "{n}小时批量结算"
+ },
+ "verdict는 'approve' 또는 'collapse'여야 합니다.": {
+  "en": "verdict must be 'approve' or 'collapse'.",
+  "ja": "verdictは'approve'または'collapse'でなければなりません。",
+  "zh": "verdict 必须为 'approve' 或 'collapse'。"
+ },
+ "이미 판정이 종료된 논제입니다.": {
+  "en": "The verdict on this Agenda has already closed.",
+  "ja": "すでに判定が終了した議題です。",
+  "zh": "该议题的裁定已结束。"
+ },
+ "이미 이 논제에 판정 투표를 하셨습니다.": {
+  "en": "You have already cast a verdict vote on this Agenda.",
+  "ja": "すでにこの議題に判定投票済みです。",
+  "zh": "您已对该议题进行裁定投票。"
+ },
+ "판정 투표는 하루 {n}개 논제까지만 참여할 수 있습니다.": {
+  "en": "Verdict votes are limited to {n} Agendas per day.",
+  "ja": "判定投票は1日{n}個の議題までです。",
+  "zh": "裁定投票每天最多参与{n}个议题。"
+ },
+ "이그지니어스": {
+  "en": "Ingenious",
+  "ja": "イグジニアス",
+  "zh": "天才"
+ },
+ "유저를 찾을 수 없습니다.": {
+  "en": "User not found.",
+  "ja": "ユーザーが見つかりません。",
+  "zh": "找不到用户。"
+ },
+ "region_id는 필수입니다.": {
+  "en": "region_id is required.",
+  "ja": "region_idは必須です。",
+  "zh": "region_id 为必填项。"
+ },
+ "지역 변경은 {n}일에 한 번만 가능합니다. {n}일 후 다시 시도해주세요.": {
+  "en": "Region can only be changed once every {n} days. Please try again in {n} days.",
+  "ja": "地域変更は{n}日に1回のみ可能です。{n}日後に再度お試しください。",
+  "zh": "每{n}天只能更改一次地区，请{n}天后再试。"
+ },
+ "자기 자신은 팔로우할 수 없습니다.": {
+  "en": "You cannot follow yourself.",
+  "ja": "自分自身はフォローできません。",
+  "zh": "不能关注自己。"
+ },
+ "이미 팔로우하고 있습니다.": {
+  "en": "Already following.",
+  "ja": "すでにフォローしています。",
+  "zh": "已关注。"
+ },
+ "본인 인벤토리만 조작할 수 있습니다.": {
+  "en": "You can only manage your own inventory.",
+  "ja": "自分のインベントリのみ操作できます。",
+  "zh": "只能操作自己的物品栏。"
+ },
+ "보유하지 않은 아이템입니다.": {
+  "en": "You do not own this item.",
+  "ja": "所持していないアイテムです。",
+  "zh": "您未拥有该物品。"
+ },
+ "vote_type은 'up' 또는 'down'이어야 합니다.": {
+  "en": "vote_type must be 'up' or 'down'.",
+  "ja": "vote_typeは'up'または'down'でなければなりません。",
+  "zh": "vote_type 必须为 'up' 或 'down'。"
+ },
+ "논증을 찾을 수 없습니다.": {
+  "en": "Argument not found.",
+  "ja": "論証が見つかりません。",
+  "zh": "找不到论证。"
+ },
+ "본인 논증에는 투표할 수 없습니다.": {
+  "en": "You cannot vote on your own Argument.",
+  "ja": "自分の論証には投票できません。",
+  "zh": "不能为自己的论证投票。"
+ },
+ "투표는 하루 {n}회까지만 가능합니다.": {
+  "en": "Votes are limited to {n} per day.",
+  "ja": "投票は1日{n}回までです。",
+  "zh": "投票每天最多{n}次。"
+ },
+ "굴복 상태": {
+  "en": "Surrendered",
+  "ja": "屈服状態",
+  "zh": "屈服状态"
+ },
+ "타 지역": {
+  "en": "Other Region",
+  "ja": "他地域",
+  "zh": "其他地区"
+ },
+ "참여": {
+  "en": "Participate",
+  "ja": "参加",
+  "zh": "参与"
+ },
+ "추천(up)": {
+  "en": "Upvote (up)",
+  "ja": "推薦(up)",
+  "zh": "推荐(up)"
+ },
+ "답글 내용을 입력해주세요.": {
+  "en": "Please enter a reply.",
+  "ja": "返信内容を入力してください。",
+  "zh": "请输入回复内容。"
+ },
+ "답글은 {n}자 이내로 작성해주세요.": {
+  "en": "Reply must be {n} characters or fewer.",
+  "ja": "返信は{n}文字以内で入力してください。",
+  "zh": "回复不得超过{n}个字符。"
+ },
+ "defender_region_id는 필수입니다.": {
+  "en": "defender_region_id is required.",
+  "ja": "defender_region_idは必須です。",
+  "zh": "defender_region_id 为必填项。"
+ },
+ "전쟁을 찾을 수 없습니다.": {
+  "en": "War not found.",
+  "ja": "戦争が見つかりません。",
+  "zh": "找不到战争。"
+ },
+ "피선포 지역 시민만 투표할 수 있습니다.": {
+  "en": "Only Citizens of the region declared upon can vote.",
+  "ja": "被宣戦地域の市民のみ投票できます。",
+  "zh": "只有被宣战地区的公民可以投票。"
+ },
+ "아직 개설된 전투가 없습니다.": {
+  "en": "No battle has been opened yet.",
+  "ja": "まだ開設された戦闘はありません。",
+  "zh": "尚未开启战斗。"
+ },
+ "side는 'attacker' 또는 'defender'여야 합니다.": {
+  "en": "side must be 'attacker' or 'defender'.",
+  "ja": "sideは'attacker'または'defender'でなければなりません。",
+  "zh": "side 必须为 'attacker' 或 'defender'。"
+ },
+ "진행 중인 전투가 없습니다.": {
+  "en": "No battle in progress.",
+  "ja": "進行中の戦闘はありません。",
+  "zh": "没有进行中的战斗。"
+ },
+ "이 전쟁에 얽힌 두 지역의 시민만 참여할 수 있습니다.": {
+  "en": "Only Citizens of the two regions involved in this War can participate.",
+  "ja": "この戦争に関わる2地域の市民のみ参加できます。",
+  "zh": "只有该战争涉及的两个地区的公民可以参与。"
+ },
+ "이미 진영을 선택하셨습니다.": {
+  "en": "You have already chosen a side.",
+  "ja": "すでに陣営を選択済みです。",
+  "zh": "您已选择阵营。"
+ },
+ "먼저 진영을 선택해야 논증을 등록할 수 있습니다.": {
+  "en": "You must choose a side before posting an Argument.",
+  "ja": "先に陣営を選択しないと論証を登録できません。",
+  "zh": "必须先选择阵营才能发布论证。"
+ },
+ "이 전쟁에 얽힌 두 지역의 시민만 투표할 수 있습니다.": {
+  "en": "Only Citizens of the two regions involved in this War can vote.",
+  "ja": "この戦争に関わる2地域の市民のみ投票できます。",
+  "zh": "只有该战争涉及的两个地区的公民可以投票。"
+ },
+ "동일 IP 대량 가입": {
+  "en": "Mass signups from the same IP",
+  "ja": "同一IPからの大量登録",
+  "zh": "同一IP批量注册"
+ },
+ "같은 IP에서 여러 계정을 동원해 같은 대상에 몰아주는": {
+  "en": "Using multiple accounts from the same IP to boost the same target",
+  "ja": "同一IPから複数アカウントを動員して同じ対象に集中させる",
+  "zh": "从同一IP动用多个账号集中支持同一对象"
+ },
+ "argument:{n} ip:{n} — 동일 IP에서 {n}시간 내 {n}개 계정이 투표": {
+  "en": "argument:{n} ip:{n} — from the same IP, within {n} hours, {n} accounts voted",
+  "ja": "argument:{n} ip:{n} — 同一IPから{n}時間以内に{n}個のアカウントが投票",
+  "zh": "argument:{n} ip:{n} — 同一IP在{n}小时内有{n}个账号投票"
+ },
+ "user:{n} ip:{n} — 동일 IP에서 {n}시간 내 {n}개 계정이 팔로우": {
+  "en": "user:{n} ip:{n} — from the same IP, within {n} hours, {n} accounts followed",
+  "ja": "user:{n} ip:{n} — 同一IPから{n}時間以内に{n}個のアカウントがフォロー",
+  "zh": "user:{n} ip:{n} — 同一IP在{n}小时内有{n}个账号关注"
+ },
+ "{n}:{n} ip:{n} — 동일 IP에서 {n}시간 내 {n}개 계정이 가입": {
+  "en": "{n}:{n} ip:{n} — from the same IP, within {n} hours, {n} accounts signed up",
+  "ja": "{n}:{n} ip:{n} — 同一IPから{n}時間以内に{n}個のアカウントが登録",
+  "zh": "{n}:{n} ip:{n} — 同一IP在{n}小时内有{n}个账号注册"
+ },
+ "neighborhood:{n} ip:{n} — 동일 IP에서 {n}시간 내 {n}개 계정이 기여": {
+  "en": "neighborhood:{n} ip:{n} — from the same IP, within {n} hours, {n} accounts contributed",
+  "ja": "neighborhood:{n} ip:{n} — 同一IPから{n}時間以内に{n}個のアカウントが貢献",
+  "zh": "neighborhood:{n} ip:{n} — 同一IP在{n}小时内有{n}个账号贡献"
+ },
+ "<section class=\"region-block\"> <h{n}>{n} 폴리스 <span class=\"count\">{n}건</span></h{n}> <ul class=\"thread-list\"> ${byRegion[r.id] .map( (t) =>": {
+  "en": "<section class=\"region-block\"> <h{n}>{n} Polis <span class=\"count\">{n} items</span></h{n}> <ul class=\"thread-list\"> ${byRegion[r.id] .map( (t) =>",
+  "ja": "<section class=\"region-block\"> <h{n}>{n} ポリス <span class=\"count\">{n}件</span></h{n}> <ul class=\"thread-list\"> ${byRegion[r.id] .map( (t) =>",
+  "zh": "<section class=\"region-block\"> <h{n}>{n} 城邦 <span class=\"count\">{n}条</span></h{n}> <ul class=\"thread-list\"> ${byRegion[r.id] .map( (t) =>"
+ },
+ "[archive] 갱신 실패:": {
+  "en": "[archive] update failed:",
+  "ja": "[archive] 更新失敗:",
+  "zh": "[archive] 更新失败："
+ },
+ "웅변가": {
+  "en": "Orator",
+  "ja": "雄弁家",
+  "zh": "雄辩家"
+ },
+ "미확정": {
+  "en": "Undecided",
+  "ja": "未確定",
+  "zh": "未确定"
+ },
+ "지배자만 전쟁을 선포할 수 있습니다.": {
+  "en": "Only Rulers can declare War.",
+  "ja": "支配者のみ戦争を宣言できます。",
+  "zh": "只有统治者可以宣战。"
+ },
+ "본인 소속 지역만 점령할 수 있습니다.": {
+  "en": "You can only occupy your own region.",
+  "ja": "自分の所属地域のみ占領できます。",
+  "zh": "只能占领自己所属的地区。"
+ },
+ "팔로워 수가 소속 인원({n}명)보다 많아야 점령할 수 있습니다. (현재 팔로워 {n}명)": {
+  "en": "You need more followers than the region's members ({n}) to occupy it. (Current followers: {n})",
+  "ja": "占領するにはフォロワー数が所属人数({n}人)より多い必要があります。(現在のフォロワー{n}人)",
+  "zh": "关注者数量须多于所属人数（{n}名）才能占领。（当前关注者{n}名）"
+ },
+ "이미 이 지역의 지배자입니다.": {
+  "en": "You are already the Ruler of this region.",
+  "ja": "すでにこの地域の支配者です。",
+  "zh": "您已是该地区的统治者。"
+ },
+ "정족수({n}명)를 채우고도 아직 붕괴되지 않은": {
+  "en": "Reached quorum ({n}) but not yet collapsed",
+  "ja": "定足数({n}人)を満たしてもまだ崩壊していない",
+  "zh": "已达到法定人数（{n}名）但尚未崩溃的"
+ },
+ "오늘의 생존자": {
+  "en": "Today's Survivors",
+  "ja": "今日の生存者",
+  "zh": "今日幸存者"
+ },
+ "바보": {
+  "en": "Fool",
+  "ja": "バカ",
+  "zh": "笨蛋"
+ },
+ "타지 진출": {
+  "en": "Expansion Abroad",
+  "ja": "他地域進出",
+  "zh": "进军外地"
+ },
+ "웃기다": {
+  "en": "Funny",
+  "ja": "笑える",
+  "zh": "好笑"
+ },
+ "가입 즉시 슬롯 채워짐": {
+  "en": "Slot filled immediately upon signup",
+  "ja": "登録直後にスロットが埋まる",
+  "zh": "注册后立即填满槽位"
+ },
+ "붕괴": {
+  "en": "Collapse",
+  "ja": "崩壊",
+  "zh": "崩溃"
+ },
+ "target_type은 'thread', 'argument', 'reply' 중 하나여야 합니다.": {
+  "en": "target_type must be one of 'thread', 'argument', or 'reply'.",
+  "ja": "target_typeは'thread'、'argument'、'reply'のいずれかでなければなりません。",
+  "zh": "target_type 必须为 'thread'、'argument' 或 'reply' 之一。"
+ },
+ "대상을 찾을 수 없습니다.": {
+  "en": "Target not found.",
+  "ja": "対象が見つかりません。",
+  "zh": "找不到对象。"
+ },
+ "본인 글에는 반응할 수 없습니다.": {
+  "en": "You cannot react to your own post.",
+  "ja": "自分の投稿には反応できません。",
+  "zh": "不能对自己的内容作出反应。"
+ },
+ "웃기다 반응은 하루 {n}회까지만 가능합니다.": {
+  "en": "Funny reactions are limited to {n} per day.",
+  "ja": "笑える反応は1日{n}回までです。",
+  "zh": "好笑反应每天最多{n}次。"
+ },
+ "인접하다": {
+  "en": "Adjacent",
+  "ja": "隣接している",
+  "zh": "相邻"
+ },
+ "내가 이겼다": {
+  "en": "I won",
+  "ja": "私が勝った",
+  "zh": "我赢了"
+ },
+ "기여하기": {
+  "en": "Contribute",
+  "ja": "貢献する",
+  "zh": "贡献"
+ },
+ "최근 N일": {
+  "en": "Last N days",
+  "ja": "直近N日",
+  "zh": "最近N天"
+ },
+ "기여는 하루 {n}회까지만 가능합니다.": {
+  "en": "Contributions are limited to {n} per day.",
+  "ja": "貢献は1日{n}回までです。",
+  "zh": "贡献每天最多{n}次。"
+ },
+ "여기서 공격을 시작한다": {
+  "en": "Start attack from here",
+  "ja": "ここから攻撃を開始する",
+  "zh": "从这里发起攻击"
+ },
+ "NPC 상태인 동은 공격이 아니라 기여로 해방시켜야 합니다.": {
+  "en": "Districts in NPC state must be Liberated by Contributing, not by attacking.",
+  "ja": "NPC状態の区は攻撃ではなく貢献で解放する必要があります。",
+  "zh": "处于NPC状态的区须通过贡献而非攻击来解放。"
+ },
+ "이미 본인이 지배 중인 동입니다.": {
+  "en": "You already rule this District.",
+  "ja": "すでに自分が支配中の区です。",
+  "zh": "该区已由您统治。"
+ },
+ "공격은 하루 {n}회까지만 가능합니다.": {
+  "en": "Attacks are limited to {n} per day.",
+  "ja": "攻撃は1日{n}回までです。",
+  "zh": "攻击每天最多{n}次。"
+ },
+ "공격을 시작할 인접 동(from_neighborhood_id)을 지정해야 합니다.": {
+  "en": "You must specify an adjacent District (from_neighborhood_id) to attack from.",
+  "ja": "攻撃を開始する隣接区(from_neighborhood_id)を指定する必要があります。",
+  "zh": "必须指定发起攻击的相邻区（from_neighborhood_id）。"
+ },
+ "공격 출발 동을 찾을 수 없습니다.": {
+  "en": "Attack origin District not found.",
+  "ja": "攻撃の出発区が見つかりません。",
+  "zh": "找不到攻击出发区。"
+ },
+ "본인이 지배 중인 동에서만 공격을 시작할 수 있습니다.": {
+  "en": "You can only start an attack from a District you rule.",
+  "ja": "自分が支配中の区からのみ攻撃を開始できます。",
+  "zh": "只能从自己统治的区发起攻击。"
+ },
+ "인접한 동이 아닙니다.": {
+  "en": "Not an adjacent District.",
+  "ja": "隣接する区ではありません。",
+  "zh": "不是相邻的区。"
+ },
+ "지지자": {
+  "en": "Supporter",
+  "ja": "支持者",
+  "zh": "支持者"
+ },
+ "답글을 찾을 수 없습니다.": {
+  "en": "Reply not found.",
+  "ja": "返信が見つかりません。",
+  "zh": "找不到回复。"
+ },
+ "본인 답글에는 반응할 수 없습니다.": {
+  "en": "You cannot react to your own reply.",
+  "ja": "自分の返信には反応できません。",
+  "zh": "不能对自己的回复作出反应。"
+ },
+ "답글 추천/비추천은 하루 {n}회까지만 가능합니다.": {
+  "en": "Reply Upvotes/Downvotes are limited to {n} per day.",
+  "ja": "返信の推薦/非推薦は1日{n}回までです。",
+  "zh": "回复推荐/反对每天最多{n}次。"
+ },
+ "[sitemap] 갱신 실패:": {
+  "en": "[sitemap] update failed:",
+  "ja": "[sitemap] 更新失敗:",
+  "zh": "[sitemap] 更新失败："
+ },
+ "본인 논제에는 반응할 수 없습니다.": {
+  "en": "You cannot react to your own Agenda.",
+  "ja": "自分の議題には反応できません。",
+  "zh": "不能对自己的议题作出反应。"
+ },
+ "논제 추천/비추천은 하루 {n}회까지만 가능합니다.": {
+  "en": "Agenda Upvotes/Downvotes are limited to {n} per day.",
+  "ja": "議題の推薦/非推薦は1日{n}回までです。",
+  "zh": "议题推荐/反对每天最多{n}次。"
+ },
+ "지배자": {
+  "en": "Ruler",
+  "ja": "支配者",
+  "zh": "统治者"
+ },
+ "예시": {
+  "en": "Example",
+  "ja": "例",
+  "zh": "示例"
+ },
+ "자신의 지역에는 선전포고할 수 없습니다.": {
+  "en": "You cannot declare War on your own region.",
+  "ja": "自分の地域には宣戦布告できません。",
+  "zh": "不能向自己的地区宣战。"
+ },
+ "지배자가 없는 지역(무주공산)에는 선전포고할 수 없습니다.": {
+  "en": "You cannot declare War on a region without a Ruler (Unclaimed).",
+  "ja": "支配者のいない地域(無主の地)には宣戦布告できません。",
+  "zh": "不能向没有统治者的地区（无主之地）宣战。"
+ },
+ "선전포고는 지배자당 {n}일에 한 번만 가능합니다.": {
+  "en": "Each Ruler can declare War only once every {n} days.",
+  "ja": "宣戦布告は支配者ごとに{n}日に1回のみ可能です。",
+  "zh": "每位统治者每{n}天只能宣战一次。"
+ },
+ "동일 지역에는 {n}일 이내 재선포할 수 없습니다.": {
+  "en": "You cannot declare War again on the same region within {n} days.",
+  "ja": "同一地域には{n}日以内に再宣戦できません。",
+  "zh": "{n}天内不能再次向同一地区宣战。"
+ },
+ "병력 격차가 너무 큽니다(공격측 {n} / 방어측 {n}). 약소 지역 보호 정책에 따라 선포할 수 없습니다.": {
+  "en": "Force gap is too large (attacker {n} / defender {n}). Declaration is blocked under the weak-region protection policy.",
+  "ja": "兵力差が大きすぎます(攻撃側{n} / 防衛側{n})。弱小地域保護方針により宣戦できません。",
+  "zh": "兵力差距过大（攻击方{n} / 防守方{n}）。根据弱小地区保护政策，无法宣战。"
+ },
+ "선포자(공격측 지배자)만 전투를 개시할 수 있습니다.": {
+  "en": "Only the declarer (attacking Ruler) can start a battle.",
+  "ja": "宣戦者(攻撃側の支配者)のみ戦闘を開始できます。",
+  "zh": "只有宣战者（攻击方统治者）可以发起战斗。"
+ },
+ "수락된 전쟁에서만 전투를 개시할 수 있습니다.": {
+  "en": "Battles can only be started in an accepted War.",
+  "ja": "受諾された戦争でのみ戦闘を開始できます。",
+  "zh": "只能在已接受的战争中发起战斗。"
+ },
+ "이미 이 전쟁에 전투가 개설되어 있습니다.": {
+  "en": "A battle has already been opened for this War.",
+  "ja": "すでにこの戦争に戦闘が開設されています。",
+  "zh": "该战争已开启战斗。"
+ },
+ "title, option_attacker, option_defender는 필수입니다.": {
+  "en": "title, option_attacker, and option_defender are required.",
+  "ja": "title、option_attacker、option_defenderは必須です。",
+  "zh": "title、option_attacker、option_defender 为必填项。"
+ },
+ "점령": {
+  "en": "Occupy",
+  "ja": "占領",
+  "zh": "占领"
+ },
+ "AGORA PANGAEA — 세계 {n}개국 영토 정복 지도": {
+  "en": "AGORA PANGAEA — World Territory Conquest Map, {n} Countries",
+  "ja": "AGORA PANGAEA — 世界{n}か国 領土征服マップ",
+  "zh": "AGORA PANGAEA — 全球{n}国领土征服地图"
+ },
+ "전 세계 {n}개국, {n}여 개 영토를 기여로 해방하고 인접 영토를 공격해 지배권을 빼앗는다. 지도 아무 곳에나 글을 남기고 반응을 주고받는 실시간 정복 지도.": {
+  "en": "Liberate over {n} territories across {n} countries by contributing, then attack adjacent territories to seize control. A real-time conquest map where you can post anywhere and trade reactions.",
+  "ja": "世界{n}か国、{n}余りの領土を貢献で解放し、隣接領土を攻撃して支配権を奪う。地図のどこにでも記録を残し、反応を交わすリアルタイム征服マップ。",
+  "zh": "通过贡献解放全球{n}国、{n}余个领土，攻击相邻领土夺取统治权。可在地图任意位置留言互动的实时征服地图。"
+ },
+ "전 세계 {n}개국, {n}여 개 영토를 기여로 해방하고 인접 영토를 공격해 지배권을 빼앗는다.": {
+  "en": "Liberate over {n} territories across {n} countries by contributing, then attack adjacent territories to seize control.",
+  "ja": "世界{n}か国、{n}余りの領土を貢献で解放し、隣接領土を攻撃して支配権を奪う。",
+  "zh": "通过贡献解放全球{n}国、{n}余个领土，攻击相邻领土夺取统治权。"
+ },
+ "채팅 · 논쟁 · 랭킹 →": {
+  "en": "Chat · Debate · Rankings →",
+  "ja": "チャット · 論争 · ランキング →",
+  "zh": "聊天 · 辩论 · 排行 →"
+ },
+ "시즌": {
+  "en": "Season",
+  "ja": "シーズン",
+  "zh": "赛季"
+ },
+ "미개척": {
+  "en": "Unclaimed",
+  "ja": "未開拓",
+  "zh": "未开拓"
+ },
+ "타 세력": {
+  "en": "Rival",
+  "ja": "他勢力",
+  "zh": "敌对势力"
+ },
+ "내 영토": {
+  "en": "My Territory",
+  "ja": "自領土",
+  "zh": "我的领土"
+ },
+ "기록": {
+  "en": "Post",
+  "ja": "記録",
+  "zh": "记录"
+ },
+ "묶음 테두리 = 비율 · 💬 기록·댓글 · 🔥 {n}시간 활동": {
+  "en": "Cluster border = ratio · 💬 Posts·Comments · 🔥 {n}h activity",
+  "ja": "クラスタ枠 = 比率 · 💬 記録·コメント · 🔥 {n}時間の活動",
+  "zh": "聚合边框 = 比例 · 💬 记录·评论 · 🔥 {n}小时活动"
+ },
+ "지도에 기록 남기기": {
+  "en": "Post on Map",
+  "ja": "地図に記録を残す",
+  "zh": "在地图上记录"
+ },
+ "국가 · 영토 검색": {
+  "en": "Search Country · Territory",
+  "ja": "国 · 領土を検索",
+  "zh": "搜索国家 · 领土"
+ },
+ "시민": {
+  "en": "Citizen",
+  "ja": "市民",
+  "zh": "公民"
+ },
+ "선지자": {
+  "en": "Prophet",
+  "ja": "預言者",
+  "zh": "先知"
+ },
+ "요청에 실패했습니다.": {
+  "en": "Request failed.",
+  "ja": "リクエストに失敗しました。",
+  "zh": "请求失败。"
+ },
+ "눌렀는데 {n}": {
+  "en": "Clicked, but {n}",
+  "ja": "押しましたが {n}",
+  "zh": "已点击，但 {n}"
+ },
+ "타 세력 지배": {
+  "en": "Rival-Ruled",
+  "ja": "他勢力支配",
+  "zh": "敌对势力统治"
+ },
+ "내 지배": {
+  "en": "Ruled by Me",
+  "ja": "自分が支配",
+  "zh": "我的统治"
+ },
+ "Leaflet을 불러오지 못해 지도 대신 목록으로 표시합니다.": {
+  "en": "Leaflet failed to load, so a list is shown instead of the map.",
+  "ja": "Leafletを読み込めなかったため、地図の代わりに一覧で表示します。",
+  "zh": "无法加载 Leaflet，改为以列表形式显示。"
+ },
+ "가장 큰 구성원 +N": {
+  "en": "Largest member +N",
+  "ja": "最大の構成員 +N",
+  "zh": "最大成员 +N"
+ },
+ "첫 구 +N": {
+  "en": "First District +N",
+  "ja": "最初の区 +N",
+  "zh": "首个区 +N"
+ },
+ "서울 {n}곳": {
+  "en": "Seoul · {n} places",
+  "ja": "ソウル {n}か所",
+  "zh": "首尔 {n}处"
+ },
+ "{n} {n}곳": {
+  "en": "{n} · {n} places",
+  "ja": "{n} {n}か所",
+  "zh": "{n} {n}处"
+ },
+ "<div style=\"padding:{n}px {n}px; border:{n}px solid rgba({n},{n}.{n}); margin-bottom:{n}px;\"> <b>{n}</b> — 영토 {n} · 미개척 {n} · 타 세력 {n}{n} </div>": {
+  "en": "<div style=\"padding:{n}px {n}px; border:{n}px solid rgba({n},{n}.{n}); margin-bottom:{n}px;\"> <b>{n}</b> — Territory {n} · Unclaimed {n} · Rival {n}{n} </div>",
+  "ja": "<div style=\"padding:{n}px {n}px; border:{n}px solid rgba({n},{n}.{n}); margin-bottom:{n}px;\"> <b>{n}</b> — 領土 {n} · 未開拓 {n} · 他勢力 {n}{n} </div>",
+  "zh": "<div style=\"padding:{n}px {n}px; border:{n}px solid rgba({n},{n}.{n}); margin-bottom:{n}px;\"> <b>{n}</b> — 领土 {n} · 未开拓 {n} · 敌对势力 {n}{n} </div>"
+ },
+ "<div class=\"mine-row\"><span>미개척</span>{n}</div> <div class=\"mine-row\"><span>타 세력</span>{n}</div>": {
+  "en": "<div class=\"mine-row\"><span>Unclaimed</span>{n}</div> <div class=\"mine-row\"><span>Rival</span>{n}</div>",
+  "ja": "<div class=\"mine-row\"><span>未開拓</span>{n}</div> <div class=\"mine-row\"><span>他勢力</span>{n}</div>",
+  "zh": "<div class=\"mine-row\"><span>未开拓</span>{n}</div> <div class=\"mine-row\"><span>敌对势力</span>{n}</div>"
+ },
+ "<div class=\"sheet-summary\" id=\"sheetSummary\"> <span>미개척 <b>{n}</b></span><span>타 세력 <b>{n}</b></span> ${authToken ?": {
+  "en": "<div class=\"sheet-summary\" id=\"sheetSummary\"> <span>Unclaimed <b>{n}</b></span><span>Rival <b>{n}</b></span> ${authToken ?",
+  "ja": "<div class=\"sheet-summary\" id=\"sheetSummary\"> <span>未開拓 <b>{n}</b></span><span>他勢力 <b>{n}</b></span> ${authToken ?",
+  "zh": "<div class=\"sheet-summary\" id=\"sheetSummary\"> <span>未开拓 <b>{n}</b></span><span>敌对势力 <b>{n}</b></span> ${authToken ?"
+ },
+ "<h{n} style=\"margin-top:{n}px;\">🔥 지금 뜨거운 곳</h{n}>": {
+  "en": "<h{n} style=\"margin-top:{n}px;\">🔥 Hot Right Now</h{n}>",
+  "ja": "<h{n} style=\"margin-top:{n}px;\">🔥 今熱い場所</h{n}>",
+  "zh": "<h{n} style=\"margin-top:{n}px;\">🔥 当前热点</h{n}>"
+ },
+ "{n} <h{n}>세계 전황</h{n}>{n} <div class=\"mine-row\"><span>내 영토</span>{n}</div> ${mine.slice({n}, {n}).map((t) =>": {
+  "en": "{n} <h{n}>World Battle Status</h{n}>{n} <div class=\"mine-row\"><span>My Territory</span>{n}</div> ${mine.slice({n}, {n}).map((t) =>",
+  "ja": "{n} <h{n}>世界戦況</h{n}>{n} <div class=\"mine-row\"><span>自領土</span>{n}</div> ${mine.slice({n}, {n}).map((t) =>",
+  "zh": "{n} <h{n}>世界战况</h{n}>{n} <div class=\"mine-row\"><span>我的领土</span>{n}</div> ${mine.slice({n}, {n}).map((t) =>"
+ },
+ "<div class=\"season-label\">시즌 {n}주</div> <div class=\"days{n}\">D-{n}</div> <div class=\"season-note\">종료 시 전 영토 초기화</div>": {
+  "en": "<div class=\"season-label\">Season · {n} weeks</div> <div class=\"days{n}\">D-{n}</div> <div class=\"season-note\">All territories reset at season end</div>",
+  "ja": "<div class=\"season-label\">シーズン {n}週</div> <div class=\"days{n}\">D-{n}</div> <div class=\"season-note\">終了時に全領土リセット</div>",
+  "zh": "<div class=\"season-label\">赛季 {n}周</div> <div class=\"days{n}\">D-{n}</div> <div class=\"season-note\">结束时全部领土重置</div>"
+ },
+ "<div class=\"season-label\">시즌 정보 없음</div>": {
+  "en": "<div class=\"season-label\">No season info</div>",
+  "ja": "<div class=\"season-label\">シーズン情報なし</div>",
+  "zh": "<div class=\"season-label\">无赛季信息</div>"
+ },
+ "<div style=\"color:var(--gray-{n}); cursor:default;\">결과 없음</div>": {
+  "en": "<div style=\"color:var(--gray-{n}); cursor:default;\">No results</div>",
+  "ja": "<div style=\"color:var(--gray-{n}); cursor:default;\">結果なし</div>",
+  "zh": "<div style=\"color:var(--gray-{n}); cursor:default;\">无结果</div>"
+ },
+ "<div class=\"card-body\"><div class=\"muted\">불러오지 못했습니다: {n}</div></div>": {
+  "en": "<div class=\"card-body\"><div class=\"muted\">Failed to load: {n}</div></div>",
+  "ja": "<div class=\"card-body\"><div class=\"muted\">読み込めませんでした: {n}</div></div>",
+  "zh": "<div class=\"card-body\"><div class=\"muted\">加载失败：{n}</div></div>"
+ },
+ "점령할 방법이 없다": {
+  "en": "No way to capture",
+  "ja": "占領する方法がない",
+  "zh": "无法占领"
+ },
+ "로그인하고 참전하기": {
+  "en": "Log in to join the war",
+  "ja": "ログインして参戦",
+  "zh": "登录参战"
+ },
+ "내가 지배 중인 영토": {
+  "en": "Territory under my rule",
+  "ja": "自分が支配中の領土",
+  "zh": "我统治中的领土"
+ },
+ "이 영토는 이미 당신의 것입니다.": {
+  "en": "This territory is already yours.",
+  "ja": "この領土はすでにあなたのものです。",
+  "zh": "这块领土已经属于你。"
+ },
+ "기여해서 해방하기": {
+  "en": "Contribute to Liberate",
+  "ja": "貢献して解放",
+  "zh": "贡献解放"
+ },
+ "정복력 {n}pt 더 쌓으면 해방됩니다 ({n}회 +{n}pt)": {
+  "en": "Liberates with {n}pt more Conquest Power ({n} times, +{n}pt each)",
+  "ja": "征服力をあと{n}pt積むと解放されます（{n}回 +{n}pt）",
+  "zh": "再积累{n}pt征服力即可解放（{n}次 +{n}pt）"
+ },
+ "반란 일으키기": {
+  "en": "Start a Revolt",
+  "ja": "反乱を起こす",
+  "zh": "发动叛乱"
+ },
+ "저항 {n}pt — 인접 조건 없이 즉시 재탈환 시도": {
+  "en": "Resistance {n}pt — retake instantly, no adjacency required",
+  "ja": "抵抗 {n}pt — 隣接条件なしで即時奪還を試みる",
+  "zh": "抵抗 {n}pt — 无需相邻条件，立即尝试夺回"
+ },
+ "점령하기": {
+  "en": "Capture",
+  "ja": "占領する",
+  "zh": "占领"
+ },
+ "{n}에서 출병합니다": {
+  "en": "Attack from {n}",
+  "ja": "{n}から出兵します",
+  "zh": "从{n}出兵"
+ },
+ "인접 영토를 먼저 확보해야 공격할 수 있습니다. 가까운 미개척 영토를 기여로 해방하세요.": {
+  "en": "You must hold an adjacent territory before attacking. Liberate a nearby unclaimed territory by contributing.",
+  "ja": "攻撃するには先に隣接領土を確保する必要があります。近くの未開拓領土を貢献で解放してください。",
+  "zh": "需先占有相邻领土才能攻击。请通过贡献解放附近的未开拓领土。"
+ },
+ "<div class=\"adj-row\"> <div> <div class=\"adj-name\">{n}</div> <div class=\"muted\">{n}</div> </div> ${canLaunch ?": {
+  "en": "<div class=\"adj-row\"> <div> <div class=\"adj-name\">{n}</div> <div class=\"muted\">{n}</div> </div> ${canLaunch ?",
+  "ja": "<div class=\"adj-row\"> <div> <div class=\"adj-name\">{n}</div> <div class=\"muted\">{n}</div> </div> ${canLaunch ?",
+  "zh": "<div class=\"adj-row\"> <div> <div class=\"adj-name\">{n}</div> <div class=\"muted\">{n}</div> </div> ${canLaunch ?"
+ },
+ "<div class=\"muted\">등록된 인접 영토가 없습니다.</div>": {
+  "en": "<div class=\"muted\">No adjacent territories registered.</div>",
+  "ja": "<div class=\"muted\">登録された隣接領土がありません。</div>",
+  "zh": "<div class=\"muted\">没有已登记的相邻领土。</div>"
+ },
+ "<div class=\"card-head\"> <div class=\"card-eyebrow\">영토 문서</div> <div class=\"card-title\">{n}</div> <div class=\"card-sub\">{n}</div> <span class=\"status-pill {n}\">{n}</span> ${t.status === 'npc' ?": {
+  "en": "<div class=\"card-head\"> <div class=\"card-eyebrow\">Territory Record</div> <div class=\"card-title\">{n}</div> <div class=\"card-sub\">{n}</div> <span class=\"status-pill {n}\">{n}</span> ${t.status === 'npc' ?",
+  "ja": "<div class=\"card-head\"> <div class=\"card-eyebrow\">領土文書</div> <div class=\"card-title\">{n}</div> <div class=\"card-sub\">{n}</div> <span class=\"status-pill {n}\">{n}</span> ${t.status === 'npc' ?",
+  "zh": "<div class=\"card-head\"> <div class=\"card-eyebrow\">领土档案</div> <div class=\"card-title\">{n}</div> <div class=\"card-sub\">{n}</div> <span class=\"status-pill {n}\">{n}</span> ${t.status === 'npc' ?"
+ },
+ ": ''} <div id=\"actionResult\">{n}</div> <div class=\"section-label\">기여 순위</div> ${t.top_contributors.length ? t.top_contributors.map((c, i) =>": {
+  "en": ": ''} <div id=\"actionResult\">{n}</div> <div class=\"section-label\">Contribution Ranking</div> ${t.top_contributors.length ? t.top_contributors.map((c, i) =>",
+  "ja": ": ''} <div id=\"actionResult\">{n}</div> <div class=\"section-label\">貢献ランキング</div> ${t.top_contributors.length ? t.top_contributors.map((c, i) =>",
+  "zh": ": ''} <div id=\"actionResult\">{n}</div> <div class=\"section-label\">贡献排名</div> ${t.top_contributors.length ? t.top_contributors.map((c, i) =>"
+ },
+ ").join('') : '<div class=\"muted\">아직 기여 기록이 없습니다.</div>'} <div class=\"section-label\">인접 영토</div> {n} </div>": {
+  "en": ").join('') : '<div class=\"muted\">No contributions yet.</div>'} <div class=\"section-label\">Adjacent Territories</div> {n} </div>",
+  "ja": ").join('') : '<div class=\"muted\">まだ貢献記録がありません。</div>'} <div class=\"section-label\">隣接領土</div> {n} </div>",
+  "zh": ").join('') : '<div class=\"muted\">暂无贡献记录。</div>'} <div class=\"section-label\">相邻领土</div> {n} </div>"
+ },
+ "<div class=\"result-box win\">+{n}pt 기여 — 누적 {n}pt": {
+  "en": "<div class=\"result-box win\">+{n}pt contributed — total {n}pt",
+  "ja": "<div class=\"result-box win\">+{n}pt 貢献 — 累計 {n}pt",
+  "zh": "<div class=\"result-box win\">+{n}pt 贡献 — 累计 {n}pt"
+ },
+ "<br><b>해방됐다.</b> 새 지배자: {n}": {
+  "en": "<br><b>Liberated.</b> New Ruler: {n}",
+  "ja": "<br><b>解放された。</b> 新たな支配者: {n}",
+  "zh": "<br><b>已解放。</b> 新统治者：{n}"
+ },
+ "<div class=\"result-box\">출병 중...</div>": {
+  "en": "<div class=\"result-box\">Attacking...</div>",
+  "ja": "<div class=\"result-box\">出兵中...</div>",
+  "zh": "<div class=\"result-box\">出兵中...</div>"
+ },
+ "<div class=\"result-box {n}\"> {n}<br> 공격력 {n} vs 방어력 {n}{n} </div>": {
+  "en": "<div class=\"result-box {n}\"> {n}<br> Attack {n} vs Defense {n}{n} </div>",
+  "ja": "<div class=\"result-box {n}\"> {n}<br> 攻撃力 {n} vs 防御力 {n}{n} </div>",
+  "zh": "<div class=\"result-box {n}\"> {n}<br> 攻击力 {n} vs 防御力 {n}{n} </div>"
+ },
+ "지도 기록을 불러오지 못했습니다:": {
+  "en": "Failed to load map posts:",
+  "ja": "地図の記録を読み込めませんでした:",
+  "zh": "无法加载地图记录："
+ },
+ "추천": {
+  "en": "Upvote",
+  "ja": "推薦",
+  "zh": "推荐"
+ },
+ "비추천": {
+  "en": "Downvote",
+  "ja": "非推薦",
+  "zh": "反对"
+ },
+ ").join('')} </div> {n} <div id=\"voteResult\"></div> <div class=\"section-label\">댓글 {n}</div> <div id=\"commentList\"> ${comments.length ? comments.map((c, i) =>": {
+  "en": ").join('')} </div> {n} <div id=\"voteResult\"></div> <div class=\"section-label\">Comments {n}</div> <div id=\"commentList\"> ${comments.length ? comments.map((c, i) =>",
+  "ja": ").join('')} </div> {n} <div id=\"voteResult\"></div> <div class=\"section-label\">コメント {n}</div> <div id=\"commentList\"> ${comments.length ? comments.map((c, i) =>",
+  "zh": ").join('')} </div> {n} <div id=\"voteResult\"></div> <div class=\"section-label\">评论 {n}</div> <div id=\"commentList\"> ${comments.length ? comments.map((c, i) =>"
+ },
+ ").join('') : '<div class=\"muted\">첫 댓글을 남겨보세요.</div>'} </div> ${authToken ?": {
+  "en": ").join('') : '<div class=\"muted\">Be the first to comment.</div>'} </div> ${authToken ?",
+  "ja": ").join('') : '<div class=\"muted\">最初のコメントを残しましょう。</div>'} </div> ${authToken ?",
+  "zh": ").join('') : '<div class=\"muted\">来发表第一条评论吧。</div>'} </div> ${authToken ?"
+ },
+ "댓글 ({n}자 이내)": {
+  "en": "Comment (up to {n} characters)",
+  "ja": "コメント（{n}文字以内）",
+  "zh": "评论（{n}字以内）"
+ },
+ ": '<div class=\"signed-out-note\"><a href=\"/v{n}.html\">로그인하면 반응과 댓글을 남길 수 있습니다 →</a></div>'} </div>": {
+  "en": ": '<div class=\"signed-out-note\"><a href=\"/v{n}.html\">Log in to react and comment →</a></div>'} </div>",
+  "ja": ": '<div class=\"signed-out-note\"><a href=\"/v{n}.html\">ログインすると反応やコメントを残せます →</a></div>'} </div>",
+  "zh": ": '<div class=\"signed-out-note\"><a href=\"/v{n}.html\">登录后即可互动和评论 →</a></div>'} </div>"
+ },
+ "기록 모드 끄기": {
+  "en": "Exit Post Mode",
+  "ja": "記録モードを終了",
+  "zh": "关闭记录模式"
+ },
+ "지도를 클릭해 기록을 남기세요": {
+  "en": "Click the map to post",
+  "ja": "地図をクリックして記録を残してください",
+  "zh": "点击地图留下记录"
+ },
+ "AGORA V{n} — 동단위 정복 (MVP)": {
+  "en": "AGORA V{n} — Neighborhood Conquest (MVP)",
+  "ja": "AGORA V{n} — 洞単位征服 (MVP)",
+  "zh": "AGORA V{n} — 洞级征服 (MVP)"
+ },
+ "V{n} · 동단위 정복 (MVP)": {
+  "en": "V{n} · Neighborhood Conquest (MVP)",
+  "ja": "V{n} · 洞単位征服 (MVP)",
+  "zh": "V{n} · 洞级征服 (MVP)"
+ },
+ "← 메인으로": {
+  "en": "← Back to Main",
+  "ja": "← メインへ",
+  "zh": "← 返回主页"
+ },
+ "시즌 정보를 불러오는 중...": {
+  "en": "Loading season info...",
+  "ja": "シーズン情報を読み込み中...",
+  "zh": "正在加载赛季信息..."
+ },
+ "점령됨": {
+  "en": "Captured",
+  "ja": "占領済み",
+  "zh": "已占领"
+ },
+ "<div data-open=\"{n}\" style=\"padding:{n}px {n}px; border:{n}px solid rgba({n},{n}.{n}); margin-bottom:{n}px; cursor:pointer;\"> <b>{n} · {n}</b> — {n} · {n}pt </div>": {
+  "en": "<div data-open=\"{n}\" style=\"padding:{n}px {n}px; border:{n}px solid rgba({n},{n}.{n}); margin-bottom:{n}px; cursor:pointer;\"> <b>{n} · {n}</b> — {n} · {n}pt </div>",
+  "ja": "<div data-open=\"{n}\" style=\"padding:{n}px {n}px; border:{n}px solid rgba({n},{n}.{n}); margin-bottom:{n}px; cursor:pointer;\"> <b>{n} · {n}</b> — {n} · {n}pt </div>",
+  "zh": "<div data-open=\"{n}\" style=\"padding:{n}px {n}px; border:{n}px solid rgba({n},{n}.{n}); margin-bottom:{n}px; cursor:pointer;\"> <b>{n} · {n}</b> — {n} · {n}pt </div>"
+ },
+ "<div class=\"signed-out-note\">로그인하면 내 동 요약이 여기 뜹니다.<br><a href=\"https://myagora.xyz/\">로그인하러 가기 →</a></div>": {
+  "en": "<div class=\"signed-out-note\">Log in to see your neighborhood summary here.<br><a href=\"https://myagora.xyz/\">Go to login →</a></div>",
+  "ja": "<div class=\"signed-out-note\">ログインすると自分の洞の要約がここに表示されます。<br><a href=\"https://myagora.xyz/\">ログインする →</a></div>",
+  "zh": "<div class=\"signed-out-note\">登录后此处将显示我的洞概要。<br><a href=\"https://myagora.xyz/\">前往登录 →</a></div>"
+ },
+ "<h{n}>내 동 요약</h{n}> <div class=\"mine-row\"><span>지배 중인 동</span><span>{n}개</span></div> ${mine.slice({n}, {n}).map((n) =>": {
+  "en": "<h{n}>My Neighborhoods</h{n}> <div class=\"mine-row\"><span>Neighborhoods ruled</span><span>{n}</span></div> ${mine.slice({n}, {n}).map((n) =>",
+  "ja": "<h{n}>自分の洞の要約</h{n}> <div class=\"mine-row\"><span>支配中の洞</span><span>{n}件</span></div> ${mine.slice({n}, {n}).map((n) =>",
+  "zh": "<h{n}>我的洞概要</h{n}> <div class=\"mine-row\"><span>统治中的洞</span><span>{n}个</span></div> ${mine.slice({n}, {n}).map((n) =>"
+ },
+ "<div>시즌 {n}주 주기</div> <div class=\"days\">D-{n}</div> <div style=\"color:var(--gray-{n}); font-size:{n}px;\">종료 시 전체 npc로 초기화</div>": {
+  "en": "<div>Season cycle · {n} weeks</div> <div class=\"days\">D-{n}</div> <div style=\"color:var(--gray-{n}); font-size:{n}px;\">All reset to npc at season end</div>",
+  "ja": "<div>シーズン {n}週周期</div> <div class=\"days\">D-{n}</div> <div style=\"color:var(--gray-{n}); font-size:{n}px;\">終了時に全て npc にリセット</div>",
+  "zh": "<div>赛季周期 {n}周</div> <div class=\"days\">D-{n}</div> <div style=\"color:var(--gray-{n}); font-size:{n}px;\">结束时全部重置为 npc</div>"
+ },
+ "<div>불러오는 중...</div>": {
+  "en": "<div>Loading...</div>",
+  "ja": "<div>読み込み中...</div>",
+  "zh": "<div>加载中...</div>"
+ },
+ "<div>불러오지 못했습니다: {n}</div>": {
+  "en": "<div>Failed to load: {n}</div>",
+  "ja": "<div>読み込めませんでした: {n}</div>",
+  "zh": "<div>加载失败：{n}</div>"
+ },
+ "<div class=\"adj-row\"> <div><div class=\"adj-name\">{n}</div><div class=\"adj-status\">{n}</div></div> ${canAttackFromHere ?": {
+  "en": "<div class=\"adj-row\"> <div><div class=\"adj-name\">{n}</div><div class=\"adj-status\">{n}</div></div> ${canAttackFromHere ?",
+  "ja": "<div class=\"adj-row\"> <div><div class=\"adj-name\">{n}</div><div class=\"adj-status\">{n}</div></div> ${canAttackFromHere ?",
+  "zh": "<div class=\"adj-row\"> <div><div class=\"adj-name\">{n}</div><div class=\"adj-status\">{n}</div></div> ${canAttackFromHere ?"
+ },
+ "기여로만 해방 가능": {
+  "en": "Liberate by contribution only",
+  "ja": "貢献でのみ解放可能",
+  "zh": "仅可通过贡献解放"
+ },
+ "<div class=\"adj-status\">등록된 인접 동이 없습니다.</div>": {
+  "en": "<div class=\"adj-status\">No adjacent neighborhoods registered.</div>",
+  "ja": "<div class=\"adj-status\">登録された隣接洞がありません。</div>",
+  "zh": "<div class=\"adj-status\">没有已登记的相邻洞。</div>"
+ },
+ "<h{n}>{n}</h{n}> <div class=\"modal-sub\">{n} 소속</div> <span class=\"status-pill {n}\">{n}</span> ${n.status === 'npc' ?": {
+  "en": "<h{n}>{n}</h{n}> <div class=\"modal-sub\">Part of {n}</div> <span class=\"status-pill {n}\">{n}</span> ${n.status === 'npc' ?",
+  "ja": "<h{n}>{n}</h{n}> <div class=\"modal-sub\">{n} 所属</div> <span class=\"status-pill {n}\">{n}</span> ${n.status === 'npc' ?",
+  "zh": "<h{n}>{n}</h{n}> <div class=\"modal-sub\">隶属 {n}</div> <span class=\"status-pill {n}\">{n}</span> ${n.status === 'npc' ?"
+ },
+ ": ''} <div class=\"stat-row\"><span>지배자</span><span>{n}</span></div> <div class=\"stat-row\"><span>누적 기여 포인트</span><span>{n}${n.status === 'npc' ?": {
+  "en": ": ''} <div class=\"stat-row\"><span>Ruler</span><span>{n}</span></div> <div class=\"stat-row\"><span>Total contribution points</span><span>{n}${n.status === 'npc' ?",
+  "ja": ": ''} <div class=\"stat-row\"><span>支配者</span><span>{n}</span></div> <div class=\"stat-row\"><span>累計貢献ポイント</span><span>{n}${n.status === 'npc' ?",
+  "zh": ": ''} <div class=\"stat-row\"><span>统治者</span><span>{n}</span></div> <div class=\"stat-row\"><span>累计贡献点数</span><span>{n}${n.status === 'npc' ?"
+ },
+ ": ''} <div class=\"section-label\">기여 상위</div> ${n.top_contributors.length ? n.top_contributors.map((c) =>": {
+  "en": ": ''} <div class=\"section-label\">Top Contributors</div> ${n.top_contributors.length ? n.top_contributors.map((c) =>",
+  "ja": ": ''} <div class=\"section-label\">貢献上位</div> ${n.top_contributors.length ? n.top_contributors.map((c) =>",
+  "zh": ": ''} <div class=\"section-label\">贡献榜</div> ${n.top_contributors.length ? n.top_contributors.map((c) =>"
+ },
+ ").join('') : '<div class=\"adj-status\">아직 기여 기록이 없습니다.</div>'} ${authToken ?": {
+  "en": ").join('') : '<div class=\"adj-status\">No contributions yet.</div>'} ${authToken ?",
+  "ja": ").join('') : '<div class=\"adj-status\">まだ貢献記録がありません。</div>'} ${authToken ?",
+  "zh": ").join('') : '<div class=\"adj-status\">暂无贡献记录。</div>'} ${authToken ?"
+ },
+ ": ''} <div class=\"section-label\">인접 동</div> {n} <div id=\"actionResult\"></div>": {
+  "en": ": ''} <div class=\"section-label\">Adjacent Neighborhoods</div> {n} <div id=\"actionResult\"></div>",
+  "ja": ": ''} <div class=\"section-label\">隣接洞</div> {n} <div id=\"actionResult\"></div>",
+  "zh": ": ''} <div class=\"section-label\">相邻洞</div> {n} <div id=\"actionResult\"></div>"
+ },
+ "<div class=\"result-box win\">+{n}pt 기여! 누적 {n}pt": {
+  "en": "<div class=\"result-box win\">+{n}pt contributed! Total {n}pt",
+  "ja": "<div class=\"result-box win\">+{n}pt 貢献！累計 {n}pt",
+  "zh": "<div class=\"result-box win\">+{n}pt 贡献！累计 {n}pt"
+ },
+ "<br><b>해방되었습니다!</b> 새 지배자: {n}": {
+  "en": "<br><b>Liberated!</b> New Ruler: {n}",
+  "ja": "<br><b>解放されました！</b> 新たな支配者: {n}",
+  "zh": "<br><b>已解放！</b> 新统治者：{n}"
+ },
+ "<div>공격 중...</div>": {
+  "en": "<div>Attacking...</div>",
+  "ja": "<div>攻撃中...</div>",
+  "zh": "<div>攻击中...</div>"
+ },
+ "<div class=\"result-box {n}\"> {n}<br> 내 공격력 {n} vs 방어력 {n}{n} </div>": {
+  "en": "<div class=\"result-box {n}\"> {n}<br> My Attack {n} vs Defense {n}{n} </div>",
+  "ja": "<div class=\"result-box {n}\"> {n}<br> 自分の攻撃力 {n} vs 防御力 {n}{n} </div>",
+  "zh": "<div class=\"result-box {n}\"> {n}<br> 我的攻击力 {n} vs 防御力 {n}{n} </div>"
+ }
+}
