@@ -48,6 +48,11 @@ app.set("trust proxy", 1); // nginx 뒤 — X-Forwarded-For 첫 홉을 req.ip로
 app.use(cors());
 app.use(express.json());
 app.use(i18n); // Accept-Language / ?lang= 에 맞춰 error·message 번역
+app.use((req, res, next) => {
+  const started = Date.now();
+  res.on("finish", () => console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - started}ms`));
+  next();
+});
 
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
@@ -84,6 +89,11 @@ app.use("/map-posts", mapPostRoutes);
 app.use("/internal", requireAdmin, internalRoutes);
 
 app.use((req, res) => res.status(404).json({ error: "존재하지 않는 경로입니다." }));
+// 처리 안 된 예외(DB 에러 등)는 Express 기본 HTML 페이지 대신 JSON으로 — 앱 클라이언트가 파싱한다.
+app.use((err, req, res, next) => {
+  console.error(`${req.method} ${req.originalUrl}`, err);
+  res.status(err.status || 500).json({ error: "서버 오류가 발생했습니다." });
+});
 
 const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {

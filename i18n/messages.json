@@ -1,4 +1,9 @@
 {
+ "서버 오류가 발생했습니다.": {
+  "en": "Something went wrong on the server.",
+  "ja": "サーバーでエラーが発生しました。",
+  "zh": "服务器发生错误。"
+ },
  "존재하지 않는 경로입니다.": {
   "en": "Route not found.",
   "ja": "存在しないパスです。",
