@@ -9,6 +9,25 @@
   window.LANG = lang;
   window.t = (s) => s;
   document.documentElement.lang = lang;
+
+  // 언어 전환: 우하단 작은 select. 바꾸면 저장 후 새로고침(번역은 로드 시 한 번에 적용되므로).
+  const NAMES = { ko: "한국어", en: "English", ja: "日本語", zh: "中文" };
+  const mountSwitch = () => {
+    const sel = document.createElement("select");
+    sel.id = "langSwitch";
+    sel.setAttribute("aria-label", "Language");
+    sel.style.cssText = "position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:9999;font:12px system-ui,sans-serif;padding:3px 6px;border:1px solid rgba(17,17,16,.35);border-radius:4px;background:rgba(255,255,255,.92);color:#111;opacity:.85;cursor:pointer;";
+    if (matchMedia("(max-width:600px)").matches) sel.style.bottom = "calc(56px + env(safe-area-inset-bottom))"; // 모바일 바텀시트 위
+    for (const k of LANGS) {
+      const o = document.createElement("option");
+      o.value = k; o.textContent = NAMES[k]; o.selected = k === lang;
+      sel.appendChild(o);
+    }
+    sel.addEventListener("change", () => { localStorage.setItem("lang", sel.value); location.reload(); });
+    document.body.appendChild(sel);
+  };
+  document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", mountSwitch) : mountSwitch();
+
   if (lang === "ko") return;
 
   const NUM = /\d+(?:[.,]\d+)?/g;
