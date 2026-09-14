@@ -7,6 +7,8 @@
 <title>AGORA V3 — 동단위 정복 (MVP)</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111110'/%3E%3Ctext x='32' y='46' font-family='Arial, sans-serif' font-weight='900' font-size='38' fill='%23BA7517' text-anchor='middle'%3E%CE%91%3C/text%3E%3C/svg%3E">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K3BCJ5GV6F"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-K3BCJ5GV6F');</script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -121,6 +123,11 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  // GA4 이벤트 전송 — v2.html/agora.html과 같은 패턴.
+  function gaEvent(name, params) {
+    if (typeof gtag === 'function') gtag('event', name, params || {});
+  }
+
   async function apiRequest(path, options = {}) {
     const res = await fetch(`${API_BASE}${path}`, {
       ...options,
@@ -228,6 +235,7 @@
     detailContent.innerHTML = '<div>불러오는 중...</div>';
     try {
       const n = await apiRequest(`/neighborhoods/${id}`);
+      gaEvent('territory_view', { event_category: 'engagement', territory_id: id, status: n.status });
       renderDetail(n);
     } catch (err) {
       detailContent.innerHTML = `<div>불러오지 못했습니다: ${esc(err.message)}</div>`;
@@ -283,6 +291,7 @@
           const box = document.getElementById('actionResult');
           box.innerHTML = `<div class="result-box win">+${result.points_awarded}pt 기여! 누적 ${result.total_points}pt` +
             (result.liberation ? `<br><b>해방되었습니다!</b> 새 지배자: ${esc(result.liberation.dominant_nickname)}` : '') + `</div>`;
+          gaEvent('contribute', { event_category: 'engagement', territory_id: n.id, liberated: !!result.liberation });
           await loadNeighborhoods();
           openDetail(n.id);
         } catch (err) {
@@ -311,6 +320,7 @@
         ${result.attacker_wins ? '승리! 지배자가 교체되었습니다.' : '패배했습니다.'}<br>
         내 공격력 ${result.attacker_power} vs 방어력 ${result.defense_power}${result.insurrection ? ' (반란 공격)' : ''}
       </div>`;
+      gaEvent('attack', { event_category: 'engagement', territory_id: targetId, won: !!result.attacker_wins, insurrection: !!result.insurrection });
       await loadNeighborhoods();
       openDetail(targetId);
     } catch (err) {

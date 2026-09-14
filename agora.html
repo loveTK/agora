@@ -476,6 +476,11 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  // GA4 이벤트 전송 — v2.html과 같은 패턴. 스크립트가 아직 안 붙어있으면 조용히 아무것도 안 함.
+  function gaEvent(name, params) {
+    if (typeof gtag === 'function') gtag('event', name, params || {});
+  }
+
   // 투구 볏을 세운 흉상 픽토그램. 선으로 그린 졸라맨 대신 면으로 채운 실루엣이라 20px 이하로
   // 줄여도 형태가 뭉개지지 않는다(모달 카드와 목록에서 같은 아이콘을 쓴다).
   function sigilSvg(size) {
@@ -543,11 +548,31 @@
   const WORLD_BOUNDS = [[-56, -172], [74, 178]];
   if (mapAvailable) {
     map = L.map('map', {
-      zoomControl: false, attributionControl: false, preferCanvas: true, worldCopyJump: true,
-      zoomSnap: 0.25, minZoom: 0, // 정수 줌만 허용하면 좁은 화면에서 한 단계 더 줄어들어 지도가 쓸데없이 작아진다
+      zoomControl: false, attributionControl: false, preferCanvas: true,
+      zoomSnap: 0.25, maxBoundsViscosity: 1.0, // 경계 밖으로는 드래그가 아예 안 먹는다(고무줄 없이 딱 멈춤)
     });
-    map.fitBounds(WORLD_BOUNDS, { animate: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, subdomains: 'abc' }).addTo(map);
+    // fitBounds(contain)는 화면비가 안 맞으면 한쪽 축에 여백이 남는다. getBoundsZoom(bounds, true)는
+    // "뷰포트가 이 범위 안에 다 들어가는" 최소 줌 — 뒤집어 보면 이 범위가 화면을 반드시 꽉 채우는
+    // 가장 작은 줌이라 첫 화면에 흰 여백이 생기지 않는다. 이 줌을 minZoom으로도 걸어서 더 축소해도
+    // 다시 여백이 생기지 않게 하고, maxBounds로 그 범위 밖으로는 드래그가 못 나가게 막는다(무한 이동 방지).
+    const worldBounds = L.latLngBounds(WORLD_BOUNDS);
+    const fillZoom = map.getBoundsZoom(worldBounds, true);
+    map.setMinZoom(fillZoom);
+    map.setMaxBounds(worldBounds);
+    map.setView(worldBounds.getCenter(), fillZoom, { animate: false });
+    // 창 크기가 바뀌면(회전, 브라우저 리사이즈) 채움 줌도 다시 계산 — 안 하면 화면비가 바뀐 뒤
+    // 다시 여백이 생기거나 반대로 필요 이상 확대된 채 minZoom이 안 맞는다.
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        map.invalidateSize();
+        const z = map.getBoundsZoom(worldBounds, true);
+        map.setMinZoom(z);
+        if (map.getZoom() < z) map.setZoom(z);
+      }, 150);
+    });
     L.control.zoom({ position: 'bottomright' }).addTo(map); // 확대/축소는 오른쪽 아래
     clusterLayer = L.layerGroup().addTo(map);
     leafLayer = L.layerGroup();
@@ -918,6 +943,7 @@
         : '<div style="color:var(--gray-2); cursor:default;">결과 없음</div>';
       searchResults.querySelectorAll('[data-go]').forEach((el) => el.addEventListener('click', () => {
         const [lat, lng] = el.dataset.ll.split(',').map(Number);
+        gaEvent('search', { search_term: q });
         // 순간이동 대신 날아가서 내려앉는다 — 세계 지도에서 어디로 이동했는지 눈으로 따라갈 수 있다.
         if (map && !Number.isNaN(lat)) map.flyTo([lat, lng], 9, { duration: reduceMotion ? 0 : 1.2 });
         searchInput.value = '';
@@ -968,7 +994,9 @@
   async function openTerritory(id) {
     openModal(SKELETON);
     try {
-      renderTerritory(await apiRequest(`/neighborhoods/${id}`));
+      const t = await apiRequest(`/neighborhoods/${id}`);
+      gaEvent('territory_view', { event_category: 'engagement', territory_id: id, status: t.status });
+      renderTerritory(t);
     } catch (err) {
       openModal(`<div class="card-body"><div class="muted">불러오지 못했습니다: ${esc(err.message)}</div></div>`);
     }
@@ -1087,6 +1115,7 @@
       const r = await apiRequest(`/neighborhoods/${id}/contribute`, { method: 'POST' });
       pendingResult = `<div class="result-box win">+${r.points_awarded}pt 기여 — 누적 ${r.total_points}pt` +
         (r.liberation ? `<br><b>해방됐다.</b> 새 지배자: ${esc(r.liberation.dominant_nickname)}` : '') + '</div>';
+      gaEvent('contribute', { event_category: 'engagement', territory_id: id, liberated: !!r.liberation });
       if (r.liberation) flashScreen();
       await afterConquestChange();
       await openTerritory(id);
@@ -1108,6 +1137,7 @@
         ${r.attacker_wins ? '<b>점령 성공.</b> 지배자가 교체됐다.' : '<b>점령 실패.</b>'}<br>
         공격력 ${r.attacker_power} vs 방어력 ${r.defense_power}${r.insurrection ? ' (반란)' : ''}
       </div>`;
+      gaEvent('attack', { event_category: 'engagement', territory_id: targetId, won: !!r.attacker_wins, insurrection: !!r.insurrection });
       if (r.attacker_wins) flashScreen();
       await afterConquestChange();
       await openTerritory(targetId);
@@ -1160,6 +1190,7 @@
         apiRequest(`/map-posts/${id}`),
         apiRequest(`/map-posts/${id}/comments`),
       ]);
+      gaEvent('map_post_view', { event_category: 'engagement', post_id: id });
       renderPost(post, comments);
     } catch (err) {
       openModal(`<div class="card-body"><div class="muted">불러오지 못했습니다: ${esc(err.message)}</div></div>`);
@@ -1233,6 +1264,7 @@
             method: 'POST',
             body: JSON.stringify({ vote_type: btn.dataset.vote }),
           });
+          gaEvent('reaction', { event_category: 'map_post', event_label: btn.dataset.vote, reaction_type: 'vote' });
           justVoted = btn.dataset.vote;
           openPost(post.id);
         } catch (err) {
@@ -1250,6 +1282,7 @@
         commentBtn.disabled = true;
         try {
           await apiRequest(`/map-posts/${post.id}/comments`, { method: 'POST', body: JSON.stringify({ body }) });
+          gaEvent('comment_create', { event_category: 'engagement', post_id: post.id });
           openPost(post.id);
         } catch (err) {
           document.getElementById('commentResult').innerHTML = `<div class="result-box lose">${esc(err.message)}</div>`;
@@ -1324,6 +1357,7 @@
           method: 'POST',
           body: JSON.stringify({ lat: latlng.lat, lng: latlng.lng, body }),
         });
+        gaEvent('map_post_create', { event_category: 'engagement' });
         addPostMarker(post);
         invalidateClusters(); // 묶음의 💬 수가 바로 늘어나야 한다
         setWriteMode(false);
