@@ -403,8 +403,7 @@ function retireProceduralProvinces() {
     `SELECT EXISTS(SELECT 1 FROM neighborhood_contributions WHERE neighborhood_id = ?)
          OR EXISTS(SELECT 1 FROM neighborhood_attacks WHERE target_neighborhood_id = ? OR from_neighborhood_id = ?)
          OR EXISTS(SELECT 1 FROM neighborhood_resistance WHERE neighborhood_id = ?)
-         OR EXISTS(SELECT 1 FROM neighborhood_founders WHERE neighborhood_id = ?)
-         OR EXISTS(SELECT 1 FROM neighborhood_season_champions WHERE neighborhood_id = ?) AS touched`
+         OR EXISTS(SELECT 1 FROM neighborhood_founders WHERE neighborhood_id = ?) AS touched`
   );
   const deleteAdjacency = db.prepare("DELETE FROM neighborhood_adjacency WHERE neighborhood_id = ? OR adjacent_neighborhood_id = ?");
   const deleteDistrict = db.prepare("DELETE FROM neighborhoods WHERE id = ?");
@@ -419,7 +418,7 @@ function retireProceduralProvinces() {
       if (!provs.length || !provs.every((p) => procedural.has(p.name))) continue;
       for (const p of provs) {
         for (const d of districtsOf.all(p.id)) {
-          const keep = d.status !== "npc" || d.dominant_user_id || touched.get(d.id, d.id, d.id, d.id, d.id, d.id).touched;
+          const keep = d.status !== "npc" || d.dominant_user_id || touched.get(d.id, d.id, d.id, d.id, d.id).touched;
           if (keep) { orphanDistrict.run(d.id); continue; }
           deleteAdjacency.run(d.id, d.id);
           deleteDistrict.run(d.id);
@@ -450,8 +449,7 @@ function retireOrRehomeLegacy() {
     `SELECT EXISTS(SELECT 1 FROM neighborhood_contributions WHERE neighborhood_id = ?)
          OR EXISTS(SELECT 1 FROM neighborhood_attacks WHERE target_neighborhood_id = ? OR from_neighborhood_id = ?)
          OR EXISTS(SELECT 1 FROM neighborhood_resistance WHERE neighborhood_id = ?)
-         OR EXISTS(SELECT 1 FROM neighborhood_founders WHERE neighborhood_id = ?)
-         OR EXISTS(SELECT 1 FROM neighborhood_season_champions WHERE neighborhood_id = ?) AS touched`
+         OR EXISTS(SELECT 1 FROM neighborhood_founders WHERE neighborhood_id = ?) AS touched`
   );
   const deleteAdjacency = db.prepare(
     "DELETE FROM neighborhood_adjacency WHERE neighborhood_id = ? OR adjacent_neighborhood_id = ?"
@@ -472,7 +470,7 @@ function retireOrRehomeLegacy() {
   let rehomed = 0;
   const tx = db.transaction(() => {
     for (const n of rows) {
-      const hasHistory = touched.get(n.id, n.id, n.id, n.id, n.id, n.id).touched;
+      const hasHistory = touched.get(n.id, n.id, n.id, n.id, n.id).touched;
       if (!hasHistory && n.status === "npc" && !n.dominant_user_id) {
         deleteAdjacency.run(n.id, n.id);
         deleteRow.run(n.id);

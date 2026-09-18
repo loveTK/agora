@@ -39,9 +39,7 @@
     position:fixed; z-index:15; background:rgba(17,17,16,0.88); color:var(--white);
     padding:12px 16px; font-size:12.5px; line-height:1.5;
   }
-  .overlay-season{ top:60px; left:16px; min-width:180px; }
-  .overlay-season .days{ font-size:22px; font-weight:800; color:var(--gold); }
-  .overlay-mine{ top:60px; right:16px; min-width:220px; max-width:280px; max-height:40vh; overflow-y:auto; }
+  .overlay-mine{ top:60px; left:16px; min-width:220px; max-width:280px; max-height:40vh; overflow-y:auto; }
   .overlay-mine h3{ font-size:12px; color:var(--gold); margin-bottom:8px; letter-spacing:0.04em; }
   .overlay-mine .mine-row{ display:flex; justify-content:space-between; gap:8px; padding:5px 0; border-top:1px solid rgba(255,255,255,0.12); }
   .overlay-mine .mine-row:first-of-type{ border-top:none; }
@@ -97,7 +95,6 @@
 
 <div id="map"></div>
 
-<div class="overlay overlay-season" id="seasonOverlay">시즌 정보를 불러오는 중...</div>
 <div class="overlay overlay-mine" id="mineOverlay"></div>
 <div class="overlay overlay-legend">
   <span><i class="dot npc"></i>NPC</span>
@@ -173,7 +170,7 @@
     if (authToken) {
       try { currentUserId = (await apiRequest('/users/me')).id; } catch (err) { /* 토큰 만료 등 — 비로그인처럼 진행 */ }
     }
-    await Promise.all([loadNeighborhoods(), loadSeason()]);
+    await loadNeighborhoods();
   }
 
   async function loadNeighborhoods() {
@@ -212,15 +209,6 @@
       <div class="mine-row"><span>지배 중인 동</span><span>${mine.length}개</span></div>
       ${mine.slice(0, 5).map((n) => `<div class="mine-row"><span>${esc(n.region_name)} · ${esc(n.name)}</span><span>${n.total_points}pt</span></div>`).join('')}
       ${resisting.length ? `<h3 style="margin-top:12px;">저항 진행 중</h3>` + resisting.slice(0, 3).map((n) => `<div class="mine-row"><span>${esc(n.region_name)} · ${esc(n.name)}</span><span>${n.my_resistance_points}pt</span></div>`).join('') : ''}
-    `;
-  }
-
-  async function loadSeason() {
-    const s = await apiRequest('/neighborhoods/season/current');
-    document.getElementById('seasonOverlay').innerHTML = `
-      <div>시즌 ${s.season_weeks}주 주기</div>
-      <div class="days">D-${s.days_remaining}</div>
-      <div style="color:var(--gray-3); font-size:11px;">종료 시 전체 npc로 초기화</div>
     `;
   }
 

@@ -10,7 +10,6 @@ const DAILY_ATTACK_LIMIT = 3;          // 유저당 하루 공격 횟수 한도(
 const ATTACK_POWER_WINDOW_DAYS = 7;    // 공격력에 반영하는 "최근 N일" 기여 윈도우
 const RESISTANCE_POINTS_ON_LOSS = 20;  // 공격에 밀려난 기존 지배자에게 주는 저항 포인트
 const RESISTANCE_THRESHOLD = 40;       // 이 이상 쌓이면 반란(재탈환) 특별 공격권 발생
-const SEASON_WEEKS = 8;                // 시즌 주기(조정 쉽게 상수로 분리 — 기획 5절)
 
 function getTotalPoints(neighborhoodId) {
   return db
@@ -206,7 +205,6 @@ module.exports = {
   ATTACK_POWER_WINDOW_DAYS,
   RESISTANCE_POINTS_ON_LOSS,
   RESISTANCE_THRESHOLD,
-  SEASON_WEEKS,
   getTotalPoints,
   getRecentPoints,
   getTopContributors,

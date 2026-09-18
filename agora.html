@@ -56,13 +56,7 @@
     padding:10px 13px; font-size:12.5px; line-height:1.5; backdrop-filter:blur(3px);
   }
 
-  /* 시즌 카드와 내 영토 카드가 좁은 화면에서 겹치지 않도록 둘 다 화면 절반을 넘지 않게 묶어둔다. */
-  .overlay-season{ top:58px; left:12px; width:max-content; max-width:min(210px, 44vw); }
-  .overlay-season .season-label{ font-size:10px; letter-spacing:0.12em; color:var(--gray-3); text-transform:uppercase; }
-  .overlay-season .days{ font-size:20px; font-weight:800; color:var(--gold); line-height:1.15; }
-  .overlay-season .season-note{ font-size:10.5px; color:var(--gray-2); }
-
-  .overlay-search{ position:fixed; z-index:1000; top:126px; left:12px; width:min(210px, 44vw); }
+  .overlay-search{ position:fixed; z-index:1000; top:58px; left:12px; width:min(210px, 44vw); }
   .overlay-search input{
     width:100%; background:var(--panel); color:var(--white); border:1px solid rgba(255,255,255,0.18);
     padding:7px 10px; font-family:'Archivo',sans-serif; font-size:12px;
@@ -219,13 +213,11 @@
   .wordmark:hover{ letter-spacing:0.2em; }
   #map{ animation:fadeIn 0.9s 0.05s both; }
 
-  /* 오버레이 네 장이 왼쪽 위 → 오른쪽 위 → 아래 순으로 차례차례 자리를 잡는다. */
+  /* 오버레이 석 장이 왼쪽 위 → 오른쪽 위 → 아래 순으로 차례차례 자리를 잡는다. */
   .overlay, .overlay-search{ animation:fadeUp 0.55s cubic-bezier(0.2,0.8,0.25,1) both; }
-  .overlay-season{ animation-delay:0.14s; }
-  .overlay-search{ animation-delay:0.22s; }
-  .overlay-mine{ animation-delay:0.3s; }
-  .overlay-legend{ animation-delay:0.38s; }
-  .overlay-season .days.urgent{ animation:urgent 2s ease-in-out infinite; } /* 시즌 막바지에만 맥동 */
+  .overlay-search{ animation-delay:0.14s; }
+  .overlay-mine{ animation-delay:0.22s; }
+  .overlay-legend{ animation-delay:0.3s; }
 
   .search-results div{ animation:fadeUp 0.26s both; transition:background 0.15s ease, padding-left 0.15s ease; }
   .search-results div:hover{ padding-left:15px; }
@@ -349,11 +341,7 @@
      위에는 검색 한 줄과 시즌 칩만, 아래에는 44px 요약 줄로 접힌 바텀시트만 남긴다. 전황 상세와 범례는
      시트를 올렸을 때만 보이고, 줌 버튼은 핀치가 대신한다. */
   @media (max-width:600px){
-    .overlay-season{ top:58px; right:12px; left:auto; width:auto; max-width:none; padding:5px 10px; white-space:nowrap; }
-    .overlay-season .season-note{ display:none; }
-    .overlay-season .season-label{ display:inline; margin-right:5px; font-size:9.5px; }
-    .overlay-season .days{ display:inline; font-size:15px; }
-    .overlay-search{ top:58px; left:12px; right:100px; width:auto; }
+    .overlay-search{ top:58px; left:12px; right:12px; width:auto; }
 
     .overlay-mine{
       top:auto; left:0; right:0; bottom:0; width:auto; min-width:0; max-width:none; max-height:none;
@@ -407,11 +395,6 @@
 </header>
 
 <div id="map"></div>
-
-<div class="overlay overlay-season" id="seasonOverlay">
-  <div class="season-label">시즌</div>
-  <div class="days">···</div>
-</div>
 
 <div class="overlay-search" id="searchOverlay">
   <input type="search" id="searchInput" placeholder="국가 · 영토 검색" autocomplete="off">
@@ -589,7 +572,7 @@
     if (authToken) {
       try { currentUserId = (await apiRequest('/users/me')).id; } catch (err) { /* 토큰 만료 등 — 비로그인처럼 진행 */ }
     }
-    await Promise.all([refreshView(), loadOverview(), loadSeason(), loadPosts()]);
+    await Promise.all([refreshView(), loadOverview(), loadPosts()]);
   }
 
   let refreshTimer = null;
@@ -649,7 +632,8 @@
   // 큰 원부터 자리를 잡고, 그 원과 반지름 합 + 여백 안에 들어오는 작은 원은 흡수한다. 흡수될수록
   // 원이 커지므로 반지름을 그때그때 다시 잰다. 합쳐진 묶음은 "가장 큰 구성원 +N"으로 부른다.
   const OVERLAP_GAP = 6;
-  function mergeOverlaps(items, sizeOf) {
+  const MAX_BUBBLES = 10; // 겹치지 않아도 화면 하나에 버블이 이보다 많으면 계속 합친다
+  function mergeOverlaps(items, sizeOf, maxGroups = Infinity) {
     const placed = [];
     const sorted = items
       .map((it) => ({ it, p: map.latLngToLayerPoint([it.lat, it.lng]) }))
@@ -659,6 +643,26 @@
       if (!host) { placed.push({ anchor: x.it, p: x.p, r: sizeOf(x.it) / 2, members: [x.it] }); continue; }
       host.members.push(x.it);
       host.r = sizeOf(groupToCluster(host)) / 2;
+    }
+    // 픽셀상 안 겹쳐도 개수 자체가 상한을 넘으면 가장 가까운 두 묶음부터 계속 합쳐 줄인다
+    // (세계 전체 보기에서 국가 250개가 뿔뿔이 흩어져 있어도 화면엔 최대 MAX_BUBBLES개만 뜬다).
+    while (placed.length > maxGroups) {
+      let bi = 0, bj = 1, bd = Infinity;
+      for (let i = 0; i < placed.length; i++) {
+        for (let j = i + 1; j < placed.length; j++) {
+          const d = placed[i].p.distanceTo(placed[j].p);
+          if (d < bd) { bd = d; bi = i; bj = j; }
+        }
+      }
+      const a = placed[bi], b = placed[bj];
+      const wa = a.members.length, wb = b.members.length;
+      const merged = {
+        anchor: wa >= wb ? a.anchor : b.anchor,
+        members: [...a.members, ...b.members],
+        p: a.p.multiplyBy(wa / (wa + wb)).add(b.p.multiplyBy(wb / (wa + wb))),
+      };
+      merged.r = sizeOf(groupToCluster(merged)) / 2;
+      placed.splice(bj, 1); placed.splice(bi, 1); placed.push(merged);
     }
     return placed.map(groupToCluster);
   }
@@ -718,7 +722,7 @@
       clusterCache[key] = { at: Date.now(), rows };
     }
     if (seq !== viewSeq || viewLevel !== level) return; // 그 사이 더 움직였으면 이 응답은 버린다
-    drawClusters(mergeOverlaps(rows, clusterSize), level);
+    drawClusters(mergeOverlaps(rows, clusterSize, MAX_BUBBLES), level);
   }
 
   // 합쳐진 묶음을 누르면 두 단계 확대해 구성원이 풀어지게 하고, 단일 묶음은 다음 단계 줌으로 날아간다.
@@ -891,31 +895,13 @@
     if (!mineOverlayCounted) { animateCounts(el); mineOverlayCounted = true; }
   }
 
-  async function loadSeason() {
-    try {
-      const s = await apiRequest('/neighborhoods/season/current');
-      // 남은 날이 한 주 안쪽일 때만 숫자를 맥동시킨다 — 늘 깜빡이면 그냥 배경이 된다.
-      document.getElementById('seasonOverlay').innerHTML = `
-        <div class="season-label">시즌 ${s.season_weeks}주</div>
-        <div class="days${s.days_remaining <= 7 ? ' urgent' : ''}">D-${s.days_remaining}</div>
-        <div class="season-note">종료 시 전 영토 초기화</div>`;
-    } catch (err) {
-      document.getElementById('seasonOverlay').innerHTML = '<div class="season-label">시즌 정보 없음</div>';
-    }
-  }
-
   /* ---------------- 검색 ---------------- */
   const searchInput = document.getElementById('searchInput');
   const searchResults = document.getElementById('searchResults');
 
-  // 시즌 카드 높이가 내용에 따라 달라지므로 검색창을 그 아래로 실제 높이만큼 밀어준다.
   const isMobile = () => window.matchMedia('(max-width:600px)').matches;
+  // 검색창은 이제 CSS 고정 위치라 여기선 범례 배치만 한다(이름은 호출부 호환을 위해 그대로 둠).
   function positionSearch() {
-    const season = document.getElementById('seasonOverlay');
-    const search = document.getElementById('searchOverlay');
-    // 데스크톱은 시즌 카드 아래로, 모바일은 시즌 칩 왼쪽까지 — 칩 폭이 내용(D-일수)에 따라 달라서 실측한다.
-    search.style.top = isMobile() ? '' : `${season.offsetTop + season.offsetHeight + 8}px`;
-    search.style.right = isMobile() ? `${window.innerWidth - season.getBoundingClientRect().left + 8}px` : '';
     placeLegend();
   }
   // 모바일에서는 범례가 늘 떠 있을 이유가 없다 — 바텀시트 안으로 옮겨 시트를 열었을 때만 보인다.

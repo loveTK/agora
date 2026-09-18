@@ -44,7 +44,6 @@ async function signup(name) {
   const n = (found && found[0]) || rows[0];
   for (let i = 0; i < 4; i++) await api("POST", `/neighborhoods/${n.id}/contribute`, { token: a.token, expect: 201 });
   await api("GET", `/neighborhoods/${n.id}`, { token: a.token });
-  await api("GET", "/neighborhoods/season/current");
 
   const th = await api("POST", "/threads", { body: { region_id: a.region, title: `스모크 논제 ${stamp}`, body: "본문" }, token: a.token, expect: 201 });
   await api("GET", `/threads/${th.id}`);

@@ -6,7 +6,6 @@ const { distributeItem } = require("../services/itemDistribution");
 const { settleExpiredWars } = require("../services/war");
 const { settleExpiredApprovals } = require("../services/congress");
 const { settleDueBattles } = require("../services/warBattle");
-const { settleSeason } = require("../services/neighborhoodSeason");
 const { seedNeighborhoodsIfEmpty } = require("../seedNeighborhoods");
 const { db } = require("../db");
 
@@ -134,13 +133,6 @@ router.post("/neighborhoods/seed", (req, res) => {
   seedNeighborhoodsIfEmpty();
   const after = db.prepare("SELECT COUNT(*) AS count FROM neighborhoods").get().count;
   res.json({ already_seeded: before > 0, neighborhood_count: after });
-});
-
-// POST /internal/neighborhoods/season/settle
-// V3 시즌 종료 배치(8주 주기, 수동 또는 cron 호출 전제). 챔피언 아카이브 후 전부 npc로 리셋.
-router.post("/neighborhoods/season/settle", (req, res) => {
-  const result = settleSeason();
-  res.json(result);
 });
 
 module.exports = router;

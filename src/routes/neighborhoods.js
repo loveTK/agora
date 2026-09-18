@@ -9,19 +9,12 @@ const {
   attemptAttack,
   RESISTANCE_THRESHOLD,
 } = require("../services/neighborhoodConquest");
-const { getSeasonProgress } = require("../services/neighborhoodSeason");
 
 const router = express.Router();
 
 const LEAF_LIMIT = 1500;      // bbox 조회 상한 — 이보다 넓으면 클라이언트가 묶음 레벨로 올라가야 한다
 const CLUSTER_TTL_MS = 15000; // 묶음 집계 캐시. 유저별 값(내 영토 수)은 캐시 밖에서 따로 얹는다
 const HOT_THRESHOLD = 6;      // 24시간 활동 점수가 이 이상이면 🔥
-
-// GET /neighborhoods/season/current — 시즌 카운트다운 오버레이용.
-// 고정 경로들은 아래 "/:id"보다 먼저 등록해야 :id로 잡아먹히지 않는다.
-router.get("/season/current", (req, res) => {
-  res.json(getSeasonProgress());
-});
 
 // ---------- 묶음(클러스터) 집계 ----------
 // 영토가 수천 곳이라 지도는 줌에 따라 국가 묶음 → 광역 묶음 → 개별 구로 펼친다. 묶음 하나에
