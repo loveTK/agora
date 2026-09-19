@@ -17,8 +17,13 @@ const seen = new Set();
 const visit = (t) => { if (seen.has(t)) return; seen.add(t); for (const d of deps[t] || []) visit(d); order.push(t); };
 tables.forEach(visit);
 
+// PG 마이그레이션이 이미 드롭한 테이블(예: 시즌제 폐지로 사라진 neighborhood_seasons)은 건너뛴다 —
+// SQLite 쪽엔 옛 데이터가 남아있어도 옮길 곳이 없다.
+const pgTables = new Set(db.prepare("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'").all().map((r) => r.table_name));
+
 let total = 0;
 for (const t of order) {
+  if (!pgTables.has(t)) { console.log(`${t}: 건너뜀 (PG 스키마에 없음 — 폐지된 테이블)`); continue; }
   const rows = sqlite.prepare(`SELECT * FROM ${t}`).all();
   if (!rows.length) continue;
   const cols = Object.keys(rows[0]);
