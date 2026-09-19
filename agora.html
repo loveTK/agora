@@ -632,7 +632,7 @@
   // 큰 원부터 자리를 잡고, 그 원과 반지름 합 + 여백 안에 들어오는 작은 원은 흡수한다. 흡수될수록
   // 원이 커지므로 반지름을 그때그때 다시 잰다. 합쳐진 묶음은 "가장 큰 구성원 +N"으로 부른다.
   const OVERLAP_GAP = 6;
-  const MAX_BUBBLES = 10; // 겹치지 않아도 화면 하나에 버블이 이보다 많으면 계속 합친다
+  const MAX_BUBBLES = 35; // 겹치지 않아도 화면 하나에 버블이 이보다 많으면 계속 합친다
   function mergeOverlaps(items, sizeOf, maxGroups = Infinity) {
     const placed = [];
     const sorted = items
