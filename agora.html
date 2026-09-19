@@ -391,7 +391,7 @@
   <a class="wordmark" href="https://myagora.xyz/">ΑΓΟΡΑ</a>
   <span class="brand-badge">PANGAEA</span>
   <span class="header-spacer"></span>
-  <a class="header-link" href="/v2.html">채팅 · 논쟁 · 랭킹 →</a>
+  <a class="header-link" href="/v2.html" id="authHeaderLink">로그인 →</a>
 </header>
 
 <div id="map"></div>
@@ -424,6 +424,8 @@
 <script>
   const API_BASE = 'https://api.myagora.xyz';
   const authToken = localStorage.getItem('agora_token'); // V2와 같은 origin/키를 공유 — 로그인 상태 그대로 이어받음
+  // v2는 이제 로그인 관문일 뿐이라 로그인 상태에서는 헤더에 그 링크를 보여줄 이유가 없다.
+  if (authToken) document.getElementById('authHeaderLink').hidden = true;
   const RANK_LABEL = { citizen: '시민', supporter: '지지자', prophet: '선지자' };
   const BODY_MAX = 300;
   const COMMENT_MAX = 200;

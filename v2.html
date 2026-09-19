@@ -643,6 +643,14 @@
     nav{ gap:18px; }
     header .shell, .section{ padding-left:20px; padding-right:20px; }
   }
+
+  /* v2는 구버전 대시보드/상점/인벤토리/관리자 화면을 더 이상 프론트에서 노출하지 않는다 —
+     로그인 관문으로만 쓰고, 로그인 직후 지도(agora.html)로 돌려보낸다. */
+  body.login-gate > header,
+  body.login-gate > main,
+  body.login-gate > #toast,
+  body.login-gate > .modal-backdrop:not(#authModal){ display:none !important; }
+  body.login-gate #authModalClose{ display:none; } /* 닫으면 빈 화면만 남으므로 닫기 자체를 감춘다 */
 </style>
 </head>
 <body>
@@ -1868,6 +1876,7 @@
     authToken = token;
     currentUser = user;
     localStorage.setItem('agora_token', token);
+    location.href = '/'; // v2는 로그인 관문일 뿐 — 성공하면 대시보드 대신 바로 지도로 보낸다
   }
 
   function clearSession() {
@@ -1877,14 +1886,15 @@
   }
 
   async function tryRestoreSession() {
-    if (!authToken) return renderCharCard();
+    if (!authToken) return showLoginGate();
     try {
       currentUser = await apiRequest('/users/me');
-      centerMapOnUser();
+      location.href = '/'; // 이미 로그인돼 있으면 v2 화면을 볼 이유가 없다 — 바로 지도로
+      return;
     } catch (err) {
       clearSession(); // 토큰 만료/무효
     }
-    renderCharCard();
+    showLoginGate();
   }
 
   function renderCharCard() {
@@ -1916,9 +1926,18 @@
     authModal.style.display = 'flex';
     renderAuthForm(mode);
   }
-  function closeAuthModal() { authModal.style.display = 'none'; }
+  function closeAuthModal() {
+    if (document.body.classList.contains('login-gate')) return; // 로그인 관문에서는 못 닫는다
+    authModal.style.display = 'none';
+  }
   document.getElementById('authModalClose').addEventListener('click', closeAuthModal);
   authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
+
+  // v2 화면 전체를 감추고 로그인/가입 모달만 강제로 띄운다 — 로그인 성공하면 setSession()이 지도로 보낸다.
+  function showLoginGate() {
+    document.body.classList.add('login-gate');
+    openAuthModal('login');
+  }
 
   async function renderLoggedIn() {
     const rankLabel = RANK_LABEL[currentUser.rank] || currentUser.rank;
