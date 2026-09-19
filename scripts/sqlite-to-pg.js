@@ -1,5 +1,6 @@
-// SQLite → PostgreSQL 1회 이전. 사용: DATABASE_URL=... node scripts/sqlite-to-pg.js data/agora.db
+// SQLite → PostgreSQL 1회 이전. 사용: node scripts/sqlite-to-pg.js data/agora.db (.env의 DATABASE_URL 사용)
 // PG 쪽은 마이그레이션만 적용된 빈 DB여야 한다(기존 행이 있으면 ON CONFLICT DO NOTHING으로 건너뜀).
+require("dotenv").config({ quiet: true }); // index.js/seed.js와 동일 — 이게 없으면 .env를 안 읽어 DATABASE_URL이 빈 채로 db.js가 죽는다
 const path = require("path");
 const src = process.argv[2];
 if (!src) { console.error("사용: node scripts/sqlite-to-pg.js <agora.db>"); process.exit(1); }
