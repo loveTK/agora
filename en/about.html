@@ -3,25 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About AGORA — Real-Time Political Debate & Regional Rivalry</title>
-<meta name="description" content="AGORA is a real-time political debate community modeled on the ancient Greek public square. Post arguments for or against a topic, vote, and help your polis (region) win dominance.">
+<title>About AGORA PANGAEA — World Conquest Map, 250 Countries</title>
+<meta name="description" content="AGORA PANGAEA is a real-time conquest map covering 250 countries and 6,000+ territories. Liberate territories with contributions, attack adjacent ones to seize control, and leave a note anywhere on the map.">
 <link rel="canonical" href="https://myagora.xyz/en/about.html">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111110'/%3E%3Ctext x='32' y='46' font-family='Arial, sans-serif' font-weight='900' font-size='38' fill='%23BA7517' text-anchor='middle'%3E%CE%91%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AGORA">
-<meta property="og:title" content="About AGORA — Real-Time Political Debate & Regional Rivalry">
-<meta property="og:description" content="AGORA is a real-time political debate community modeled on the ancient Greek public square. Post arguments for or against a topic, vote, and help your polis (region) win dominance.">
+<meta property="og:title" content="About AGORA PANGAEA — World Conquest Map, 250 Countries">
+<meta property="og:description" content="A real-time conquest map covering 250 countries and 6,000+ territories. Liberate territories with contributions, attack adjacent ones to seize control.">
 <meta property="og:image" content="https://myagora.xyz/og-image.png">
 <meta property="og:url" content="https://myagora.xyz/en/about.html">
 <link rel="alternate" hreflang="ko" href="https://myagora.xyz/about.html">
 <link rel="alternate" hreflang="en" href="https://myagora.xyz/en/about.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "AGORA PANGAEA",
+  "url": "https://myagora.xyz/",
+  "description": "A real-time conquest map covering 250 countries and 6,000+ territories. Liberate territories with contributions, attack adjacent ones to seize control.",
+  "applicationCategory": "Game",
+  "operatingSystem": "Any",
+  "inLanguage": ["ko", "en", "ja", "zh"],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
 <style>
   :root{
     --black:#111110; --ink:#1c1c1a; --gray-1:#4a4a46; --gray-2:#8a8a84;
     --gray-3:#c9c9c2; --gray-4:#e6e6e0; --white:#ffffff;
     --line:rgba(17,17,16,0.14); --gold:#BA7517; --on-gold:#111110;
+    --npc:#8a8a84; --taken:#B23A3A; --mine:#2F7D4F;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{ background:var(--white); color:var(--ink); font-family:'Archivo',sans-serif; line-height:1.6; }
@@ -37,6 +51,11 @@
   h1{ font-weight:900; font-size:clamp(30px,5vw,44px); line-height:1.12; letter-spacing:-0.015em; margin-bottom:16px; text-wrap:balance; }
   .lede{ font-size:17px; color:var(--gray-1); max-width:60ch; }
 
+  .stat-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-top:28px; }
+  .stat{ background:var(--white); padding:16px 18px; }
+  .stat dt{ font-size:10.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray-2); }
+  .stat dd{ font-family:'Archivo',sans-serif; font-weight:800; font-size:clamp(20px,3.5vw,26px); margin-top:4px; font-variant-numeric:tabular-nums; }
+
   section{ margin-top:52px; padding-top:36px; border-top:1px solid var(--line); }
   h2{ font-weight:800; font-size:22px; margin-bottom:14px; letter-spacing:-0.005em; }
   p{ font-size:15.5px; color:var(--ink); margin-bottom:14px; max-width:64ch; }
@@ -46,6 +65,11 @@
   .feature{ background:var(--white); padding:22px 24px; }
   .feature h3{ font-size:15px; font-weight:700; margin-bottom:6px; }
   .feature p{ font-size:13.5px; color:var(--gray-1); margin:0; }
+
+  .status-row{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:8px; }
+  .status-chip{ display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; }
+  .status-chip i{ width:9px; height:9px; border-radius:50%; }
+  .status-chip.npc i{ background:var(--npc); } .status-chip.taken i{ background:var(--taken); } .status-chip.mine i{ background:var(--mine); }
 
   .rank-list{ margin-top:8px; display:flex; flex-direction:column; gap:0; }
   .rank-row{ display:flex; gap:16px; padding:12px 0; border-bottom:1px solid var(--line); align-items:baseline; }
@@ -62,7 +86,7 @@
   footer .shell{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; max-width:1440px; }
   footer a{ color:var(--gray-1); }
 
-  @media (max-width:560px){ .feature-grid{ grid-template-columns:1fr; } }
+  @media (max-width:560px){ .feature-grid{ grid-template-columns:1fr; } .stat-row{ grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -70,35 +94,53 @@
 <header>
   <div class="shell">
     <div class="wordmark">ΑΓΟΡΑ<span>agora</span></div>
-    <a class="cta" href="https://myagora.xyz/">Enter the site</a>
+    <a class="cta" href="https://myagora.xyz/">Open the map</a>
   </div>
 </header>
 
 <main>
   <div class="shell">
-    <div class="eyebrow">What is AGORA</div>
-    <h1>Public opinion isn't decided by a person — it's the sum of every argument</h1>
-    <p class="lede">AGORA is a real-time political debate community modeled on the ancient Greek public square. Nineteen regions ("poleis") compete every day for public opinion through debate.</p>
+    <div class="eyebrow">What is AGORA PANGAEA</div>
+    <h1>The world lives on the map — conquest is decided by contribution</h1>
+    <p class="lede">AGORA PANGAEA is a real-time conquest map covering 250 countries and 6,000+ territories. Liberate territories with contributions, attack adjacent ones to seize control, and leave a note anywhere on the map for others to react to.</p>
+
+    <dl class="stat-row">
+      <div class="stat"><dt>Countries</dt><dd>250</dd></div>
+      <div class="stat"><dt>Territories</dt><dd>6,000+</dd></div>
+      <div class="stat"><dt>Languages</dt><dd>4</dd></div>
+    </dl>
 
     <section>
       <h2>How it works</h2>
-      <p><b>1. Post a topic.</b> Anyone can raise up to three debate topics ("threads") a day.</p>
-      <p><b>2. Argue for or against it.</b> Other citizens post their own arguments, and everyone weighs in with upvotes, downvotes, and "idiot" reactions to gauge the strength of each point.</p>
-      <p><b>3. Regions compete for dominance.</b> The total engagement and upvotes a region's threads and arguments earn decide who controls that polis. Congress votes and declared wars shift the balance of power further.</p>
+      <p><b>1. Find a territory on the map.</b> Countries split into provinces, which split into districts; zoom out and nearby territories collapse into a single bubble.</p>
+      <p><b>2. Liberate it with contributions.</b> Contributing to an unclaimed territory earns points, and crossing the threshold makes you its ruler.</p>
+      <p><b>3. Attack from an adjacent territory.</b> You can only launch an attack from a territory you already control that borders the target — the winner takes control.</p>
+      <p><b>4. Leave a note on the map.</b> Pick any spot, post a note, and others can comment or react (upvote, downvote, "fool") to it.</p>
+    </section>
+
+    <section>
+      <h2>What the map shows</h2>
+      <p>Every territory is in one of three states, and a bubble's ring shows the exact mix of states inside it.</p>
+      <div class="status-row">
+        <span class="status-chip npc"><i></i>Unclaimed</span>
+        <span class="status-chip taken"><i></i>Rival-controlled</span>
+        <span class="status-chip mine"><i></i>Mine</span>
+      </div>
     </section>
 
     <section>
       <h2>Key features</h2>
       <div class="feature-grid">
-        <div class="feature"><h3>Threads &amp; Arguments</h3><p>Post a topic and argue for, against, or take a third stance.</p></div>
-        <div class="feature"><h3>Regional rivalry</h3><p>19 poleis compete on engagement and upvotes for dominance.</p></div>
-        <div class="feature"><h3>Congress &amp; wars</h3><p>Approval votes and declared wars reshape the balance of power.</p></div>
-        <div class="feature"><h3>Character customization</h3><p>Equip shop items your character actually wears on stage.</p></div>
+        <div class="feature"><h3>World conquest map</h3><p>250 countries, 6,000+ territories — take them by contribution and attack.</p></div>
+        <div class="feature"><h3>Free-form map posts</h3><p>Leave a note anywhere on the map; others comment and react.</p></div>
+        <div class="feature"><h3>Live activity signals</h3><p>Areas active in the last 24 hours get a 🔥 marker; active discussion gets a 💬 badge.</p></div>
+        <div class="feature"><h3>Multilingual</h3><p>Korean, English, Japanese, and Chinese, shown automatically based on your device language.</p></div>
       </div>
     </section>
 
     <section>
       <h2>Rank system</h2>
+      <p>Map posts and comments show the author's rank.</p>
       <div class="rank-list">
         <div class="rank-row"><span class="rank-name">Citizen</span><span class="rank-desc">The default rank every participant starts at.</span></div>
         <div class="rank-row"><span class="rank-name">Supporter</span><span class="rank-desc">A mid-tier rank earned through accumulated reputation.</span></div>
@@ -107,9 +149,9 @@
     </section>
 
     <div class="cta-block">
-      <h2>Post your first topic today</h2>
+      <h2>Liberate your first territory today</h2>
       <p>Sign up with email or a Google account in under a minute.</p>
-      <a href="https://myagora.xyz/">Start on AGORA →</a>
+      <a href="https://myagora.xyz/">Open the map →</a>
     </div>
   </div>
 </main>
